@@ -52,8 +52,6 @@ const components = [
   NetworkEditComponent,
   HomeComponent,
   ModalComponent,
-  TooltipIconComponent,
-  TooltipTextIconComponent,
   ConfettiComponent,
   SnowflakesComponent,
   NetworkComponent,
@@ -74,6 +72,8 @@ const components = [
     DialogListComponent
   ],
   imports: [
+    TooltipIconComponent, // <-- HIERHER VERSCHOBEN (Wichtig für Standalone)
+    TooltipTextIconComponent,
     EditComponent,
     AutotuneComponent,
     BrowserModule,

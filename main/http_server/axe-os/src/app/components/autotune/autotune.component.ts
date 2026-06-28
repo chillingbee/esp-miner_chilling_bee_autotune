@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
 
 import { LoadingService } from 'src/app/services/loading.service';
 
@@ -8,6 +9,12 @@ import { ToastrService } from 'ngx-toastr';
 import { forkJoin } from 'rxjs';
 import { AutotuneSettings, SystemInfo } from 'src/app/generated/models';
 import { SystemApiService } from 'src/app/services/system.service';
+
+// PrimeNG & Eigene UI-Element-Imports für das Template
+import { CheckboxModule } from 'primeng/checkbox';
+import { MessageModule } from 'primeng/message';
+import { SliderModule } from 'primeng/slider';
+import { TooltipTextIconComponent } from '../tooltip-text-icon/tooltip-text-icon.component';
 
 interface SliderConfig {
   formControlName: string;
@@ -22,6 +29,15 @@ interface SliderConfig {
 @Component({
   selector: 'autotune',
   templateUrl: './autotune.component.html',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    CheckboxModule,
+    MessageModule,
+    SliderModule,
+    TooltipTextIconComponent
+  ]
 })
 export class AutotuneComponent implements OnInit {
   public autotuneForm!: FormGroup;
@@ -174,15 +190,12 @@ export class AutotuneComponent implements OnInit {
   }
 
   private updateSliderMinForPid(info: SystemInfo): void {
-    // Check if PID is active (autofanspeed = 1)
     const isPidActive = info.autofanspeed === 1;
 
-    // If PID is active, set the minimum value to (temptarget + 1)
-    // Otherwise keep the default minimum of 20
     const minTemp = isPidActive ? (info.temptarget + 1) : 20;
     const minFanspeed = isPidActive ? (info.minFanSpeed + 1) : 20;
     const maxPower = info.maxPower;
-    // Update the slider configuration in our component
+
     this.sliderConfigs.forEach(config => {
       if (config.formControlName === 'max_temp_asic') {
         config.min = minTemp;
