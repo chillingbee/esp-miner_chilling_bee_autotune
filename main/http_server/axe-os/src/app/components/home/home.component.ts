@@ -870,7 +870,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         }
 
         this.efficiency = this.calculateEfficiency(info, 'hashRate');
-        this.efficiencyAverage = this.calculateEfficiency(info, 'hashRate_1m');
+        this.efficiencyAverage = this.calculateEfficiency(info, 'hashRate_1h');
         this.expectedEfficiency = this.calculateEfficiency(info, 'expectedHashrate');
         this.networkDifficultyPercentage = this.getNetworkDifficultyPercentage(info);
         this.payoutPercentage = this.getPayoutPercentage(info);
