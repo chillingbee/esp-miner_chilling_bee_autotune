@@ -870,7 +870,15 @@ export class HomeComponent implements OnInit, OnDestroy {
         }
 
         this.efficiency = this.calculateEfficiency(info, 'hashRate');
-        this.efficiencyAverage = this.calculateEfficiency(info, 'hashRate_1h');
+        
+        // MANUELLE BERECHNUNG FÜR DEN STUNDEN-DURCHSCHNITT:
+        if (info && info.power > 0 && info.hashRate_1h > 0) {
+            // Leistung (W) geteilt durch Hashrate (GH/s umgerechnet in TH/s -> durch 1000)
+            this.efficiencyAverage = info.power / (info.hashRate_1h / 1000);
+        } else {
+            this.efficiencyAverage = 0;
+        }
+
         this.expectedEfficiency = this.calculateEfficiency(info, 'expectedHashrate');
         this.networkDifficultyPercentage = this.getNetworkDifficultyPercentage(info);
         this.payoutPercentage = this.getPayoutPercentage(info);
