@@ -175,6 +175,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   public asicDomainsAmount: number = 0;
   public efficiency: number = 0;
   public efficiencyAverage: number = 0;
+  public smoothedEfficiencyAverage: number = 0;
   public expectedEfficiency: number = 0;
   public activePoolUserAddressPart: string = '';
   public activePoolUserSuffixPart: string = '';
@@ -871,12 +872,24 @@ export class HomeComponent implements OnInit, OnDestroy {
 
         this.efficiency = this.calculateEfficiency(info, 'hashRate');
         
-        // MANUELLE BERECHNUNG FÜR DEN STUNDEN-DURCHSCHNITT:
+        // BERECHNUNG MIT GEGLÄTTETEM FILTER (DÄMPFUNG)
         if (info && info.power > 0 && info.hashRate_1h > 0) {
-            // Leistung (W) geteilt durch Hashrate (GH/s umgerechnet in TH/s -> durch 1000)
-            this.efficiencyAverage = (info.power * 1000) / info.hashRate_1h;
+            const currentRawAvg = (info.power * 1000) / info.hashRate_1h;
+            
+            // Wenn der Wert zum ersten Mal berechnet wird, nimm den aktuellen Wert
+            if (this.smoothedEfficiencyAverage === 0) {
+                this.smoothedEfficiencyAverage = currentRawAvg;
+            } else {
+                // FILTER: 99% alter Wert + 1% neuer Wert. 
+                // Das schluckt jede sekündliche Schwankung komplett!
+                this.smoothedEfficiencyAverage = (this.smoothedEfficiencyAverage * 0.99) + (currentRawAvg * 0.01);
+            }
+            
+            // Weise den geglätteten Wert der Anzeige zu
+            this.efficiencyAverage = this.smoothedEfficiencyAverage;
         } else {
             this.efficiencyAverage = 0;
+            this.smoothedEfficiencyAverage = 0;
         }
 
         this.expectedEfficiency = this.calculateEfficiency(info, 'expectedHashrate');
