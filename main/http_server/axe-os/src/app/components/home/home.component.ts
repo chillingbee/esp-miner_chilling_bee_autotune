@@ -874,7 +874,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         // MANUELLE BERECHNUNG FÜR DEN STUNDEN-DURCHSCHNITT:
         if (info && info.power > 0 && info.hashRate_1h > 0) {
             // Leistung (W) geteilt durch Hashrate (GH/s umgerechnet in TH/s -> durch 1000)
-            this.efficiencyAverage = info.power / (info.hashRate_1h / 1000);
+            this.efficiencyAverage = (info.power * 1000) / info.hashRate_1h;
         } else {
             this.efficiencyAverage = 0;
         }
