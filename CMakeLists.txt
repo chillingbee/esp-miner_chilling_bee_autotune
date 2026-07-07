@@ -8,7 +8,6 @@ cmake_minimum_required(VERSION 3.5)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 # HIER DIE VERSION HÄNDISCH SETZEN (OHNE -DIRTY):
-
-
+set(PROJECT_VERSION "v2.4.1-chilling_bee-10")
 project(esp-miner)
 
