@@ -230,23 +230,26 @@ void POWER_MANAGEMENT_task(void * pvParameters)
                 ESP_LOGI(TAG, "Resuming normal operation. Reduced frequency (%.0f MHz) will be applied automatically.", reduced_asic_frequency);
             }
         }
+// Variablen-Deklaration für die Abfrage
+        float core_voltage = 0.0f;
+        float asic_frequency = 0.0f;
 
-<// 1. Priorität: Self-Test
-if (GLOBAL_STATE->SELF_TEST_MODULE.is_active) {
-    core_voltage = GLOBAL_STATE->DEVICE_CONFIG.family.asic.default_voltage_mv;
-    asic_frequency = GLOBAL_STATE->DEVICE_CONFIG.family.asic.default_frequency_mhz;
-} 
-// 2. Priorität: Auto-Tune Logik (dein Teil)
-else if (auto_tune_get_auto_tune_hashrate()) {
-    auto_tune();
-    core_voltage = auto_tune_get_voltage();
-    asic_frequency = auto_tune_get_frequency();
-} 
-// 3. Fallback: NVS Standard-Config
-else {
-    core_voltage = nvs_config_get_u16(NVS_CONFIG_ASIC_VOLTAGE);
-    asic_frequency = nvs_config_get_float(NVS_CONFIG_ASIC_FREQUENCY);
-}
+        // 1. Priorität: Self-Test
+        if (GLOBAL_STATE->SELF_TEST_MODULE.is_active) {
+            core_voltage = GLOBAL_STATE->DEVICE_CONFIG.family.asic.default_voltage_mv;
+            asic_frequency = GLOBAL_STATE->DEVICE_CONFIG.family.asic.default_frequency_mhz;
+        } 
+        // 2. Priorität: Auto-Tune Logik
+        else if (auto_tune_get_auto_tune_hashrate()) {
+            auto_tune();
+            core_voltage = auto_tune_get_voltage();
+            asic_frequency = auto_tune_get_frequency();
+        } 
+        // 3. Fallback: NVS Standard-Config
+        else {
+            core_voltage = nvs_config_get_u16(NVS_CONFIG_ASIC_VOLTAGE);
+            asic_frequency = nvs_config_get_float(NVS_CONFIG_ASIC_FREQUENCY);
+        }
 
         if (core_voltage != last_core_voltage) {
             ESP_LOGI(TAG, "set vcore voltage from %fmV to %fmV", last_core_voltage, core_voltage);
