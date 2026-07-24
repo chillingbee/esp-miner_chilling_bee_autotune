@@ -16,7 +16,7 @@ INCLUDE_DIRS
 
 REQUIRES 
     "freertos"
-    "driver"
+    "esp_driver_uart"
     "stratum"
     "tcp_transport"
 )
