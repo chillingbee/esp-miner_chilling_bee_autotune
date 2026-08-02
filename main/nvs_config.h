@@ -78,7 +78,17 @@ typedef enum {
     NVS_CONFIG_TPS546_STACK_CONFIG,
     NVS_CONFIG_TPS546_SYNC_CONFIG,
     NVS_CONFIG_TPS546_FREQUENCY,
+    NVS_CONFIG_KEY_POWER_LIMIT,
+    NVS_CONFIG_KEY_FAN_LIMIT,
+    NVS_CONFIG_KEY_MAX_VOLTAGE_ASIC,
+    NVS_CONFIG_KEY_MAX_FREQUENCY_ASIC,
+    NVS_CONFIG_KEY_MAX_TEMP_ASIC,
+    NVS_CONFIG_KEY_AUTO_TUNE_ENABLE,
+    NVS_CONFIG_KEY_OVERSHOT_POWER_LIMIT,
+    NVS_CONFIG_KEY_OVERSHOT_FAN_LIMIT,
+    NVS_CONFIG_KEY_MAX_TEMP_VR,
     NVS_CONFIG_COUNT
+    
 } NvsConfigKey;
 
 typedef enum {
@@ -100,6 +110,7 @@ typedef union {
 } ConfigValue;
 
 typedef struct {
+    //max key char length 15!
     const char *nvs_key_name;
     ConfigType type;
     ConfigValue *value;
