@@ -48,20 +48,11 @@ import { DialogService, DialogListComponent } from './services/dialog.service';
 
 const components = [
   AppComponent,
-  EditComponent,
-  AutotuneComponent,
-  NetworkEditComponent,
-  HomeComponent,
   ModalComponent,
-  TooltipIconComponent,
-  TooltipTextIconComponent,
-  ConfettiComponent,
   SnowflakesComponent,
-  NetworkComponent,
   LogsComponent,
   SystemComponent,
   UpdateComponent,
-  PoolComponent
 ];
 
 @NgModule({
@@ -92,6 +83,7 @@ const components = [
     SliderComponent,
     AppChartComponent,
     EditComponent,
+    AutotuneComponent, // <--- HIER ERGÄNZT
     SettingsComponent,
     ANSIPipe,
     DateAgoPipe,

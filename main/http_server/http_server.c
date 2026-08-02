@@ -1961,7 +1961,7 @@ esp_err_t start_rest_server(void * pvParameters)
     config.uri_match_fn = httpd_uri_match_wildcard;
     config.stack_size = 8192;
     config.max_open_sockets = 20;
-    config.max_uri_handlers = 25;
+    config.max_uri_handlers = 50;
     config.close_fn = websocket_close_fn;
     config.lru_purge_enable = true;
 
@@ -2151,7 +2151,7 @@ esp_err_t start_rest_server(void * pvParameters)
         .handler = websocket_handler, 
         .user_ctx = (void *)WS_TYPE_LOGS, 
         .is_websocket = true,
-        .ws_pre_handshake_cb = websocket_pre_handshake,
+        .ws_post_handshake_cb = websocket_pre_handshake,
         .ws_post_handshake_cb = websocket_post_handshake
     };
     httpd_register_uri_handler(server, &ws);
@@ -2162,7 +2162,7 @@ esp_err_t start_rest_server(void * pvParameters)
         .handler = websocket_handler, 
         .user_ctx = (void *)WS_TYPE_API, 
         .is_websocket = true,
-        .ws_pre_handshake_cb = websocket_pre_handshake,
+        .ws_post_handshake_cb = websocket_pre_handshake,
         .ws_post_handshake_cb = websocket_post_handshake
     };
     httpd_register_uri_handler(server, &ws_live);

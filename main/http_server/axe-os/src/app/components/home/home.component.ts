@@ -27,6 +27,24 @@ import { LocalStorageService } from 'src/app/local-storage.service';
 import { GridStack, GridItemHTMLElement } from 'gridstack';
 import { DashboardEditService, WidgetDef } from 'src/app/services/dashboard-edit.service';
 
+import { CommonModule } from '@angular/common';
+import { TooltipTextIconComponent } from '../tooltip-text-icon/tooltip-text-icon.component';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+
+// Eigene Pipes & Direktiven importieren (Pfad anpassen)
+
+
+import { SatsPipe } from '../../pipes/sats.pipe';
+import { AddressPipe } from '../../pipes/address.pipe';
+
+import { TooltipDirective } from '../../directives/tooltip.directive'; // falls als Direktive eingebunden
+
+// Eigene Komponenten importieren
+import { DropdownComponent } from '../../components/dropdown/dropdown.component';
+import { ConfettiComponent } from '../../components/confetti/confetti.component';
+
+
+
 type PoolLabel = 'Primary' | 'Fallback';
 type ProtocolLabel = 'SV2 Standard Channel' | 'SV2 Extended Channel';
 type MessageType =
@@ -74,7 +92,22 @@ const WIDGET_DEFAULTS: WidgetDef[] = [
     selector: 'app-home',
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.scss'],
-    standalone: false
+    standalone: true,
+    imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    ConfettiComponent,
+    HashSuffixPipe,
+    DiffSuffixPipe,
+    SatsPipe,
+    AddressPipe,
+    DateAgoPipe,
+    TooltipDirective,
+    DropdownComponent,
+    AppChartComponent,
+    ConfettiComponent,
+    TooltipTextIconComponent /* weitere benötigte Module */],
 })
 export class HomeComponent implements OnInit, OnDestroy {
   public messages: ISystemMessage[] = [];
