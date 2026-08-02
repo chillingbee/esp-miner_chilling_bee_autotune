@@ -210,11 +210,15 @@
             </div>
           </div>
           <div>
-            <span class="font-medium cursor-pointer" appTooltip="{{info.bestSessionDiff | number:'1.0-0'}}" tooltipPosition="bottom">
-              {{info.bestSessionDiff | diffSuffix}}
-            </span>
-            <span class="text-secondary text-lg">session best</span>
-          </div>
+    <span class="font-medium cursor-pointer" appTooltip="{{(displayInfo?.bestSessionDiff || info?.bestSessionDiff) | number:'1.0-0'}}" tooltipPosition="bottom">
+        {{(displayInfo?.bestSessionDiff || info?.bestSessionDiff) | diffSuffix}}
+    </span>
+    <span class="text-secondary text-lg">session best</span>
+    <span class="text-sm font-medium mb-4" 
+        [ngStyle]="{'color': (getElapsedTime(displayInfo?.lastBestUpdate).includes('h ago')) ? 'red' : 'gray'}">
+        (Updated: {{ getElapsedTime(displayInfo?.lastBestUpdate) }})
+    </span>
+</div>
         </div>
       </div>
     </div>

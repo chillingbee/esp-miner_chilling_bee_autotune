@@ -112,6 +112,16 @@ const WIDGET_DEFAULTS: WidgetDef[] = [
 export class HomeComponent implements OnInit, OnDestroy {
   public messages: ISystemMessage[] = [];
 
+ public displayInfo: any;
+  private lastKnownBestSessionDiff: number = Number(localStorage.getItem('axe_os_last_best_diff') || '0');
+  
+  public lastBestUpdate: Date = (() => {
+    const saved = localStorage.getItem('axe_os_last_best_update');
+    return saved ? new Date(Number(saved)) : new Date();
+  })();
+
+  private isInitialBestSessionLoad: boolean = !localStorage.getItem('axe_os_last_best_update');
+
   public info$!: Observable<ISystemInfo>;
   public stats$!: Observable<ISystemStatistics>;
   public pools$!: Observable<SelectOption<PoolLabel>[]>;
@@ -129,6 +139,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   public maxTemp: number = 75;
   public maxRpm: number = 7000;
   public maxFrequency: number = 800;
+
 
   public quickLink$!: Observable<string | undefined>;
 
@@ -220,6 +231,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   public networkDifficultyPercentage: string = '0';
   public payoutPercentage: number = -1;
   public chartDataSources: { name: string; value: string }[] = [];
+
+public smoothedEfficiencyAverage: number = 0;
+private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
+
   private lastHasVrTemp = false;
   private lastHasAsicTemp2 = false;
   private lastHasFanRpm = false;
@@ -270,6 +285,29 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+
+
+    // Live-Ticker für den Timer
+    setInterval(() => {
+      if (this.displayInfo) {
+        this.displayInfo = { ...this.displayInfo }; // Das zwingt Angular zum Aktualisieren
+      }
+    }, 1000);
+
+// Live-Ticker für den Timer
+  const savedTime = this.storageService.getItem('axe_os_last_best_update');
+    if (savedTime) {
+      this.lastBestUpdate = new Date(Number(savedTime));
+      this.isInitialBestSessionLoad = false;
+    }
+
+    // Prüfen, ob im Browser-Speicher ein alter Zeitstempel liegt
+    const savedUpdate = this.storageService.getItem(this.HOME_BEST_UPDATE_KEY);
+    if (savedUpdate) {
+      this.lastBestUpdate = new Date(Number(savedUpdate));
+      this.isInitialBestSessionLoad = false; // Wir wissen jetzt: Es ist kein "echter" erster Start mehr
+    }
+
     this.dashboardEditService.widgetDefs = this.widgetDefs;
     this.dashboardEditService.isActive$.next(true);
 
@@ -321,6 +359,13 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.staleCheckInterval = setInterval(() => this.checkStaleData(), 1000);
 
     this.loadPreviousData();
+
+    // Live-Ticker für den Timer (aktualisiert die Anzeige sekündlich)
+    setInterval(() => {
+      if (this.displayInfo) {
+        this.displayInfo = { ...this.displayInfo };
+      }
+    }, 1000);
   }
 
   @HostListener('document:visibilitychange')
@@ -884,6 +929,54 @@ export class HomeComponent implements OnInit, OnDestroy {
         return processed;
       }),
       tap(info => {
+
+// --- TIMER & REKORD SICHERUNG MIT REBOOT-ERKENNUNG ---
+        const incomingBestDiff = Number(info.bestSessionDiff) || 0;
+        const currentUptime = Number(info.uptimeSeconds) || 0;
+        
+        // Letzte gespeicherte Uptime aus dem Storage holen (um Reboots zu erkennen)
+        const lastSavedUptime = Number(localStorage.getItem('axe_os_last_uptime') || 0);
+
+        // REBOOT-ERKENNUNG: Entweder ist die Uptime kleiner geworden oder fast 0 nach einem längeren Lauf
+        const isMinerRebooted = (currentUptime < lastSavedUptime) || (currentUptime < 10 && lastSavedUptime > 30);
+
+        if (isMinerRebooted) {
+          console.log('MINER REBOOT ERKANNT! Timer wird auf 0 zurückgesetzt.');
+          localStorage.removeItem('axe_os_last_best_update');
+          localStorage.removeItem('axe_os_last_best_diff');
+          localStorage.removeItem('axe_os_last_uptime');
+          
+          this.isInitialBestSessionLoad = true;
+          this.lastBestUpdate = new Date();
+          this.lastKnownBestSessionDiff = 0;
+        }
+
+        // Aktuelle Uptime für den nächsten Vergleich speichern
+        localStorage.setItem('axe_os_last_uptime', currentUptime.toString());
+
+        if (this.isInitialBestSessionLoad) {
+          this.lastKnownBestSessionDiff = Math.max(incomingBestDiff, Number(localStorage.getItem('axe_os_last_best_diff')) || 0);
+          this.isInitialBestSessionLoad = false;
+          
+          if (incomingBestDiff > this.lastKnownBestSessionDiff) {
+            this.lastKnownBestSessionDiff = incomingBestDiff;
+          }
+          
+          localStorage.setItem('axe_os_last_best_diff', this.lastKnownBestSessionDiff.toString());
+          if (!localStorage.getItem('axe_os_last_best_update')) {
+            localStorage.setItem('axe_os_last_best_update', this.lastBestUpdate.getTime().toString());
+          }
+        } 
+        else if (incomingBestDiff > this.lastKnownBestSessionDiff) {
+          console.log('NEUER REKORD ERKANNT! Timer wird zurückgesetzt.');
+          this.lastBestUpdate = new Date();
+          this.lastKnownBestSessionDiff = incomingBestDiff;
+          
+          localStorage.setItem('axe_os_last_best_update', this.lastBestUpdate.getTime().toString());
+          localStorage.setItem('axe_os_last_best_diff', incomingBestDiff.toString());
+        }
+
+        this.displayInfo = { ...info, lastBestUpdate: this.lastBestUpdate };
         this.latestInfo = info;
         this.lastMessageTime = new Date().getTime();
         // Clear error indicators if data is flowing
@@ -912,6 +1005,50 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.expectedEfficiency = this.calculateEfficiency(info, 'expectedHashrate');
         this.networkDifficultyPercentage = this.getNetworkDifficultyPercentage(info);
         this.payoutPercentage = this.getPayoutPercentage(info);
+
+
+        this.efficiency = this.calculateEfficiency(info, 'hashRate');
+
+        // --- HIER STARTET DIE TIMER-LOGIK ---
+      const currentBestDiff = info.bestSessionDiff || 0;
+        
+        if (this.isInitialBestSessionLoad) {
+          this.lastKnownBestSessionDiff = currentBestDiff;
+          this.isInitialBestSessionLoad = false;
+        } else if (currentBestDiff > this.lastKnownBestSessionDiff) {
+          // Neuer Rekord!
+          this.lastBestUpdate = new Date();
+          this.lastKnownBestSessionDiff = currentBestDiff;
+          
+          // IM STORAGE SPEICHERN, damit er einen Reload überlebt:
+          this.storageService.setItem(this.HOME_BEST_UPDATE_KEY, this.lastBestUpdate.getTime().toString());
+        }
+
+        this.displayInfo = { ...info, lastBestUpdate: this.lastBestUpdate };
+
+        // Wir packen das Info-Objekt zusammen mit unserem Zeitstempel in displayInfo
+        this.displayInfo = { ...info, lastBestUpdate: this.lastBestUpdate };
+        // --- ENDE DER TIMER-LOGIK ---
+
+        // MANUELLE BERECHNUNG FÜR DEN GEGLÄTTETEN DURCHSCHNITT:
+        if (info && info.power > 0 && info.hashRate_1h > 0) {
+            const currentRawAvg = (info.power * 1000) / info.hashRate_1h;
+            
+            // Wenn der Wert zum ersten Mal berechnet wird, nimm den aktuellen Wert
+            if (this.smoothedEfficiencyAverage === 0) {
+                this.smoothedEfficiencyAverage = currentRawAvg;
+            } else {
+                // FILTER: 99% alter Wert + 1% neuer Wert (schluckt sekündliche Schwankungen)
+                this.smoothedEfficiencyAverage = (this.smoothedEfficiencyAverage * 0.99) + (currentRawAvg * 0.01);
+            }
+            
+            this.efficiencyAverage = this.smoothedEfficiencyAverage;
+        } else {
+            this.efficiencyAverage = 0;
+            this.smoothedEfficiencyAverage = 0;
+        }
+
+        this.expectedEfficiency = this.calculateEfficiency(info, 'expectedHashrate');
 
         const isFallbackPool = !!info.isUsingFallbackStratum;
         this.activePoolLabel = isFallbackPool ? 'Fallback' : 'Primary';
@@ -1030,7 +1167,9 @@ export class HomeComponent implements OnInit, OnDestroy {
         }
         return result;
       }));
+
   }
+  
 
   onPoolChange(event: { originalEvent?: Event; value: PoolLabel }) {
     const useFallbackStratum = Number(event.value === 'Fallback');
@@ -1443,5 +1582,12 @@ export class HomeComponent implements OnInit, OnDestroy {
     const dotIndex = user.lastIndexOf('.');
     return dotIndex !== -1 ? '.' + user.substring(dotIndex + 1) : '';
   }
-
+public getElapsedTime(date: Date | undefined): string {
+    if (!date) return 'noch keine Daten';
+    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+    if (seconds < 60) return `${seconds}s ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    return `${Math.floor(minutes / 60)}h ago`;
+  }
 }
