@@ -930,21 +930,21 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
       }),
       tap(info => {
 
-// --- TIMER & REKORD SICHERUNG MIT REBOOT-ERKENNUNG ---
+// --- TIMER & REKORD SICHERUNG MIT REBOOT- & GERÄTE-SYNC ---
         const incomingBestDiff = Number(info.bestSessionDiff) || 0;
         const currentUptime = Number(info.uptimeSeconds) || 0;
         
-        // Letzte gespeicherte Uptime aus dem Storage holen (um Reboots zu erkennen)
-        const lastSavedUptime = Number(localStorage.getItem('axe_os_last_uptime') || 0);
+        // Letzte gespeicherte Uptime über den Service holen
+        const lastSavedUptime = Number(this.storageService.getItem('axe_os_last_uptime') || 0);
 
         // REBOOT-ERKENNUNG: Entweder ist die Uptime kleiner geworden oder fast 0 nach einem längeren Lauf
         const isMinerRebooted = (currentUptime < lastSavedUptime) || (currentUptime < 10 && lastSavedUptime > 30);
 
         if (isMinerRebooted) {
           console.log('MINER REBOOT ERKANNT! Timer wird auf 0 zurückgesetzt.');
-          localStorage.removeItem('axe_os_last_best_update');
-          localStorage.removeItem('axe_os_last_best_diff');
-          localStorage.removeItem('axe_os_last_uptime');
+          this.storageService.removeItem('axe_os_last_best_update');
+          this.storageService.removeItem('axe_os_last_best_diff');
+          this.storageService.removeItem('axe_os_last_uptime');
           
           this.isInitialBestSessionLoad = true;
           this.lastBestUpdate = new Date();
@@ -952,33 +952,53 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
         }
 
         // Aktuelle Uptime für den nächsten Vergleich speichern
-        localStorage.setItem('axe_os_last_uptime', currentUptime.toString());
+        this.storageService.setItem('axe_os_last_uptime', currentUptime.toString());
 
         if (this.isInitialBestSessionLoad) {
-          this.lastKnownBestSessionDiff = Math.max(incomingBestDiff, Number(localStorage.getItem('axe_os_last_best_diff')) || 0);
+          const savedBestDiff = this.storageService.getNumber('axe_os_last_best_diff') || 0;
+          const savedTimestamp = this.storageService.getNumber('axe_os_last_best_update') || 0;
+          
+          // NEUES GERÄT / ABWESENHEIT: Wenn noch kein Timestamp da ist, aber Uptime existiert, 
+          // berechnen wir den Startpunkt anhand der Miner-Uptime, damit es auf dem Handy nicht bei 0 startet!
+          if (savedTimestamp === 0 && currentUptime > 0) {
+            console.log('NEUES GERÄT ERKANNT! Timer wird anhand der Miner-Uptime synchronisiert.');
+            this.lastKnownBestSessionDiff = Math.max(incomingBestDiff, savedBestDiff);
+            // Wir schätzen den Zeitpunkt des Rekords grob auf Basis der aktuellen Uptime des Miners
+            this.lastBestUpdate = new Date(Date.now() - (currentUptime * 1000));
+          } 
+          else if (incomingBestDiff > savedBestDiff) {
+            console.log('NEUER REKORD WÄHREND ABWESENHEIT! Timer startet bei 0.');
+            this.lastKnownBestSessionDiff = incomingBestDiff;
+            this.lastBestUpdate = new Date();
+          } 
+          else {
+            this.lastKnownBestSessionDiff = Math.max(incomingBestDiff, savedBestDiff);
+            if (savedTimestamp > 0) {
+              this.lastBestUpdate = new Date(savedTimestamp);
+            }
+          }
+
           this.isInitialBestSessionLoad = false;
           
-          if (incomingBestDiff > this.lastKnownBestSessionDiff) {
-            this.lastKnownBestSessionDiff = incomingBestDiff;
-          }
-          
-          localStorage.setItem('axe_os_last_best_diff', this.lastKnownBestSessionDiff.toString());
-          if (!localStorage.getItem('axe_os_last_best_update')) {
-            localStorage.setItem('axe_os_last_best_update', this.lastBestUpdate.getTime().toString());
-          }
+          // Im Storage Service sichern
+          this.storageService.setItem('axe_os_last_best_diff', this.lastKnownBestSessionDiff.toString());
+          this.storageService.setItem('axe_os_last_best_update', this.lastBestUpdate.getTime().toString());
         } 
         else if (incomingBestDiff > this.lastKnownBestSessionDiff) {
           console.log('NEUER REKORD ERKANNT! Timer wird zurückgesetzt.');
           this.lastBestUpdate = new Date();
           this.lastKnownBestSessionDiff = incomingBestDiff;
           
-          localStorage.setItem('axe_os_last_best_update', this.lastBestUpdate.getTime().toString());
-          localStorage.setItem('axe_os_last_best_diff', incomingBestDiff.toString());
+          this.storageService.setItem('axe_os_last_best_update', this.lastBestUpdate.getTime().toString());
+          this.storageService.setItem('axe_os_last_best_diff', incomingBestDiff.toString());
         }
 
         this.displayInfo = { ...info, lastBestUpdate: this.lastBestUpdate };
         this.latestInfo = info;
         this.lastMessageTime = new Date().getTime();
+
+
+        
         // Clear error indicators if data is flowing
         const systemInfoError = this.systemInfoError$.value;
         if (!!systemInfoError.duration) {
