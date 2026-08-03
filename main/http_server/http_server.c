@@ -2152,7 +2152,7 @@ esp_err_t start_rest_server(void * pvParameters)
         .user_ctx = (void *)WS_TYPE_LOGS, 
         .is_websocket = true,
         .ws_post_handshake_cb = websocket_pre_handshake,
-        .ws_post_handshake_cb = websocket_post_handshake
+        
     };
     httpd_register_uri_handler(server, &ws);
 
@@ -2163,7 +2163,7 @@ esp_err_t start_rest_server(void * pvParameters)
         .user_ctx = (void *)WS_TYPE_API, 
         .is_websocket = true,
         .ws_post_handshake_cb = websocket_pre_handshake,
-        .ws_post_handshake_cb = websocket_post_handshake
+        
     };
     httpd_register_uri_handler(server, &ws_live);
 
