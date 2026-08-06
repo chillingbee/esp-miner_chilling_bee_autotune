@@ -86,6 +86,7 @@ typedef struct
     uint64_t best_nonce_diff;
     char best_diff_string[DIFF_STRING_SIZE];
     uint64_t best_session_nonce_diff;
+    uint32_t best_session_uptime; // Uptime in Sekunden, als der Best-Diff erzielt wurde
     char best_session_diff_string[DIFF_STRING_SIZE];
     int block_found;
     bool show_new_block;

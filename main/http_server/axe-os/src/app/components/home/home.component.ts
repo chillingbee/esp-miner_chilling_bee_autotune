@@ -112,15 +112,13 @@ const WIDGET_DEFAULTS: WidgetDef[] = [
 export class HomeComponent implements OnInit, OnDestroy {
   public messages: ISystemMessage[] = [];
 
- public displayInfo: any;
-  private lastKnownBestSessionDiff: number = Number(localStorage.getItem('axe_os_last_best_diff') || '0');
+  cachedBestSessionDiff?: number;
+  sessionStartTime: number = Date.now();
+  previousUptime?: number;
   
-  public lastBestUpdate: Date = (() => {
-    const saved = localStorage.getItem('axe_os_last_best_update');
-    return saved ? new Date(Number(saved)) : new Date();
-  })();
+  displayInfo: any = null;
+  public lastBestUpdate: Date = new Date();
 
-  private isInitialBestSessionLoad: boolean = !localStorage.getItem('axe_os_last_best_update');
 
   public info$!: Observable<ISystemInfo>;
   public stats$!: Observable<ISystemStatistics>;
@@ -285,28 +283,6 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
   }
 
   ngOnInit(): void {
-
-
-    // Live-Ticker für den Timer
-    setInterval(() => {
-      if (this.displayInfo) {
-        this.displayInfo = { ...this.displayInfo }; // Das zwingt Angular zum Aktualisieren
-      }
-    }, 1000);
-
-// Live-Ticker für den Timer
-  const savedTime = this.storageService.getItem('axe_os_last_best_update');
-    if (savedTime) {
-      this.lastBestUpdate = new Date(Number(savedTime));
-      this.isInitialBestSessionLoad = false;
-    }
-
-    // Prüfen, ob im Browser-Speicher ein alter Zeitstempel liegt
-    const savedUpdate = this.storageService.getItem(this.HOME_BEST_UPDATE_KEY);
-    if (savedUpdate) {
-      this.lastBestUpdate = new Date(Number(savedUpdate));
-      this.isInitialBestSessionLoad = false; // Wir wissen jetzt: Es ist kein "echter" erster Start mehr
-    }
 
     this.dashboardEditService.widgetDefs = this.widgetDefs;
     this.dashboardEditService.isActive$.next(true);
@@ -930,75 +906,64 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
       }),
       tap(info => {
 
-// --- TIMER & REKORD SICHERUNG MIT REBOOT- & GERÄTE-SYNC ---
-        const incomingBestDiff = Number(info.bestSessionDiff) || 0;
-        const currentUptime = Number(info.uptimeSeconds) || 0;
+// --- ROBUSTER TIMER (F5- & BROWSER-NEUSTART SICHER ÜBER LOCALSTORAGE) ---
+    const incomingBestDiff = Number(info.bestSessionDiff) || 0;
+    const currentUptime = Number(info.uptimeSeconds) || 0;
+
+    // 1. Initialisierung beim ersten Start oder nach Browser-Neustart
+    if (this.cachedBestSessionDiff === undefined) {
+        this.cachedBestSessionDiff = incomingBestDiff;
         
-        // Letzte gespeicherte Uptime über den Service holen
-        const lastSavedUptime = Number(this.storageService.getItem('axe_os_last_uptime') || 0);
+        // Versuche den Startzeitpunkt aus dem localStorage zu holen (überlebt Browser-Neustart!)
+        const savedSessionStart = localStorage.getItem('bitaxe_session_start');
+        const savedDiff = localStorage.getItem('bitaxe_session_diff');
 
-        // REBOOT-ERKENNUNG: Entweder ist die Uptime kleiner geworden oder fast 0 nach einem längeren Lauf
-        const isMinerRebooted = (currentUptime < lastSavedUptime) || (currentUptime < 10 && lastSavedUptime > 30);
-
-        if (isMinerRebooted) {
-          console.log('MINER REBOOT ERKANNT! Timer wird auf 0 zurückgesetzt.');
-          this.storageService.removeItem('axe_os_last_best_update');
-          this.storageService.removeItem('axe_os_last_best_diff');
-          this.storageService.removeItem('axe_os_last_uptime');
-          
-          this.isInitialBestSessionLoad = true;
-          this.lastBestUpdate = new Date();
-          this.lastKnownBestSessionDiff = 0;
+        if (savedSessionStart && savedDiff && Number(savedDiff) === incomingBestDiff) {
+            // Highscore ist derselbe geblieben -> Gespeicherten Startzeitpunkt weiter nutzen!
+            this.sessionStartTime = Number(savedSessionStart);
+        } else {
+            // Neuer Highscore oder erster Start -> Auf "Jetzt" setzen und dauerhaft speichern
+            this.sessionStartTime = Date.now();
+            localStorage.setItem('bitaxe_session_start', this.sessionStartTime.toString());
+            localStorage.setItem('bitaxe_session_diff', incomingBestDiff.toString());
         }
+    }
 
-        // Aktuelle Uptime für den nächsten Vergleich speichern
-        this.storageService.setItem('axe_os_last_uptime', currentUptime.toString());
-
-        if (this.isInitialBestSessionLoad) {
-          const savedBestDiff = this.storageService.getNumber('axe_os_last_best_diff') || 0;
-          const savedTimestamp = this.storageService.getNumber('axe_os_last_best_update') || 0;
-          
-          // NEUES GERÄT / ABWESENHEIT: Wenn noch kein Timestamp da ist, aber Uptime existiert, 
-          // berechnen wir den Startpunkt anhand der Miner-Uptime, damit es auf dem Handy nicht bei 0 startet!
-          if (savedTimestamp === 0 && currentUptime > 0) {
-            console.log('NEUES GERÄT ERKANNT! Timer wird anhand der Miner-Uptime synchronisiert.');
-            this.lastKnownBestSessionDiff = Math.max(incomingBestDiff, savedBestDiff);
-            // Wir schätzen den Zeitpunkt des Rekords grob auf Basis der aktuellen Uptime des Miners
-            this.lastBestUpdate = new Date(Date.now() - (currentUptime * 1000));
-          } 
-          else if (incomingBestDiff > savedBestDiff) {
-            console.log('NEUER REKORD WÄHREND ABWESENHEIT! Timer startet bei 0.');
-            this.lastKnownBestSessionDiff = incomingBestDiff;
-            this.lastBestUpdate = new Date();
-          } 
-          else {
-            this.lastKnownBestSessionDiff = Math.max(incomingBestDiff, savedBestDiff);
-            if (savedTimestamp > 0) {
-              this.lastBestUpdate = new Date(savedTimestamp);
-            }
-          }
-
-          this.isInitialBestSessionLoad = false;
-          
-          // Im Storage Service sichern
-          this.storageService.setItem('axe_os_last_best_diff', this.lastKnownBestSessionDiff.toString());
-          this.storageService.setItem('axe_os_last_best_update', this.lastBestUpdate.getTime().toString());
-        } 
-        else if (incomingBestDiff > this.lastKnownBestSessionDiff) {
-          console.log('NEUER REKORD ERKANNT! Timer wird zurückgesetzt.');
-          this.lastBestUpdate = new Date();
-          this.lastKnownBestSessionDiff = incomingBestDiff;
-          
-          this.storageService.setItem('axe_os_last_best_update', this.lastBestUpdate.getTime().toString());
-          this.storageService.setItem('axe_os_last_best_diff', incomingBestDiff.toString());
-        }
-
-        this.displayInfo = { ...info, lastBestUpdate: this.lastBestUpdate };
-        this.latestInfo = info;
-        this.lastMessageTime = new Date().getTime();
-
-
+    // 2. Reset bei ECHTEM neuem Highscore im laufenden Betrieb
+    if (incomingBestDiff > this.cachedBestSessionDiff) {
+        console.log('NEUER REKORD! Timer auf 0.');
+        this.cachedBestSessionDiff = incomingBestDiff;
+        this.sessionStartTime = Date.now();
         
+        localStorage.setItem('bitaxe_session_start', this.sessionStartTime.toString());
+        localStorage.setItem('bitaxe_session_diff', incomingBestDiff.toString());
+    }
+    // 3. Reset bei Miner-REBOOT (Uptime des Miners ist kleiner geworden)
+    else if (this.previousUptime !== undefined && currentUptime < this.previousUptime) {
+        console.log('MINER REBOOT ERKANNT! Timer auf 0.');
+        this.cachedBestSessionDiff = incomingBestDiff;
+        this.sessionStartTime = Date.now();
+        
+        localStorage.setItem('bitaxe_session_start', this.sessionStartTime.toString());
+        localStorage.setItem('bitaxe_session_diff', incomingBestDiff.toString());
+    }
+
+    // Merken für den nächsten Durchlauf
+    this.previousUptime = currentUptime;
+
+    // Vergangene Sekunden seit dem letzten Highscore
+    let secondsSinceBest = Math.floor((Date.now() - this.sessionStartTime) / 1000);
+    if (secondsSinceBest < 0) secondsSinceBest = 0;
+
+    // Exaktes Datum für das Display erzeugen
+    this.lastBestUpdate = new Date(Date.now() - (secondsSinceBest * 1000));
+
+    // Display-Info setzen
+    this.displayInfo = { ...info, lastBestUpdate: this.lastBestUpdate };
+    this.latestInfo = info;
+    this.lastMessageTime = new Date().getTime();
+    // --- ENDE ---
+    
         // Clear error indicators if data is flowing
         const systemInfoError = this.systemInfoError$.value;
         if (!!systemInfoError.duration) {
@@ -1025,30 +990,6 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
         this.expectedEfficiency = this.calculateEfficiency(info, 'expectedHashrate');
         this.networkDifficultyPercentage = this.getNetworkDifficultyPercentage(info);
         this.payoutPercentage = this.getPayoutPercentage(info);
-
-
-        this.efficiency = this.calculateEfficiency(info, 'hashRate');
-
-        // --- HIER STARTET DIE TIMER-LOGIK ---
-      const currentBestDiff = info.bestSessionDiff || 0;
-        
-        if (this.isInitialBestSessionLoad) {
-          this.lastKnownBestSessionDiff = currentBestDiff;
-          this.isInitialBestSessionLoad = false;
-        } else if (currentBestDiff > this.lastKnownBestSessionDiff) {
-          // Neuer Rekord!
-          this.lastBestUpdate = new Date();
-          this.lastKnownBestSessionDiff = currentBestDiff;
-          
-          // IM STORAGE SPEICHERN, damit er einen Reload überlebt:
-          this.storageService.setItem(this.HOME_BEST_UPDATE_KEY, this.lastBestUpdate.getTime().toString());
-        }
-
-        this.displayInfo = { ...info, lastBestUpdate: this.lastBestUpdate };
-
-        // Wir packen das Info-Objekt zusammen mit unserem Zeitstempel in displayInfo
-        this.displayInfo = { ...info, lastBestUpdate: this.lastBestUpdate };
-        // --- ENDE DER TIMER-LOGIK ---
 
         // MANUELLE BERECHNUNG FÜR DEN GEGLÄTTETEN DURCHSCHNITT:
         if (info && info.power > 0 && info.hashRate_1h > 0) {
