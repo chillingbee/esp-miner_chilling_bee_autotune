@@ -43,6 +43,8 @@ import { TooltipDirective } from '../../directives/tooltip.directive'; // falls 
 import { DropdownComponent } from '../../components/dropdown/dropdown.component';
 import { ConfettiComponent } from '../../components/confetti/confetti.component';
 
+import { ChangeDetectorRef } from '@angular/core';
+
 
 
 type PoolLabel = 'Primary' | 'Fallback';
@@ -112,12 +114,14 @@ const WIDGET_DEFAULTS: WidgetDef[] = [
 export class HomeComponent implements OnInit, OnDestroy {
   public messages: ISystemMessage[] = [];
 
-  cachedBestSessionDiff?: number;
-  sessionStartTime: number = Date.now();
-  previousUptime?: number;
-  
+// --- KLASSEN-PROPERTIES & DI ---
+  private _lastBestDiff: number = -1;
+  private _bestDiffTimestamp: number = 0;
+  private _lastUptime: number = -1;
+
   displayInfo: any = null;
   public lastBestUpdate: Date = new Date();
+
 
 
   public info$!: Observable<ISystemInfo>;
@@ -256,6 +260,7 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
   @Input() uri = '';
 
   constructor(
+    private cdr: ChangeDetectorRef,
     private fb: FormBuilder,
     private systemService: SystemApiService,
     private themeService: ThemeService,
@@ -906,63 +911,53 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
       }),
       tap(info => {
 
-// --- ROBUSTER TIMER (F5- & BROWSER-NEUSTART SICHER ÜBER LOCALSTORAGE) ---
+// --- HIGH-PRECISION TIMER ---
     const incomingBestDiff = Number(info.bestSessionDiff) || 0;
     const currentUptime = Number(info.uptimeSeconds) || 0;
 
-    // 1. Initialisierung beim ersten Start oder nach Browser-Neustart
-    if (this.cachedBestSessionDiff === undefined) {
-        this.cachedBestSessionDiff = incomingBestDiff;
-        
-        // Versuche den Startzeitpunkt aus dem localStorage zu holen (überlebt Browser-Neustart!)
-        const savedSessionStart = localStorage.getItem('bitaxe_session_start');
-        const savedDiff = localStorage.getItem('bitaxe_session_diff');
-
-        if (savedSessionStart && savedDiff && Number(savedDiff) === incomingBestDiff) {
-            // Highscore ist derselbe geblieben -> Gespeicherten Startzeitpunkt weiter nutzen!
-            this.sessionStartTime = Number(savedSessionStart);
-        } else {
-            // Neuer Highscore oder erster Start -> Auf "Jetzt" setzen und dauerhaft speichern
-            this.sessionStartTime = Date.now();
-            localStorage.setItem('bitaxe_session_start', this.sessionStartTime.toString());
-            localStorage.setItem('bitaxe_session_diff', incomingBestDiff.toString());
-        }
+    // Erster Durchlauf
+    if (this._lastBestDiff === -1) {
+        this._lastBestDiff = incomingBestDiff;
+        this._bestDiffTimestamp = Date.now() - (currentUptime * 1000);
     }
 
-    // 2. Reset bei ECHTEM neuem Highscore im laufenden Betrieb
-    if (incomingBestDiff > this.cachedBestSessionDiff) {
-        console.log('NEUER REKORD! Timer auf 0.');
-        this.cachedBestSessionDiff = incomingBestDiff;
-        this.sessionStartTime = Date.now();
-        
-        localStorage.setItem('bitaxe_session_start', this.sessionStartTime.toString());
-        localStorage.setItem('bitaxe_session_diff', incomingBestDiff.toString());
-    }
-    // 3. Reset bei Miner-REBOOT (Uptime des Miners ist kleiner geworden)
-    else if (this.previousUptime !== undefined && currentUptime < this.previousUptime) {
-        console.log('MINER REBOOT ERKANNT! Timer auf 0.');
-        this.cachedBestSessionDiff = incomingBestDiff;
-        this.sessionStartTime = Date.now();
-        
-        localStorage.setItem('bitaxe_session_start', this.sessionStartTime.toString());
-        localStorage.setItem('bitaxe_session_diff', incomingBestDiff.toString());
+    // Konsolen-Log zur Kontrolle
+    if (incomingBestDiff !== this._lastBestDiff) {
+        console.log(`[Timer] BestDiff hat sich geändert! Alt: ${this._lastBestDiff}, Neu: ${incomingBestDiff}`);
     }
 
-    // Merken für den nächsten Durchlauf
-    this.previousUptime = currentUptime;
+    // Wenn der neue Wert GRÖSSER ist als der alte -> Sofort auf JETZT (0s) zurücksetzen!
+    if (incomingBestDiff > this._lastBestDiff) {
+        console.log('[Timer] >>> RESET WEGEN NEUEM HIGHSCORE! <<<');
+        this._bestDiffTimestamp = Date.now(); 
+        this._lastBestDiff = incomingBestDiff;
+    }
 
-    // Vergangene Sekunden seit dem letzten Highscore
-    let secondsSinceBest = Math.floor((Date.now() - this.sessionStartTime) / 1000);
-    if (secondsSinceBest < 0) secondsSinceBest = 0;
+    // Miner Neustart erkannt
+    if (currentUptime < this._lastUptime) {
+        console.log('[Timer] >>> RESET WEGEN REBOOT! <<<');
+        this._bestDiffTimestamp = Date.now() - (currentUptime * 1000);
+    }
+    this._lastUptime = currentUptime;
 
-    // Exaktes Datum für das Display erzeugen
-    this.lastBestUpdate = new Date(Date.now() - (secondsSinceBest * 1000));
+    // Vergangene Zeit berechnen
+    const elapsedMs = Date.now() - this._bestDiffTimestamp;
+    this.lastBestUpdate = new Date(Date.now() - elapsedMs);
 
-    // Display-Info setzen
-    this.displayInfo = { ...info, lastBestUpdate: this.lastBestUpdate };
+    // Display-Info setzen mit frischem Zeitstempel
+    this.displayInfo = { 
+        ...info, 
+        bestSessionDiff: incomingBestDiff,
+        lastBestUpdate: new Date(this._bestDiffTimestamp) 
+    };
+    
     this.latestInfo = info;
     this.lastMessageTime = new Date().getTime();
+    
+    // UI sofort aktualisieren zwingen
+    this.cdr.detectChanges();
     // --- ENDE ---
+
     
         // Clear error indicators if data is flowing
         const systemInfoError = this.systemInfoError$.value;
