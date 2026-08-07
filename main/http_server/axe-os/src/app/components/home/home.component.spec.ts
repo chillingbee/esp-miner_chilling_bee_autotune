@@ -151,11 +151,12 @@ describe('HomeComponent', () => {
       declarations: [
         // HomeComponent hier ENTFERNEN, da es standalone ist!
         
-        TooltipIconComponent,
+        
         ConfettiComponent,
         SnowflakesComponent
       ],
       imports: [
+        TooltipIconComponent,
         TooltipTextIconComponent,
         HomeComponent, // <-- HomeComponent gehört hierher in imports
         ReactiveFormsModule,
