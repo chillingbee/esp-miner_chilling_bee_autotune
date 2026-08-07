@@ -26,7 +26,6 @@ beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [],
       imports: [
-        SwarmComponent,
         ModalComponent,
         TooltipTextIconComponent,
         ReactiveFormsModule,
