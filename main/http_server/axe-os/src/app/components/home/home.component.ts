@@ -44,6 +44,7 @@ import { DropdownComponent } from '../../components/dropdown/dropdown.component'
 import { ConfettiComponent } from '../../components/confetti/confetti.component';
 
 import { ChangeDetectorRef } from '@angular/core';
+import { ProgressbarComponent } from '../../components/progressbar/progressbar.component'; // Pfad anpassen
 
 
 
@@ -96,20 +97,21 @@ const WIDGET_DEFAULTS: WidgetDef[] = [
     styleUrls: ['./home.component.scss'],
     standalone: true,
     imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
-    ConfettiComponent,
-    HashSuffixPipe,
-    DiffSuffixPipe,
-    SatsPipe,
-    AddressPipe,
-    DateAgoPipe,
-    TooltipDirective,
-    DropdownComponent,
-    AppChartComponent,
-    ConfettiComponent,
-    TooltipTextIconComponent /* weitere benötigte Module */],
+        CommonModule,
+        ReactiveFormsModule,
+        FormsModule,
+        ConfettiComponent,
+        HashSuffixPipe,
+        DiffSuffixPipe,
+        SatsPipe,
+        AddressPipe,
+        DateAgoPipe,
+        TooltipDirective,
+        DropdownComponent,
+        AppChartComponent,
+        TooltipTextIconComponent,
+        ProgressbarComponent // <-- Hier hinzufügen (Name an dein Projekt anpassen, falls sie anders heißt)
+    ],
 })
 export class HomeComponent implements OnInit, OnDestroy {
   public messages: ISystemMessage[] = [];
