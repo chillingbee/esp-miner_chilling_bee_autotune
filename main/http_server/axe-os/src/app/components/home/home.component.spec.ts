@@ -146,16 +146,17 @@ describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
 
-  beforeEach(() => {
+ beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
-        HomeComponent,
+        // HomeComponent hier ENTFERNEN, da es standalone ist!
         TooltipTextIconComponent,
         TooltipIconComponent,
         ConfettiComponent,
         SnowflakesComponent
       ],
       imports: [
+        HomeComponent, // <-- HomeComponent gehört hierher in imports
         ReactiveFormsModule,
         FormsModule,
         NoopAnimationsModule,
