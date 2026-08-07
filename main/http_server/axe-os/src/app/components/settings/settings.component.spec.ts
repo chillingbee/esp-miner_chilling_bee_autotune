@@ -6,6 +6,7 @@ import { provideToastr } from 'ngx-toastr';
 import { provideRouter } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('SettingsComponent', () => {
   let component: SettingsComponent;
@@ -15,6 +16,7 @@ describe('SettingsComponent', () => {
     TestBed.configureTestingModule({
       imports: [SettingsComponent, EditComponent],
       providers: [
+        provideHttpClientTesting(),
         provideHttpClient(),
         provideToastr(),
         provideRouter([]),
