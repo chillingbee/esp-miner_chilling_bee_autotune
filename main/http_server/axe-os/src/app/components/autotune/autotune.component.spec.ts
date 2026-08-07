@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AutotuneComponent } from './autotune.component';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { ToastrModule } from 'ngx-toastr';
 
 describe('SettingsComponent', () => {
   let component: AutotuneComponent;
@@ -11,7 +12,9 @@ describe('SettingsComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [],
+      imports: [ToastrModule.forRoot()],
       providers: [
+        provideHttpClient(),
        provideHttpClient(),
        provideHttpClientTesting(),
   // ... weitere Provider

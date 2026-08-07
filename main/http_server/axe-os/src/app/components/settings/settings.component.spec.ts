@@ -19,7 +19,6 @@ describe('SettingsComponent', () => {
         provideToastr(),
         provideHttpClientTesting(),
         provideHttpClient(),
-        provideToastr(),
         provideRouter([]),
         {
           provide: ActivatedRoute,
