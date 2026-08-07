@@ -102,31 +102,25 @@
 </div>
 
 <app-modal #progressModal [headline]="'Updating ' + updateTarget" [closable]="updateStatus !== 'progress'">
-  <div class="flex flex-col items-center justify-center p-4">
-    @if (updateStatus === 'progress') {
-      @if (updateTarget === 'AxeOS' && websiteUpdateProgress !== null) {
-        <div class="text-xl mb-3">
-          Uploading... {{ websiteUpdateProgress }}%
-        </div>
-      }
-      @if (updateTarget === 'Firmware' && firmwareUpdateProgress !== null) {
-        <div class="text-xl mb-3">
-          Uploading... {{ firmwareUpdateProgress }}%
-        </div>
-      }
-      @if ((updateTarget === 'AxeOS' && websiteUpdateProgress === null) || (updateTarget === 'Firmware' && firmwareUpdateProgress === null)) {
-        <div class="text-xl mb-3">
-          Applying update...
-        </div>
-      }
-      @let progressVal = (updateTarget === 'AxeOS' ? websiteUpdateProgress : firmwareUpdateProgress);
-      <div class="w-full bg-progressbar rounded-sm overflow-hidden h-6">
-        <div class="bg-progressbar-value h-full transition-all duration-300" [style.width.%]="progressVal"></div>
-      </div>
-      <div class="text-center mt-3 text-secondary">
-        Please do not disconnect the power.
-      </div>
-    }
+    <div class="flex flex-col items-center justify-center p-4">
+        <ng-container *ngIf="updateStatus === 'progress'">
+            <div class="text-xl mb-3" *ngIf="updateTarget === 'AxeOS' && websiteUpdateProgress !== null">
+                Uploading... {{ websiteUpdateProgress }}%
+            </div>
+            <div class="text-xl mb-3" *ngIf="updateTarget === 'Firmware' && firmwareUpdateProgress !== null">
+                Uploading... {{ firmwareUpdateProgress }}%
+            </div>
+            <div class="text-xl mb-3" *ngIf="(updateTarget === 'AxeOS' && websiteUpdateProgress === null) || (updateTarget === 'Firmware' && firmwareUpdateProgress === null)">
+                Applying update...
+            </div>
+            
+            @let progressVal = (updateTarget === 'AxeOS' ? websiteUpdateProgress : firmwareUpdateProgress);
+            <app-progressbar [value]="progressVal ?? 0" heightClass="h-6"></app-progressbar>
+            
+            <div class="text-center mt-3 text-secondary">
+                Please do not disconnect the power.
+            </div>
+        </ng-container>
 
     @if (updateStatus === 'success') {
       <i class="pi pi-check-circle text-green-500" style="font-size: 3.5rem; margin-bottom: 1rem;"></i>

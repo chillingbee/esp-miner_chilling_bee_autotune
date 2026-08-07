@@ -1923,7 +1923,7 @@ esp_err_t POST_autotune_update(httpd_req_t * req)
         AUTO_TUNE.max_temp_asic = item->valuedouble;
         nvs_config_set_u16(NVS_CONFIG_KEY_MAX_TEMP_ASIC, (uint16_t)AUTO_TUNE.max_temp_asic);
     }
-        if ((item = cJSON_GetObjectItem(root, nvs_config_get_settings(NVS_CONFIG_KEY_AUTO_TUNE_ENABLE)->nvs_key_name)) && cJSON_IsBool(item)) {
+    if ((item = cJSON_GetObjectItem(root, nvs_config_get_settings(NVS_CONFIG_KEY_AUTO_TUNE_ENABLE)->nvs_key_name)) && cJSON_IsBool(item)) {
         AUTO_TUNE.auto_tune_hashrate = item->valueint;
         nvs_config_set_bool(NVS_CONFIG_KEY_AUTO_TUNE_ENABLE, (bool)AUTO_TUNE.auto_tune_hashrate);
     }
@@ -1935,7 +1935,7 @@ esp_err_t POST_autotune_update(httpd_req_t * req)
         AUTO_TUNE.overshot_fanspeed = (uint16_t)item->valuedouble;
         nvs_config_set_u16(NVS_CONFIG_KEY_OVERSHOT_FAN_LIMIT, (uint16_t)AUTO_TUNE.overshot_fanspeed);
     }
-     if ((item = cJSON_GetObjectItem(root, nvs_config_get_settings(NVS_CONFIG_KEY_MAX_TEMP_VR)->nvs_key_name)) && cJSON_IsNumber(item)) {
+    if ((item = cJSON_GetObjectItem(root, nvs_config_get_settings(NVS_CONFIG_KEY_MAX_TEMP_VR)->nvs_key_name)) && cJSON_IsNumber(item)) {
         AUTO_TUNE.max_temp_vr = (uint16_t)item->valueint;
         nvs_config_set_u16(NVS_CONFIG_KEY_MAX_TEMP_VR, (uint16_t)AUTO_TUNE.max_temp_vr);
     }
@@ -1944,10 +1944,10 @@ esp_err_t POST_autotune_update(httpd_req_t * req)
     httpd_resp_send_chunk(req, NULL, 0);
     return ESP_OK;
 }
-esp_err_t start_rest_server(void * pvParameters)
+
+esp_err_t start_rest_server(GlobalState * global_state)
 {
-    GLOBAL_STATE = (GlobalState *) pvParameters;
-    
+    GLOBAL_STATE = global_state;
     // Initialize the ASIC API with the global state
     asic_api_init(GLOBAL_STATE);
     const char * base_path = "";
