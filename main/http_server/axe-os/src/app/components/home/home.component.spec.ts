@@ -150,12 +150,13 @@ describe('HomeComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         // HomeComponent hier ENTFERNEN, da es standalone ist!
-        TooltipTextIconComponent,
+        
         TooltipIconComponent,
         ConfettiComponent,
         SnowflakesComponent
       ],
       imports: [
+        TooltipTextIconComponent,
         HomeComponent, // <-- HomeComponent gehört hierher in imports
         ReactiveFormsModule,
         FormsModule,

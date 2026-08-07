@@ -8,7 +8,8 @@ describe('SettingsComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [AutotuneComponent]
+      declarations: [],
+      imports: [AutotuneComponent]
     });
     fixture = TestBed.createComponent(AutotuneComponent);
     component = fixture.componentInstance;
