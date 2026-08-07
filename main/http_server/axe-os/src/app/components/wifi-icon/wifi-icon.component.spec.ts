@@ -8,8 +8,7 @@ describe('WifiIconComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [],
-      imports: [WifiIconComponent, TooltipIconComponent],
+      imports: [TooltipIconComponent], // WifiIconComponent hier entfernt
     });
     fixture = TestBed.createComponent(WifiIconComponent);
     component = fixture.componentInstance;

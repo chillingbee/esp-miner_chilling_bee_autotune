@@ -14,7 +14,7 @@ describe('SettingsComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [SettingsComponent, EditComponent],
+      imports: [EditComponent], // SettingsComponent entfernt, da man sich nicht selbst importiert
       providers: [
         provideHttpClientTesting(),
         provideHttpClient(),

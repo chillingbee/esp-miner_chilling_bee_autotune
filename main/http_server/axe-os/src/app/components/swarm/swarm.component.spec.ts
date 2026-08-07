@@ -22,10 +22,10 @@ describe('SwarmComponent', () => {
   let fixture: ComponentFixture<SwarmComponent>;
   let httpClient: HttpClient;
 
-beforeEach(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [],
       imports: [
+        SwarmComponent, // <-- HIER MUSS DIE KOMPONENTE SELBST AUCH REIN (da standalone)
         ModalComponent,
         TooltipTextIconComponent,
         ReactiveFormsModule,
