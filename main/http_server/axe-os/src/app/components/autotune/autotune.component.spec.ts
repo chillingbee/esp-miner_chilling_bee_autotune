@@ -15,8 +15,8 @@ describe('SettingsComponent', () => {
        provideHttpClient(),
        provideHttpClientTesting(),
   // ... weitere Provider
-]
-      imports: [AutotuneComponent]
+],
+      imports: [AutotuneComponent],
     });
     fixture = TestBed.createComponent(AutotuneComponent);
     component = fixture.componentInstance;
