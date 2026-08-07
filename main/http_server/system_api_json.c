@@ -41,6 +41,10 @@ static const char *get_reset_reason_str(esp_reset_reason_t reason)
     }
 }
 
+// Statische Variablen für das Highscore-Uptime-Tracking (müssen außerhalb der Funktion stehen!)
+static uint64_t last_tracked_best_diff = 0;
+static uint32_t best_score_uptime = 0;
+
 static void system_api_add_telemetry(cJSON *root, GlobalState *g) {
     if (!root || !g) return;
 
@@ -87,13 +91,30 @@ static void system_api_add_telemetry(cJSON *root, GlobalState *g) {
         cJSON_AddNumberToObject(root, "coinbaseValueUserSatoshis", g->coinbase_value_user_satoshis);
     }
 
-    // Dynamic System Stats
+    // Dynamic System Stats & Highscore Uptime Logik
+    uint32_t current_uptime = (uint32_t)((esp_timer_get_time() - g->SYSTEM_MODULE.start_time) / 1000000);
+    uint64_t current_best_diff = g->SYSTEM_MODULE.best_session_nonce_diff;
+
+    // Wenn Miner neu gestartet wurde oder erster Lauf
+    if (current_uptime < best_score_uptime || last_tracked_best_diff == 0) {
+        last_tracked_best_diff = current_best_diff;
+        best_score_uptime = current_uptime;
+    }
+
+    // Wenn ein neuer Highscore reinkommt -> exakte Uptime festhalten
+    if (current_best_diff > last_tracked_best_diff) {
+        last_tracked_best_diff = current_best_diff;
+        best_score_uptime = current_uptime;
+    }
+
     cJSON_AddNumberToObject(root, "freeHeap", esp_get_free_heap_size());
     cJSON_AddNumberToObject(root, "freeHeapInternal", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
     cJSON_AddNumberToObject(root, "freeHeapSpiram", heap_caps_get_free_size(MALLOC_CAP_SPIRAM));
     cJSON_AddNumberToObject(root, "minFreeHeap", esp_get_minimum_free_heap_size());
     cJSON_AddNumberToObject(root, "maxAllocHeap", heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL));
-    cJSON_AddNumberToObject(root, "uptimeSeconds", (uint32_t)((esp_timer_get_time() - g->SYSTEM_MODULE.start_time) / 1000000));
+    cJSON_AddNumberToObject(root, "uptimeSeconds", current_uptime);
+    cJSON_AddNumberToObject(root, "bestScoreUptime", best_score_uptime); // <--- Übergabe an den Webserver/Browser
+    
     cJSON_AddFloatToObject(root, "cpuUsage", g->SYSTEM_MODULE.cpu_usage);
     cJSON_AddBoolToObject(root, "miningPaused", g->SYSTEM_MODULE.mining_paused);
     cJSON_AddNumberToObject(root, "overheat_mode", g->SYSTEM_MODULE.overheat_mode ? 1 : 0);

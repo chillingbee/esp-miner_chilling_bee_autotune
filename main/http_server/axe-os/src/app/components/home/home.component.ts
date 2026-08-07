@@ -911,50 +911,25 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
       }),
       tap(info => {
 
-// --- HIGH-PRECISION TIMER ---
-    const incomingBestDiff = Number(info.bestSessionDiff) || 0;
+// --- FINALER, FELSENFESTER TIMER (FIRMWARE-GESTÜTZT) ---
     const currentUptime = Number(info.uptimeSeconds) || 0;
+    const bestScoreUptime = Number((info as any).bestScoreUptime) || 0;
 
-    // Erster Durchlauf
-    if (this._lastBestDiff === -1) {
-        this._lastBestDiff = incomingBestDiff;
-        this._bestDiffTimestamp = Date.now() - (currentUptime * 1000);
-    }
+    // Die vergangene Zeit ist mathematisch korrekt die Differenz
+    const uptimeSinceBest = Math.max(0, currentUptime - bestScoreUptime);
+    const elapsedMs = uptimeSinceBest * 1000;
 
-    // Konsolen-Log zur Kontrolle
-    if (incomingBestDiff !== this._lastBestDiff) {
-        console.log(`[Timer] BestDiff hat sich geändert! Alt: ${this._lastBestDiff}, Neu: ${incomingBestDiff}`);
-    }
-
-    // Wenn der neue Wert GRÖSSER ist als der alte -> Sofort auf JETZT (0s) zurücksetzen!
-    if (incomingBestDiff > this._lastBestDiff) {
-        console.log('[Timer] >>> RESET WEGEN NEUEM HIGHSCORE! <<<');
-        this._bestDiffTimestamp = Date.now(); 
-        this._lastBestDiff = incomingBestDiff;
-    }
-
-    // Miner Neustart erkannt
-    if (currentUptime < this._lastUptime) {
-        console.log('[Timer] >>> RESET WEGEN REBOOT! <<<');
-        this._bestDiffTimestamp = Date.now() - (currentUptime * 1000);
-    }
-    this._lastUptime = currentUptime;
-
-    // Vergangene Zeit berechnen
-    const elapsedMs = Date.now() - this._bestDiffTimestamp;
+    // Datum setzen, ab dem der Timer zählt
     this.lastBestUpdate = new Date(Date.now() - elapsedMs);
 
-    // Display-Info setzen mit frischem Zeitstempel
+    // Display-Info für das UI aktualisieren
     this.displayInfo = { 
         ...info, 
-        bestSessionDiff: incomingBestDiff,
-        lastBestUpdate: new Date(this._bestDiffTimestamp) 
+        lastBestUpdate: this.lastBestUpdate
     };
     
     this.latestInfo = info;
     this.lastMessageTime = new Date().getTime();
-    
-    // UI sofort aktualisieren zwingen
     this.cdr.detectChanges();
     // --- ENDE ---
 

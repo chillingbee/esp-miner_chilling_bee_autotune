@@ -215,7 +215,7 @@
     </span>
     <span class="text-secondary text-lg">session best</span>
     <span class="text-sm font-medium mb-4" 
-        [ngStyle]="{'color': (getElapsedTime(displayInfo?.lastBestUpdate).includes('h ago')) ? 'red' : 'gray'}">
+        [ngStyle]="{'color': ((displayInfo?.bestSessionDiff || info?.bestSessionDiff) >= info?.bestDiff) ? '#22c55e' : 'gray'}">
         ({{ getElapsedTime(displayInfo?.lastBestUpdate) }})
     </span>
 </div>
