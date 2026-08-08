@@ -149,13 +149,13 @@ describe('HomeComponent', () => {
 beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
-        // declarations komplett leer lassen, da alle verwendeten Komponenten standalone sind!
+        SnowflakesComponent,
       ],
       imports: [
         ConfettiComponent,
         TooltipIconComponent,
         TooltipTextIconComponent,
-        SnowflakesComponent, // <-- HIERHER verschoben, falls sie standalone ist!
+        
         HomeComponent,
         ReactiveFormsModule,
         FormsModule,
