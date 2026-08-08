@@ -123,6 +123,7 @@ const mockLiveDataService = {
 };
 
 const mockSystemApiService = {
+  getInfo: () => of({}), // <-- Hier ergänzen
   getStatistics: () => of(mockSystemStatistics),
   updateSystem: () => of(null),
   restart: () => of(null),
@@ -134,6 +135,8 @@ const mockThemeService = {
   setTheme: () => {},
   getCurrentTheme: () => 'dark'
 };
+
+
 
 const mockLocalStorageService = {
   getItem: () => null,
