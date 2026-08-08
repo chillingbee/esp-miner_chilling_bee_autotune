@@ -155,7 +155,6 @@ beforeEach(() => {
         ConfettiComponent,
         TooltipIconComponent,
         TooltipTextIconComponent,
-        
         HomeComponent,
         ReactiveFormsModule,
         FormsModule,
@@ -172,7 +171,7 @@ beforeEach(() => {
         ByteSuffixPipe
       ],
       providers: [
-        // ... deine Provider bleiben unverändert
+       { provide: SystemApiService, useValue: mockSystemApiService },
       ]
     });
     fixture = TestBed.createComponent(HomeComponent);
