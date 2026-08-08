@@ -3,8 +3,7 @@ import { SettingsComponent } from './settings.component';
 import { EditComponent } from '../edit/edit.component';
 import { provideHttpClient } from '@angular/common/http';
 import { provideToastr } from 'ngx-toastr';
-import { provideRouter } from '@angular/router';
-import { ActivatedRoute } from '@angular/router';
+import { provideRouter, ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
@@ -14,7 +13,7 @@ describe('SettingsComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [EditComponent], // SettingsComponent entfernt, da man sich nicht selbst importiert
+      imports: [EditComponent], // SettingsComponent hier NICHT importieren, da sie selbst getestet wird
       providers: [
         provideToastr(),
         provideHttpClientTesting(),
@@ -23,8 +22,14 @@ describe('SettingsComponent', () => {
         {
           provide: ActivatedRoute,
           useValue: {
-            snapshot: { paramMap: { get: () => '1' } },
-            params: of({})
+            snapshot: { 
+              paramMap: { get: () => '1' },
+              queryParamMap: { get: () => null }
+            },
+            params: of({}),
+            queryParams: of({}),
+            paramMap: of({ get: () => '1' }),
+            queryParamMap: of({ get: () => null })
           }
         }
       ]

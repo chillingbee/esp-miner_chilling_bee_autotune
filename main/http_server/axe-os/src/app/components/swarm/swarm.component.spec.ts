@@ -24,9 +24,10 @@ describe('SwarmComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      declarations: [
+        ModalComponent // <-- HIER MUSS SIE HIN, da sie nicht standalone ist!
+      ],
       imports: [
-    
-        ModalComponent,
         TooltipTextIconComponent,
         ReactiveFormsModule,
         FormsModule,

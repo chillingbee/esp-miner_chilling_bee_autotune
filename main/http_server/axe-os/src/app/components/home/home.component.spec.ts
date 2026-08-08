@@ -152,10 +152,11 @@ describe('HomeComponent', () => {
         // HomeComponent hier ENTFERNEN, da es standalone ist!
         
         
-        ConfettiComponent,
+        
         SnowflakesComponent
       ],
       imports: [
+        ConfettiComponent,
         TooltipIconComponent,
         TooltipTextIconComponent,
         HomeComponent, // <-- HomeComponent gehört hierher in imports
