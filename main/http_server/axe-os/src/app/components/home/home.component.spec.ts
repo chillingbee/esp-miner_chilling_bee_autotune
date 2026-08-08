@@ -210,19 +210,27 @@ beforeEach(() => {
   });
 
 it('should render the dashboard widgets and dropdowns when info is loaded', fakeAsync(() => {
-    // Da info$ ein Observable ist, weisen wir ihm hier die gemockten Systemdaten zu.
-    // Wir nutzen of() aus rxjs und füllen alle Pflichtfelder ab, die .toFixed() aufrufen.
     component.info$ = of({
       power_fault: false,
       power: 0,
-      temp: 0,
-      hr: 0,
       voltage: 0,
-      current: 0
+      current: 0,
+      temp: 0,
+      temp2: 0,
+      hr: 0,
+      hashrate: 0,
+      frequency: 0,
+      freeram: 0,
+      uptime: 0,
+      bestDiff: "0",
+      sharesAccepted: 0,
+      sharesRejected: 0,
+      fanSpeed: 0,
+      fanPercent: 0
     } as any);
 
     fixture.detectChanges();
-    tick(100); // Wartet auf das setTimeout aus dem effect()
+    tick(100);
     fixture.detectChanges();
 
     const element = fixture.nativeElement;
