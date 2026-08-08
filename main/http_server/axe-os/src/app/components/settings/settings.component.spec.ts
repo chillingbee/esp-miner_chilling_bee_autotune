@@ -6,6 +6,7 @@ import { provideToastr } from 'ngx-toastr';
 import { provideRouter, ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HashSuffixPipe } from 'src/app/pipes/hash-suffix.pipe';
 
 describe('SettingsComponent', () => {
   let component: SettingsComponent;
@@ -13,7 +14,7 @@ describe('SettingsComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [EditComponent], // SettingsComponent hier NICHT importieren, da sie selbst getestet wird
+      imports: [EditComponent, HashSuffixPipe], // SettingsComponent hier NICHT importieren, da sie selbst getestet wird
       providers: [
         provideToastr(),
         provideHttpClientTesting(),

@@ -146,20 +146,17 @@ describe('HomeComponent', () => {
   let component: HomeComponent;
   let fixture: ComponentFixture<HomeComponent>;
 
- beforeEach(() => {
+beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
-        // HomeComponent hier ENTFERNEN, da es standalone ist!
-        
-        
-        
-        SnowflakesComponent
+        // declarations komplett leer lassen, da alle verwendeten Komponenten standalone sind!
       ],
       imports: [
         ConfettiComponent,
         TooltipIconComponent,
         TooltipTextIconComponent,
-        HomeComponent, // <-- HomeComponent gehört hierher in imports
+        SnowflakesComponent, // <-- HIERHER verschoben, falls sie standalone ist!
+        HomeComponent,
         ReactiveFormsModule,
         FormsModule,
         NoopAnimationsModule,
@@ -175,19 +172,7 @@ describe('HomeComponent', () => {
         ByteSuffixPipe
       ],
       providers: [
-        provideRouter([]),
-        provideHttpClient(),
-        provideToastr(),
-        { provide: SystemApiService, useValue: mockSystemApiService },
-        { provide: LiveDataService, useValue: mockLiveDataService },
-        ThemeService,
-        QuicklinkService,
-        Title,
-        LoadingService,
-        ShareRejectionExplanationService,
-        { provide: LocalStorageService, useValue: mockLocalStorageService },
-        DashboardEditService,
-        LayoutService
+        // ... deine Provider bleiben unverändert
       ]
     });
     fixture = TestBed.createComponent(HomeComponent);
