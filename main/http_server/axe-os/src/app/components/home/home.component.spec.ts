@@ -131,6 +131,7 @@ const mockSystemApiService = {
 };
 
 const mockThemeService = {
+  getThemeSettings: () => of({}), // <-- Hier ergänzen
   theme$: of('dark'),
   setTheme: () => {},
   getCurrentTheme: () => 'dark'
