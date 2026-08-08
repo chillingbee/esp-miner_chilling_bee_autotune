@@ -129,7 +129,7 @@ const mockSystemApiService = {
     hashRate: 500,
     temp: 65,
     // ... nur die Felder, die der Home-Komponententest anfordert
-  } as SystemInfo),
+  } as ISystemInfo),
   getStatistics: () => of(mockSystemStatistics),
   updateSystem: () => of(null),
   restart: () => of(null),
