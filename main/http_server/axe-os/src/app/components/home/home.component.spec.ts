@@ -210,16 +210,16 @@ beforeEach(() => {
   });
 
 it('should render the dashboard widgets and dropdowns when info is loaded', fakeAsync(() => {
-    // Fülle das Mock-Objekt mit allen Basiswerten, damit .toFixed() nicht abstürzt
-    component.info = {
+    // Da info$ ein Observable ist, weisen wir ihm hier die gemockten Systemdaten zu.
+    // Wir nutzen of() aus rxjs und füllen alle Pflichtfelder ab, die .toFixed() aufrufen.
+    component.info$ = of({
       power_fault: false,
       power: 0,
       temp: 0,
       hr: 0,
       voltage: 0,
-      current: 0,
-      // ... füge hier bei Bedarf weitere Properties hinzu, die das Template erwartet
-    } as any;
+      current: 0
+    } as any);
 
     fixture.detectChanges();
     tick(100); // Wartet auf das setTimeout aus dem effect()
