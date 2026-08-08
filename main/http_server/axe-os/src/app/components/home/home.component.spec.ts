@@ -210,11 +210,15 @@ beforeEach(() => {
   });
 
 it('should render the dashboard widgets and dropdowns when info is loaded', fakeAsync(() => {
-    // Falls der Service direkt gepatcht werden muss oder info$ versorgt wird:
-    // component.info$ = of({ power_fault: false } as any);
+    // Falls das Observable direkt auf der Komponente überschrieben werden kann:
+    component.info$ = of({ power_fault: false } as any);
+
+    // ODER falls ein SystemService gemockt wird (Beispiel):
+    // const systemService = TestBed.inject(SystemApiService);
+    // spyOn(systemService, 'getInfo').and.returnValue(of({ power_fault: false } as any));
 
     fixture.detectChanges();
-    tick(100); // Wartet auf das setTimeout aus dem effect()
+    tick(100); // Wartet auf das setTimeout im effect()
     fixture.detectChanges();
 
     const element = fixture.nativeElement;
