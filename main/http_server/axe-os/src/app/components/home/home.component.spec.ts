@@ -210,27 +210,20 @@ beforeEach(() => {
   });
 
 it('should render the dashboard widgets and dropdowns when info is loaded', fakeAsync(() => {
-    component.info$ = of({
-      power_fault: false,
-      power: 0,
-      voltage: 0,
-      current: 0,
-      temp: 0,
-      temp2: 0,
-      hr: 0,
-      hashrate: 0,
-      frequency: 0,
-      freeram: 0,
-      uptime: 0,
-      bestDiff: "0",
-      sharesAccepted: 0,
-      sharesRejected: 0,
-      fanSpeed: 0,
-      fanPercent: 0
-    } as any);
+    // Erstelle ein Proxy-Objekt, das für *jederlei* fehlende Properties standardmäßig 0 zurückgibt
+    const proxyInfo = new Proxy({ power_fault: false }, {
+      get(target: any, prop: string) {
+        if (prop in target) {
+          return target[prop];
+        }
+        return 0; // Jede andere Eigenschaft (wie hashrate, temp, etc.) liefert 0 statt undefined
+      }
+    });
+
+    component.info$ = of(proxyInfo as any);
 
     fixture.detectChanges();
-    tick(100);
+    tick(100); // Wartet auf das setTimeout aus dem effect()
     fixture.detectChanges();
 
     const element = fixture.nativeElement;
