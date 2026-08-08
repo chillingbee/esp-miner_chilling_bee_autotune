@@ -35,7 +35,7 @@ import { LocalStorageService } from 'src/app/local-storage.service';
 import { DashboardEditService } from 'src/app/services/dashboard-edit.service';
 import { LayoutService } from 'src/app/layout/service/app.layout.service';
 import { SystemInfo as ISystemInfo, SystemStatistics as ISystemStatistics } from 'src/app/generated/models';
-import { TestBed, ComponentFixture, fakeAsync, tick } from '@angular/core/testing';
+import { fakeAsync, tick } from '@angular/core/testing';
 
 const mockSystemInfo: ISystemInfo = {
   power_fault: '',
