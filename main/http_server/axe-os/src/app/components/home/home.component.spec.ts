@@ -210,9 +210,15 @@ beforeEach(() => {
   });
 
 it('should render the dashboard widgets and dropdowns when info is loaded', fakeAsync(() => {
+    // Setze info explizit so, dass power_fault false ist:
+    component.info = {
+      power_fault: false,
+      // ... weitere benötigte Felder falls nötig
+    } as any;
+
     fixture.detectChanges();
-    tick(100); // Wartet die 100ms vom setTimeout im effect() ab
-    fixture.detectChanges(); // Aktualisiert das DOM
+    tick(100); // Wartet auf das setTimeout aus dem effect()
+    fixture.detectChanges();
 
     const element = fixture.nativeElement;
     expect(element.querySelector('app-dropdown')).toBeTruthy();
