@@ -123,7 +123,13 @@ const mockLiveDataService = {
 };
 
 const mockSystemApiService = {
-  getInfo: () => of({}), // <-- Hier ergänzen
+  getInfo: () => of({
+    hostname: 'Bitaxe',
+    version: 'v2.14.0',
+    hashRate: 500,
+    temp: 65,
+    // ... nur die Felder, die der Home-Komponententest anfordert
+  } as SystemInfo),
   getStatistics: () => of(mockSystemStatistics),
   updateSystem: () => of(null),
   restart: () => of(null),
