@@ -128,7 +128,7 @@ const mockSystemApiService = {
     version: 'v2.14.0',
     hashRate: 500,
     temp: 65,
-    // ... nur die Felder, die der Home-Komponententest anfordert
+    // Falls TypeScript meckert, caste es als ISystemInfo:
   } as ISystemInfo),
   getStatistics: () => of(mockSystemStatistics),
   updateSystem: () => of(null),
@@ -208,10 +208,13 @@ beforeEach(() => {
     expect(component).toBeTruthy();
   });
 
-  it('should render the dashboard widgets and dropdowns when info is loaded', () => {
+it('should render the dashboard widgets and dropdowns when info is loaded', () => {
+    // Falls ein asynchroner Tick oder ein weiteres detectChanges nötig ist:
     fixture.detectChanges();
+    tick(); // Falls fakeAsync verwendet wird
+    fixture.detectChanges();
+    
     const element = fixture.nativeElement;
-    // Verify that the dropdowns inside *ngIf are rendered
     expect(element.querySelector('app-dropdown')).toBeTruthy();
   });
 
