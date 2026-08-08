@@ -211,12 +211,14 @@ beforeEach(() => {
 
 it('should render the dashboard widgets and dropdowns when info is loaded', fakeAsync(() => {
     fixture.detectChanges();
-    tick();
-    fixture.detectChanges();
-    
+    tick(100); // Wartet die 100ms vom setTimeout im effect() ab
+    fixture.detectChanges(); // Aktualisiert das DOM
+
     const element = fixture.nativeElement;
     expect(element.querySelector('app-dropdown')).toBeTruthy();
   }));
+
+
   describe('stale data and visibility state', () => {
     it('should set stale data error when visible and last message is old', () => {
       spyOnProperty(document, 'visibilityState', 'get').and.returnValue('visible');
