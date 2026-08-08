@@ -777,6 +777,7 @@ static bool validate_pool_json(const cJSON *pool_item, int i) {
     }
 
     if (!validate_string_field(cJSON_GetObjectItem(pool_item, "stratumV2AuthorityPubkey"), "stratumV2AuthorityPubkey", 128, i)) return false;
+    if (!validate_bool_or_num(cJSON_GetObjectItem(pool_item, "stratumV2RequireAuth"), "stratumV2RequireAuth", i)) return false;
 
     return true;
 }
@@ -820,6 +821,7 @@ static void update_pool_nvs(const cJSON *pool_item, int i) {
     add_bool_field_default(p_obj, pool_item, "stratumDecodeCoinbase", true);
     add_string_field_default(p_obj, pool_item, "stratumV2ChannelType", SV2_CHANNEL_TYPE_EXTENDED);
     add_string_field_default(p_obj, pool_item, "stratumV2AuthorityPubkey", "");
+    add_bool_field_default(p_obj, pool_item, "stratumV2RequireAuth", false);
 
     char *json_str = cJSON_PrintUnformatted(p_obj);
     if (json_str) {
@@ -2161,7 +2163,7 @@ esp_err_t start_rest_server(GlobalState * global_state)
         .handler = websocket_handler, 
         .user_ctx = (void *)WS_TYPE_API, 
         .is_websocket = true,
-        .ws_post_handshake_cb = websocket_post_handshake,
+        .ws_post_handshake_cb = websocket_post_handshake
     };
     httpd_register_uri_handler(server, &ws_live);
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, Input, OnDestroy, ElementRef, HostListener, effect } from '@angular/core';
+import { Component, OnInit, ViewChild, Input, OnDestroy, ElementRef, HostListener, effect, NgZone, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { map, Observable, shareReplay, Subscription, switchMap, tap, first, Subject, takeUntil, BehaviorSubject, filter, combineLatest } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { getHttpErrorMessage } from 'src/app/utils/error-handler';
@@ -42,8 +42,6 @@ import { TooltipDirective } from '../../directives/tooltip.directive'; // falls 
 // Eigene Komponenten importieren
 import { DropdownComponent } from '../../components/dropdown/dropdown.component';
 import { ConfettiComponent } from '../../components/confetti/confetti.component';
-
-import { ChangeDetectorRef } from '@angular/core';
 import { ProgressbarComponent } from '../../components/progressbar/progressbar.component'; // Pfad anpassen
 
 
@@ -95,6 +93,7 @@ const WIDGET_DEFAULTS: WidgetDef[] = [
     selector: 'app-home',
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.scss'],
+changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
     imports: [
         CommonModule,
@@ -110,7 +109,7 @@ const WIDGET_DEFAULTS: WidgetDef[] = [
         DropdownComponent,
         AppChartComponent,
         TooltipTextIconComponent,
-        ProgressbarComponent // <-- Hier hinzufügen (Name an dein Projekt anpassen, falls sie anders heißt)
+        ProgressbarComponent
     ],
 })
 export class HomeComponent implements OnInit, OnDestroy {
@@ -274,7 +273,9 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
     private shareRejectReasonsService: ShareRejectionExplanationService,
     private storageService: LocalStorageService,
     private dashboardEditService: DashboardEditService,
-    public layoutService: LayoutService
+    public layoutService: LayoutService,
+    private ngZone: NgZone,
+    private cd: ChangeDetectorRef
   ) {
     this.initializeChart();
 
@@ -339,7 +340,9 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
       this.loadPreviousData();
     })
 
-    this.staleCheckInterval = setInterval(() => this.checkStaleData(), 1000);
+    this.ngZone.runOutsideAngular(() => {
+      this.staleCheckInterval = setInterval(() => this.checkStaleData(), 1000);
+    });
 
     this.loadPreviousData();
 
@@ -542,7 +545,9 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
         const durationSeconds = Math.floor(elapsedMs / 1000);
         const current = this.systemInfoError$.value;
         if (current.duration !== durationSeconds) {
-          this.systemInfoError$.next({ duration: durationSeconds, startTime: this.lastMessageTime });
+          this.ngZone.run(() => {
+            this.systemInfoError$.next({ duration: durationSeconds, startTime: this.lastMessageTime });
+          });
         }
       }
     }
@@ -1032,7 +1037,12 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
         if (this.lastSharesAcceptedCount !== -1 && currentSharesAccepted > this.lastSharesAcceptedCount) {
           this.flashShareAccepted = true;
           clearTimeout(this.shareAcceptedTimeout);
-          this.shareAcceptedTimeout = setTimeout(() => this.flashShareAccepted = false, 500);
+          this.ngZone.runOutsideAngular(() => {
+            this.shareAcceptedTimeout = setTimeout(() => {
+              this.flashShareAccepted = false;
+              this.cd.markForCheck();
+            }, 500);
+          });
         }
         this.lastSharesAcceptedCount = currentSharesAccepted;
 
@@ -1040,7 +1050,12 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
         if (this.lastSharesRejectedCount !== -1 && currentSharesRejected > this.lastSharesRejectedCount) {
           this.flashShareRejected = true;
           clearTimeout(this.shareRejectedTimeout);
-          this.shareRejectedTimeout = setTimeout(() => this.flashShareRejected = false, 500);
+          this.ngZone.runOutsideAngular(() => {
+            this.shareRejectedTimeout = setTimeout(() => {
+              this.flashShareRejected = false;
+              this.cd.markForCheck();
+            }, 500);
+          });
         }
         this.lastSharesRejectedCount = currentSharesRejected;
 
@@ -1048,9 +1063,15 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
         if (this.lastWorkReceived !== -1 && currentWorkReceived > this.lastWorkReceived) {
           this.flashWorkReceived = true;
           clearTimeout(this.workReceivedTimeout);
-          this.workReceivedTimeout = setTimeout(() => this.flashWorkReceived = false, 500);
+          this.ngZone.runOutsideAngular(() => {
+            this.workReceivedTimeout = setTimeout(() => {
+              this.flashWorkReceived = false;
+              this.cd.markForCheck();
+            }, 500);
+          });
         }
         this.lastWorkReceived = currentWorkReceived;
+        this.cd.markForCheck();
       }),
       map(info => {
         const formatted = { ...info };
@@ -1074,6 +1095,7 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
       .subscribe(([info, systemInfoError]) => {
         this.handleSystemMessages(info, systemInfoError);
         this.setTitle(info, systemInfoError);
+        this.cd.markForCheck();
       });
 
     this.info$.pipe(first(), takeUntil(this.destroy$)).subscribe(() => {
@@ -1343,54 +1365,55 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
     const statsFrequencyMs = (statsFrequency || 30) * 1000;
     const windowDurationMs = limit * statsFrequencyMs;
 
+    const currentSpan = this.dataLabel[this.dataLabel.length - 1] - this.dataLabel[0];
+    if (currentSpan >= windowDurationMs) {
+      const excess = this.dataLabel.length - limit;
+      if (excess > 0) {
+        this.dataLabel.splice(0, excess);
+        this.hashrateData.splice(0, excess);
+        this.powerData.splice(0, excess);
+        this.chartY1Data.splice(0, excess);
+        this.chartY2Data.splice(0, excess);
+      }
+    }
+
     while (this.dataLabel.length > limit) {
-      const currentSpan = this.dataLabel[this.dataLabel.length - 1] - this.dataLabel[0];
-
-      if (currentSpan >= windowDurationMs) {
-        // Option A: Chart is at max capacity in time. Prune oldest to slide the window.
-        this.dataLabel.shift();
-        this.hashrateData.shift();
-        this.powerData.shift();
-        this.chartY1Data.shift();
-        this.chartY2Data.shift();
-      } else {
-        // Option B: Chart is crowded. Binary search for the densest region.
-        // We initialize search range from index 1 to length - 2 to protect the oldest point (index 0) 
-        // and newest point (index length - 1) from being deleted, preserving chart boundaries.
-        let low = 1;
-        let high = this.dataLabel.length - 2;
-        while (high - low > 1) {
-          const midTime = (this.dataLabel[low] + this.dataLabel[high]) / 2;
-          
-          let split = low;
-          for (let i = low; i <= high; i++) {
-            if (this.dataLabel[i] >= midTime) {
-              split = i;
-              break;
-            }
-          }
-
-          // Ensure we make progress even if multiple points have the same timestamp
-          if (split === low) split++;
-          if (split > high) split = high;
-
-          const leftCount = split - low;
-          const rightCount = high - split + 1;
-
-          if (leftCount > rightCount) {
-             high = split - 1;
-          } else {
-             low = split;
+      // Option B: Chart is crowded. Binary search for the densest region.
+      // We initialize search range from index 1 to length - 2 to protect the oldest point (index 0) 
+      // and newest point (index length - 1) from being deleted, preserving chart boundaries.
+      let low = 1;
+      let high = this.dataLabel.length - 2;
+      while (high - low > 1) {
+        const midTime = (this.dataLabel[low] + this.dataLabel[high]) / 2;
+        
+        let split = low;
+        for (let i = low; i <= high; i++) {
+          if (this.dataLabel[i] >= midTime) {
+            split = i;
+            break;
           }
         }
-        
-        // Remove point at index 'low'.
-        this.dataLabel.splice(low, 1);
-        this.hashrateData.splice(low, 1);
-        this.powerData.splice(low, 1);
-        this.chartY1Data.splice(low, 1);
-        this.chartY2Data.splice(low, 1);
+
+        // Ensure we make progress even if multiple points have the same timestamp
+        if (split === low) split++;
+        if (split > high) split = high;
+
+        const leftCount = split - low;
+        const rightCount = high - split + 1;
+
+        if (leftCount > rightCount) {
+           high = split - 1;
+        } else {
+           low = split;
+        }
       }
+      
+      // Remove point at index 'low'.
+      this.dataLabel.splice(low, 1);
+      this.hashrateData.splice(low, 1);
+      this.powerData.splice(low, 1);
+      this.chartY1Data.splice(low, 1);
+      this.chartY2Data.splice(low, 1);
     }
 
     if (this.chartData) {
