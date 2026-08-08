@@ -129,6 +129,12 @@ const mockSystemApiService = {
   dismissBlockFound: () => of(null)
 };
 
+const mockThemeService = {
+  theme$: of('dark'),
+  setTheme: () => {},
+  getCurrentTheme: () => 'dark'
+};
+
 const mockLocalStorageService = {
   getItem: () => null,
   setItem: () => {},
@@ -172,6 +178,7 @@ beforeEach(() => {
       ],
       providers: [
        { provide: SystemApiService, useValue: mockSystemApiService },
+       { provide: ThemeService, useValue: mockThemeService },
       ]
     });
     fixture = TestBed.createComponent(HomeComponent);
