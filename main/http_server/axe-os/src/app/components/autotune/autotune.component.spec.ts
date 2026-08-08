@@ -14,12 +14,12 @@ describe('SettingsComponent', () => {
       declarations: [],
       imports: [ToastrModule.forRoot()],
       providers: [
+        AutotuneComponent,
         provideHttpClient(),
        provideHttpClient(),
        provideHttpClientTesting(),
   // ... weitere Provider
 ],
-      imports: [AutotuneComponent],
     });
     fixture = TestBed.createComponent(AutotuneComponent);
     component = fixture.componentInstance;
