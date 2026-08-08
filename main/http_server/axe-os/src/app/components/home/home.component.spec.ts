@@ -210,15 +210,19 @@ beforeEach(() => {
   });
 
 it('should render the dashboard widgets and dropdowns when info is loaded', fakeAsync(() => {
-    // Falls das Observable direkt auf der Komponente überschrieben werden kann:
-    component.info$ = of({ power_fault: false } as any);
-
-    // ODER falls ein SystemService gemockt wird (Beispiel):
-    // const systemService = TestBed.inject(SystemApiService);
-    // spyOn(systemService, 'getInfo').and.returnValue(of({ power_fault: false } as any));
+    // Fülle das Mock-Objekt mit allen Basiswerten, damit .toFixed() nicht abstürzt
+    component.info = {
+      power_fault: false,
+      power: 0,
+      temp: 0,
+      hr: 0,
+      voltage: 0,
+      current: 0,
+      // ... füge hier bei Bedarf weitere Properties hinzu, die das Template erwartet
+    } as any;
 
     fixture.detectChanges();
-    tick(100); // Wartet auf das setTimeout im effect()
+    tick(100); // Wartet auf das setTimeout aus dem effect()
     fixture.detectChanges();
 
     const element = fixture.nativeElement;
