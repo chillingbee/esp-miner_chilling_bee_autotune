@@ -210,11 +210,8 @@ beforeEach(() => {
   });
 
 it('should render the dashboard widgets and dropdowns when info is loaded', fakeAsync(() => {
-    // Setze info explizit so, dass power_fault false ist:
-    component.info = {
-      power_fault: false,
-      // ... weitere benötigte Felder falls nötig
-    } as any;
+    // Falls der Service direkt gepatcht werden muss oder info$ versorgt wird:
+    // component.info$ = of({ power_fault: false } as any);
 
     fixture.detectChanges();
     tick(100); // Wartet auf das setTimeout aus dem effect()
