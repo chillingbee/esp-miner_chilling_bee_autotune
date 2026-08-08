@@ -177,8 +177,16 @@ beforeEach(() => {
         ByteSuffixPipe
       ],
       providers: [
+        provideToastr(),
        { provide: SystemApiService, useValue: mockSystemApiService },
        { provide: ThemeService, useValue: mockThemeService },
+       QuicklinkService,
+        Title,
+        LoadingService,
+        ShareRejectionExplanationService,
+        { provide: LocalStorageService, useValue: mockLocalStorageService },
+        DashboardEditService,
+        LayoutService
       ]
     });
     fixture = TestBed.createComponent(HomeComponent);
