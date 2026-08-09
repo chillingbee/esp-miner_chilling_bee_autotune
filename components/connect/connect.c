@@ -449,20 +449,19 @@ static void event_handler(void * arg, esp_event_base_t event_base, int32_t event
 
             snprintf(GLOBAL_STATE->SYSTEM_MODULE.wifi_status, sizeof(GLOBAL_STATE->SYSTEM_MODULE.wifi_status), "%s (Error %d, retry #%d)", get_wifi_reason_string(event->reason), event->reason, s_retry_num);
             ESP_LOGI(TAG, "Wi-Fi status: %s", GLOBAL_STATE->SYSTEM_MODULE.wifi_status);
+// Wait a little
+            s_retry_num++;
 
-            // Wait a little
-s_retry_num++;
-s_reconnect_global_state = GLOBAL_STATE;
-
-if (reconnect_timer == NULL) {
-    reconnect_timer = xTimerCreate("reconnect_timer", pdMS_TO_TICKS(5000), pdFALSE, NULL, reconnect_timer_callback);
-}
-if (reconnect_timer != NULL) {
-    xTimerStart(reconnect_timer, 0);
+            if (reconnect_timer == NULL) {
+                reconnect_timer = xTimerCreate("reconnect_timer", pdMS_TO_TICKS(5000), pdFALSE, NULL, reconnect_timer_callback);
+            }
+            if (reconnect_timer != NULL) {
+                xTimerStart(reconnect_timer, 0);
+            }
 
             if (ip_acquire_timer != NULL) {
                 xTimerStop(ip_acquire_timer, 0);
-            }            
+            }          
         }
         
         if (event_id == WIFI_EVENT_AP_START) {
