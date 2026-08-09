@@ -249,6 +249,7 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
   private latestInfo?: ISystemInfo;
   private liveDataStarted = false;
   private resizeTimer: any;
+  private displayTickInterval: any;
   public form!: FormGroup;
 
   private staleCheckInterval: any;
@@ -346,12 +347,15 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
 
     this.loadPreviousData();
 
-    // Live-Ticker für den Timer (aktualisiert die Anzeige sekündlich)
-    setInterval(() => {
-      if (this.displayInfo) {
-        this.displayInfo = { ...this.displayInfo };
-      }
-    }, 1000);
+// Live-Ticker für den Timer (aktualisiert die Anzeige sekündlich)
+this.ngZone.runOutsideAngular(() => {
+  this.displayTickInterval = setInterval(() => {
+    if (this.displayInfo) {
+      this.displayInfo = { ...this.displayInfo };
+      this.cd.markForCheck();
+    }
+  }, 1000);
+});
   }
 
   @HostListener('document:visibilitychange')
@@ -401,6 +405,7 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
   ngOnDestroy() {
     clearTimeout(this.resizeTimer);
     clearInterval(this.staleCheckInterval);
+    clearInterval(this.displayTickInterval);
     this.dashboardEditService.isActive$.next(false);
     this.dashboardEditService.editMode$.next(false);
     this.destroy$.next();
@@ -1083,7 +1088,7 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
         formatted.temp = parseFloat(formatted.temp.toFixed(1));
         formatted.temp2 = parseFloat(formatted.temp2.toFixed(1));
         formatted.responseTime = parseFloat(formatted.responseTime.toFixed(1));
-        info.frequency = parseFloat(info.frequency.toFixed(2));
+        formatted.frequency = parseFloat(info.frequency.toFixed(2));
 
         return formatted;
       }),
