@@ -59,6 +59,8 @@
 static const char * TAG = "connect";
 
 static TimerHandle_t ip_acquire_timer = NULL;
+static TimerHandle_t reconnect_timer = NULL;
+static GlobalState *s_reconnect_global_state = NULL;
 
 static bool is_scanning = false;
 static uint16_t ap_number = 0;
@@ -385,6 +387,12 @@ static void ip_timeout_callback(TimerHandle_t xTimer)
     }
 }
 
+static void reconnect_timer_callback(TimerHandle_t xTimer)
+{
+    ESP_LOGI(TAG, "Retrying Wi-Fi connection...");
+    esp_wifi_connect();
+}
+
 static void event_handler(void * arg, esp_event_base_t event_base, int32_t event_id, void * event_data)
 {
     GlobalState *GLOBAL_STATE = (GlobalState *)arg;
@@ -443,11 +451,14 @@ static void event_handler(void * arg, esp_event_base_t event_base, int32_t event
             ESP_LOGI(TAG, "Wi-Fi status: %s", GLOBAL_STATE->SYSTEM_MODULE.wifi_status);
 
             // Wait a little
-            vTaskDelay(5000 / portTICK_PERIOD_MS);
+s_retry_num++;
+s_reconnect_global_state = GLOBAL_STATE;
 
-            s_retry_num++;
-            ESP_LOGI(TAG, "Retrying Wi-Fi connection...");
-            esp_wifi_connect();
+if (reconnect_timer == NULL) {
+    reconnect_timer = xTimerCreate("reconnect_timer", pdMS_TO_TICKS(5000), pdFALSE, NULL, reconnect_timer_callback);
+}
+if (reconnect_timer != NULL) {
+    xTimerStart(reconnect_timer, 0);
 
             if (ip_acquire_timer != NULL) {
                 xTimerStop(ip_acquire_timer, 0);
