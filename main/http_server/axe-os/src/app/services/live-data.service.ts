@@ -116,7 +116,7 @@ export class LiveDataService {
     });
 
     return this.socket$.pipe(
-      timeout(5000),
+      timeout(20000),
       tap(msg => {
         this.lastMessageAt = Date.now();
         if (msg.event === 'update' && msg.data) {
