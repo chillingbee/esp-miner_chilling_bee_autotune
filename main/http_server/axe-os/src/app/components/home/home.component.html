@@ -453,7 +453,7 @@
               }
             </div>
 
-            @if (info.coinbaseOutputs.length > 0) {
+            @if ((info.coinbaseOutputs?.length ?? 0) > 0) {
               @let percentage = payoutPercentage;
               <div class="flex flex-nowrap">
                 @if (percentage >= 95) {
@@ -545,7 +545,7 @@
             </div>
           </div>
 
-          @if (info.coinbaseOutputs.length > 0) {
+          @if ((info.coinbaseOutputs?.length ?? 0) > 0) {
             <div class="flex flex-nowrap justify-between">
               <div class="w-24 shrink-0 text-secondary">
                 <tooltip-text-icon text="Value" tooltip="Total value of transaction outputs in BTC. For non-bitcoin chains, disable 'Decode Coinbase Tx' in Advanced Pool Options." />
