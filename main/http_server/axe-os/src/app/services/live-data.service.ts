@@ -117,12 +117,12 @@ export class LiveDataService {
 
     return this.socket$.pipe(
       timeout(20000),
-tap(msg => {
-  this.lastMessageAt = Date.now();
-  if (msg.event === 'update' && msg.data) {
-    this.updates$.next(msg.data);
-  }
-}),
+      tap(msg => {
+        this.lastMessageAt = Date.now();
+        if (msg.event === 'update' && msg.data) {
+          this.updates$.next(msg.data);
+        }
+      }),
       retry({ delay: 2000 }),
       share({ resetOnRefCountZero: false })
     );
