@@ -193,6 +193,7 @@ beforeEach(() => {
         provideToastr(),
        { provide: SystemApiService, useValue: mockSystemApiService },
        { provide: ThemeService, useValue: mockThemeService },
+       { provide: LiveDataService, useValue: mockLiveDataService },
        QuicklinkService,
         Title,
         LoadingService,
