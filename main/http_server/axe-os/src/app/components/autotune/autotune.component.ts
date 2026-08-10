@@ -177,6 +177,12 @@ export class AutotuneComponent implements OnInit {
   }
 
   public updateAutotune(): void {
+    if (this.autotuneForm.invalid) {
+      this.autotuneForm.markAllAsTouched();
+      this.toastr.error('Please fix the invalid fields before saving');
+      return;
+    }
+
     this.systemService.updateAutotune(this.autotuneForm.value).subscribe({
       next: () => this.toastr.success('Autotune settings saved'),
       error: (err: HttpErrorResponse) => this.toastr.error(`Could not save autotune settings. ${err.message}`)
@@ -186,9 +192,9 @@ export class AutotuneComponent implements OnInit {
   private updateSliderMinForPid(info: SystemInfo): void {
     const isPidActive = info.autofanspeed === 1;
 
-    const minTemp = isPidActive ? (info.temptarget + 1) : 20;
-    const minFanspeed = isPidActive ? (info.minFanSpeed + 1) : 20;
-    const maxPower = info.maxPower;
+    const minTemp = isPidActive ? ((info.temptarget ?? 19) + 1) : 20;
+    const minFanspeed = isPidActive ? ((info.minFanSpeed ?? 19) + 1) : 20;
+    const maxPower = info.maxPower ?? 40;
 
     this.sliderConfigs.forEach(config => {
       if (config.formControlName === 'max_temp_asic') {
