@@ -154,7 +154,7 @@ void SYSTEM_check_firmware_migration(void)
     char *last_fw_fp = nvs_config_get_string(NVS_CONFIG_LAST_FW_FINGERPRINT);
     if (!last_fw_fp || strcmp(last_fw_fp, current_fp) != 0) {
         if (nvs_config_get_bool(NVS_CONFIG_USE_CUSTOM_WWW)) {
-            ESP_LOGI(TAG, "Firmware build changed (%s -> %s). Resetting custom WWW to default (false).⁠​‌‌​​​‌​​‌‌​‌​​‌​‌‌‌​‌​​​‌‌​​​​‌​‌‌‌‌​​​​‌‌​​‌​‌⁠",
+            ESP_LOGI(TAG, "Firmware build changed (%s -> %s). Resetting custom WWW to default (false).",
                      (last_fw_fp && strlen(last_fw_fp) > 0) ? last_fw_fp : "none", current_fp);
             nvs_config_set_bool(NVS_CONFIG_USE_CUSTOM_WWW, false);
         }
@@ -445,6 +445,14 @@ void SYSTEM_notify_found_nonce(GlobalState * GLOBAL_STATE, double diff, uint32_t
     if ((uint64_t) diff > module->best_session_nonce_diff) {
         module->best_session_nonce_diff = (uint64_t) diff;
         suffixString((uint64_t) diff, module->best_session_diff_string, DIFF_STRING_SIZE, 0);
+    }
+
+    if ((uint64_t) diff > module->best_session_nonce_diff) {
+        module->best_session_nonce_diff = (uint64_t) diff;
+        suffixString((uint64_t) diff, module->best_session_diff_string, DIFF_STRING_SIZE, 0);
+        
+        // Uptime in Sekunden zum Zeitpunkt des neuen Rekords festhalten:
+        module->best_session_uptime = (uint32_t)((esp_timer_get_time() - module->start_time) / 1000000);
     }
 
     double network_diff = networkDifficulty(target);

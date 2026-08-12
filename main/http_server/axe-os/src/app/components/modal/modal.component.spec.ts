@@ -8,7 +8,7 @@ describe('ModalComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ModalComponent]
+      imports: [], // ModalComponent hier entfernt
     });
     fixture = TestBed.createComponent(ModalComponent);
     component = fixture.componentInstance;

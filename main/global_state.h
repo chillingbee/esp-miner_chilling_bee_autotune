@@ -80,6 +80,7 @@ typedef struct SystemModule
     uint64_t best_nonce_diff;
     char best_diff_string[DIFF_STRING_SIZE];
     uint64_t best_session_nonce_diff;
+    uint32_t best_session_uptime; // Uptime in Sekunden, als der Best-Diff erzielt wurde
     char best_session_diff_string[DIFF_STRING_SIZE];
     int block_found;
     bool show_new_block;
@@ -176,7 +177,6 @@ typedef struct GlobalState
     bool new_set_mining_difficulty_msg;
     uint32_t version_mask;
     bool new_stratum_version_rolling_msg;
-    bool reset_extranonce2;
 
     esp_transport_handle_t transport;
     portMUX_TYPE stratum_mux;
