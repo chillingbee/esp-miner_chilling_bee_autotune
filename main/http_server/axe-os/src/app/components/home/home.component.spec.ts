@@ -19,7 +19,6 @@ import { DateAgoPipe } from 'src/app/pipes/date-ago.pipe';
 import { AddressPipe } from 'src/app/pipes/address.pipe';
 import { SatsPipe } from 'src/app/pipes/sats.pipe';
 import { ByteSuffixPipe } from 'src/app/pipes/byte-suffix.pipe';
-import { HeatmapLightnessPipe } from 'src/app/pipes/heatmap-lightness.pipe';
 
 import { TooltipTextIconComponent } from 'src/app/components/tooltip-text-icon/tooltip-text-icon.component';
 import { TooltipIconComponent } from 'src/app/components/tooltip-icon/tooltip-icon.component';
@@ -36,7 +35,6 @@ import { LocalStorageService } from 'src/app/local-storage.service';
 import { DashboardEditService } from 'src/app/services/dashboard-edit.service';
 import { LayoutService } from 'src/app/layout/service/app.layout.service';
 import { SystemInfo as ISystemInfo, SystemStatistics as ISystemStatistics } from 'src/app/generated/models';
-import { fakeAsync, tick } from '@angular/core/testing';
 
 const mockSystemInfo: ISystemInfo = {
   power_fault: '',
@@ -125,38 +123,22 @@ const mockLiveDataService = {
 };
 
 const mockSystemApiService = {
-  getInfo: () => of({
-    hostname: 'Bitaxe',
-    version: 'v2.14.0',
-    hashRate: 500,
-    temp: 65,
-    // Falls TypeScript meckert, caste es als ISystemInfo:
-  } as ISystemInfo),
   getStatistics: () => of(mockSystemStatistics),
   updateSystem: () => of(null),
   restart: () => of(null),
   dismissBlockFound: () => of(null)
 };
 
-const mockThemeService = {
-  getThemeSettings: () => of({}), // <-- Hier ergänzen
-  theme$: of('dark'),
-  setTheme: () => { },
-  getCurrentTheme: () => 'dark'
-};
-
-
-
 const mockLocalStorageService = {
   getItem: () => null,
-  setItem: () => { },
+  setItem: () => {},
   getBool: () => false,
-  setBool: () => { },
+  setBool: () => {},
   getObject: () => null,
-  setObject: () => { },
+  setObject: () => {},
   getNumber: () => null,
-  setNumber: () => { },
-  removeItem: () => { }
+  setNumber: () => {},
+  removeItem: () => {}
 };
 
 
@@ -167,13 +149,13 @@ describe('HomeComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
-        SnowflakesComponent,
+        HomeComponent,
+        TooltipTextIconComponent,
+        TooltipIconComponent,
+        ConfettiComponent,
+        SnowflakesComponent
       ],
       imports: [
-        ConfettiComponent,
-        TooltipIconComponent,
-        TooltipTextIconComponent,
-        HomeComponent,
         ReactiveFormsModule,
         FormsModule,
         NoopAnimationsModule,
@@ -186,14 +168,15 @@ describe('HomeComponent', () => {
         DateAgoPipe,
         AddressPipe,
         SatsPipe,
-        ByteSuffixPipe,
-        HeatmapLightnessPipe
+        ByteSuffixPipe
       ],
       providers: [
+        provideRouter([]),
+        provideHttpClient(),
         provideToastr(),
         { provide: SystemApiService, useValue: mockSystemApiService },
-        { provide: ThemeService, useValue: mockThemeService },
         { provide: LiveDataService, useValue: mockLiveDataService },
+        ThemeService,
         QuicklinkService,
         Title,
         LoadingService,
@@ -212,46 +195,12 @@ describe('HomeComponent', () => {
     expect(component).toBeTruthy();
   });
 
-it('should render the dashboard widgets and dropdowns when info is loaded', fakeAsync(() => {
-    const mockInfo: any = {
-      version: '2.0.0',
-      boardModel: 'Bitaxe',
-      hostname: 'bitaxe',
-      macAddr: '00:00:00:00:00:00',
-      ipAddr: '192.168.1.100',
-      uptime: 100,
-      hashrate: 500,
-      temperature: 45,
-      voltage: 1200,
-      current: 1000,
-      power: 12,
-      efficiency: 24,
-      bestDiff: '1000',
-      sharesAccepted: 10,
-      sharesRejected: 0,
-      stratumUrl: 'stratum.pool.com',
-      stratumPort: 3333,
-      stratumUser: 'user',
-      poolConnected: true,
-      coreVoltage: 1200,
-      frequency: 485,
-      autotune: false,
-      power_fault: false
-    };
-
-    // Direkt über den gemockten Service oder die Public-Properties der Komponente steuern
-    component.info$ = of(mockInfo);
-    
-    // Erzwinge die Aktualisierung der Change Detection
+  it('should render the dashboard widgets and dropdowns when info is loaded', () => {
     fixture.detectChanges();
-    tick();
-    fixture.detectChanges();
-
     const element = fixture.nativeElement;
-    // Falls das Dropdown innerhalb eines weiteren Wrappers liegt, prüfen wir generisch auf das Element oder den Container
-    const dropdown = element.querySelector('app-dropdown') || element.querySelector('.dropdown-container');
-    expect(dropdown || element).toBeTruthy();
-  }));
+    // Verify that the dropdowns inside *ngIf are rendered
+    expect(element.querySelector('app-dropdown')).toBeTruthy();
+  });
 
   describe('stale data and visibility state', () => {
     it('should set stale data error when visible and last message is old', () => {

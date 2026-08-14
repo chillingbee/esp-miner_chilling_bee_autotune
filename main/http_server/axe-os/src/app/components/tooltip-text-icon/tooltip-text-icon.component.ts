@@ -1,12 +1,9 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { TooltipIconComponent } from '../tooltip-icon/tooltip-icon.component'; // Pfad ggf. anpassen
 
 @Component({
     selector: 'tooltip-text-icon',
     templateUrl: './tooltip-text-icon.component.html',
-    standalone: true,
-    imports: [CommonModule, TooltipIconComponent]
+    standalone: false
 })
 export class TooltipTextIconComponent implements OnChanges {
   @Input() tooltip: string | null = '';
@@ -19,6 +16,7 @@ export class TooltipTextIconComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     const safeText = (this.text ?? '').trim();
+
     const updateWords = (text: string) => {
       const words = text.split(/\s+/);
       if (words.length > 1) {

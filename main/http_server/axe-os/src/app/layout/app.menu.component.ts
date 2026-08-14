@@ -5,9 +5,9 @@ import { LayoutService } from './service/app.layout.service';
 import { SystemInfo as ISystemInfo } from 'src/app/generated/models';
 
 @Component({
-    selector: 'app-menu',
-    templateUrl: './app.menu.component.html',
-    standalone: false
+  selector: 'app-menu',
+  templateUrl: './app.menu.component.html',
+  standalone: false
 })
 export class AppMenuComponent implements OnInit {
   public info$: Observable<ISystemInfo>;
@@ -32,12 +32,12 @@ export class AppMenuComponent implements OnInit {
           { label: 'Logs', icon: 'pi pi-fw pi-list', routerLink: ['logs'] },
           { label: 'System', icon: 'pi pi-fw pi-wave-pulse', routerLink: ['system'] },
           { separator: true },
-
+          
           { label: 'Pool', icon: 'pi pi-fw pi-server', routerLink: ['pool'] },
           { label: 'Network', icon: 'pi pi-fw pi-wifi', routerLink: ['network'] },
           { label: 'Theme', icon: 'pi pi-fw pi-palette', routerLink: ['design'] },
           { label: 'Settings', icon: 'pi pi-fw pi-cog', routerLink: ['settings'] },
-          { label: 'Autotune', icon: 'pi pi-fw pi-sliders-h', routerLink: ['autotune'] },
+          { label: 'Autotune', icon: 'pi pi-fw pi-sliders-h', routerLink: ['/autotune'] },
           { label: 'Update', icon: 'pi pi-fw pi-sync', routerLink: ['update'] },
           { separator: true },
 
@@ -47,4 +47,3 @@ export class AppMenuComponent implements OnInit {
     ];
   }
 }
-

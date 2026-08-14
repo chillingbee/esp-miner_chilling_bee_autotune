@@ -13,22 +13,24 @@ import { DesignComponent } from './components/design/design.component';
 import { PoolComponent } from './components/pool/pool.component';
 import { AppLayoutComponent } from './layout/app.layout.component';
 import { ApModeGuard } from './guards/ap-mode.guard';
+
 import { AutotuneComponent } from './components/autotune/autotune.component';
 
 const TITLE_PREFIX = 'AxeOS';
 
 const routes: Routes = [
   {
-      path: 'ap',
-      component: AppLayoutComponent,
-      children: [
-        {
-          path: '',
-          component: NetworkComponent,
-          title: `${TITLE_PREFIX} Network`,
-        }
-      ]
+    path: 'ap',
+    component: AppLayoutComponent,
+    children: [
+      {
+        path: '',
+        component: NetworkComponent,
+        title: `${TITLE_PREFIX} Network`,
+      }
+    ]
   },
+
   {
     path: '',
     component: AppLayoutComponent,
@@ -39,6 +41,7 @@ const routes: Routes = [
         component: HomeComponent,
         title: TITLE_PREFIX,
       },
+
       {
         path: 'logs',
         component: LogsComponent,
@@ -88,7 +91,7 @@ const routes: Routes = [
         path: 'autotune',
         component: AutotuneComponent,
         title: `${TITLE_PREFIX} Autotune`,
-      }
+      },
     ]
   },
 
@@ -99,4 +102,3 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class AppRoutingModule { }
-

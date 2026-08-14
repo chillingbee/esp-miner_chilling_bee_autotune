@@ -1,10 +1,6 @@
 import { Component, EventEmitter, Input, Output, forwardRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
-
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-
 @Component({
   selector: 'app-checkbox',
   template: `
@@ -35,8 +31,7 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
       multi: true
     }
   ],
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule]
+  standalone: true
 })
 export class CheckboxComponent implements ControlValueAccessor {
   @Input() inputId: string = '';

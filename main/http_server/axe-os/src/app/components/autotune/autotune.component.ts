@@ -1,16 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { HttpErrorResponse } from '@angular/common/http';
-
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http'
 import { LoadingService } from 'src/app/services/loading.service';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin } from 'rxjs';
 import { AutotuneSettings, SystemInfo } from 'src/app/generated/models';
 import { SystemApiService } from 'src/app/services/system.service';
-
-
-import { TooltipTextIconComponent } from 'src/app/components/tooltip-text-icon/tooltip-text-icon.component'; // Passe ggf. den relativen Pfad an
+import { TooltipTextIconComponent } from '../tooltip-text-icon/tooltip-text-icon.component'; // Pfad ggf. anpassen
+import { CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA } from '@angular/core';
 
 
 interface SliderConfig {
@@ -25,12 +23,7 @@ interface SliderConfig {
 
 @Component({
   selector: 'autotune',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    TooltipTextIconComponent
-  ],
+  standalone: false,
   templateUrl: './autotune.component.html',
 })
 export class AutotuneComponent implements OnInit {

@@ -1,13 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+
 import { TooltipIconComponent } from './tooltip-icon.component';
 
-describe('TooltipIconComponent', () => {
+describe('WifiIconComponent', () => {
   let component: TooltipIconComponent;
   let fixture: ComponentFixture<TooltipIconComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [] // TooltipIconComponent hier entfernt, da man sich nicht selbst importiert
+      declarations: [TooltipIconComponent]
     });
     fixture = TestBed.createComponent(TooltipIconComponent);
     component = fixture.componentInstance;

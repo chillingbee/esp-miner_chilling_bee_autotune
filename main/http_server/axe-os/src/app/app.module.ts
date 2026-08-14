@@ -33,7 +33,6 @@ import { SystemComponent } from './components/system/system.component';
 import { UpdateComponent } from './components/update/update.component';
 import { NetworkComponent } from './components/network/network.component';
 import { SettingsComponent } from './components/settings/settings.component';
-import { AutotuneComponent } from './components/autotune/autotune.component';
 import { SwarmComponent } from './components/swarm/swarm.component';
 import { ScoreboardComponent } from './components/scoreboard/scoreboard.component';
 import { ThemeConfigComponent } from './components/design/theme-config.component';
@@ -45,22 +44,31 @@ import { HashSuffixPipe } from './pipes/hash-suffix.pipe';
 import { DiffSuffixPipe } from './pipes/diff-suffix.pipe';
 import { AddressPipe } from './pipes/address.pipe';
 import { SatsPipe } from './pipes/sats.pipe';
-import { HeatmapLightnessPipe } from './pipes/heatmap-lightness.pipe';
 import { DialogService, DialogListComponent } from './services/dialog.service';
+
+import { AutotuneComponent } from './components/autotune/autotune.component';
 
 const components = [
   AppComponent,
+  NetworkEditComponent,
+  HomeComponent,
   ModalComponent,
+
+  ConfettiComponent,
   SnowflakesComponent,
+  NetworkComponent,
   LogsComponent,
   SystemComponent,
   UpdateComponent,
+  PoolComponent
 ];
 
 @NgModule({
   declarations: [
     ...components,
-
+    TooltipIconComponent,
+    TooltipTextIconComponent,
+    AutotuneComponent,
     SwarmComponent,
     ScoreboardComponent,
     ThemeConfigComponent,
@@ -85,7 +93,6 @@ const components = [
     SliderComponent,
     AppChartComponent,
     EditComponent,
-    AutotuneComponent, // <--- HIER ERGÄNZT
     SettingsComponent,
     ProgressbarComponent,
     ANSIPipe,
@@ -94,7 +101,6 @@ const components = [
     DiffSuffixPipe,
     AddressPipe,
     SatsPipe,
-    HeatmapLightnessPipe,
   ],
   providers: [
     { provide: LocationStrategy, useClass: HashLocationStrategy },

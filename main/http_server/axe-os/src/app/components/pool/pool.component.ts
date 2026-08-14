@@ -7,14 +7,6 @@ import { LoadingService } from 'src/app/services/loading.service';
 import { SystemApiService } from 'src/app/services/system.service';
 import { LiveDataService } from 'src/app/services/live-data.service';
 import { first } from 'rxjs';
-import { CommonModule } from '@angular/common';
-import { TooltipTextIconComponent } from '../tooltip-text-icon/tooltip-text-icon.component';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { DropdownComponent } from '../../components/dropdown/dropdown.component';
-import { RadioButtonComponent } from '../../components/radio-button/radio-button.component';
-
-import { CheckboxComponent } from '../../components/checkbox/checkbox.component'; // Pfad anpassen
-
 
 interface ITlsOption {
   value: number;
@@ -39,15 +31,7 @@ interface IPoolDropdownOption {
 @Component({
     selector: 'app-pool',
     templateUrl: './pool.component.html',
-     standalone: true,
- imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
-    DropdownComponent,
-    RadioButtonComponent,
-    TooltipTextIconComponent,
-    CheckboxComponent /* weitere benötigte Module */],
+    standalone: false
 })
 export class PoolComponent implements OnInit {
   public form!: FormGroup;
