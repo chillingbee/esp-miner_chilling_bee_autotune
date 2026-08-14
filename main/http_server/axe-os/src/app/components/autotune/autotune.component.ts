@@ -25,6 +25,7 @@ interface SliderConfig {
   selector: 'autotune',
   standalone: false,
   templateUrl: './autotune.component.html',
+  imports: [CommonModule,],
 })
 export class AutotuneComponent implements OnInit {
   public autotuneForm!: FormGroup;

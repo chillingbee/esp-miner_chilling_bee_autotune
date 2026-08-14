@@ -45,7 +45,6 @@ import { DiffSuffixPipe } from './pipes/diff-suffix.pipe';
 import { AddressPipe } from './pipes/address.pipe';
 import { SatsPipe } from './pipes/sats.pipe';
 import { DialogService, DialogListComponent } from './services/dialog.service';
-
 import { AutotuneComponent } from './components/autotune/autotune.component';
 
 const components = [
@@ -53,7 +52,6 @@ const components = [
   NetworkEditComponent,
   HomeComponent,
   ModalComponent,
-
   ConfettiComponent,
   SnowflakesComponent,
   NetworkComponent,
@@ -73,9 +71,10 @@ const components = [
     ScoreboardComponent,
     ThemeConfigComponent,
     DesignComponent,
-    DialogListComponent
+    DialogListComponent,
   ],
   imports: [
+    CommonModule,
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule,
