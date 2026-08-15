@@ -33,6 +33,7 @@ import { SystemComponent } from './components/system/system.component';
 import { UpdateComponent } from './components/update/update.component';
 import { NetworkComponent } from './components/network/network.component';
 import { SettingsComponent } from './components/settings/settings.component';
+import { AutotuneComponent } from './components/autotune/autotune.component';
 import { SwarmComponent } from './components/swarm/swarm.component';
 import { ScoreboardComponent } from './components/scoreboard/scoreboard.component';
 import { ThemeConfigComponent } from './components/design/theme-config.component';
@@ -51,8 +52,6 @@ const components = [
   NetworkEditComponent,
   HomeComponent,
   ModalComponent,
-  TooltipIconComponent,
-  TooltipTextIconComponent,
   ConfettiComponent,
   SnowflakesComponent,
   NetworkComponent,
@@ -73,6 +72,10 @@ const components = [
     DialogListComponent
   ],
   imports: [
+    TooltipIconComponent, // <-- HIERHER VERSCHOBEN (Wichtig für Standalone)
+    TooltipTextIconComponent,
+    EditComponent,
+    AutotuneComponent,
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule,

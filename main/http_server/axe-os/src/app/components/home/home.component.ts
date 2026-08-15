@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, Input, OnDestroy, ElementRef, HostListener, effect } from '@angular/core';
+import { Component, OnInit, ViewChild, Input, OnDestroy, ElementRef, HostListener, effect, NgZone, ChangeDetectorRef } from '@angular/core';
 import { map, Observable, shareReplay, Subscription, switchMap, tap, first, Subject, takeUntil, BehaviorSubject, filter, combineLatest } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { getHttpErrorMessage } from 'src/app/utils/error-handler';
@@ -55,25 +55,25 @@ const DEFAULT_CELL_HEIGHT = 40;
 const DEFAULT_HIDDEN_SENSORS = new Set(['hashrate_1m', 'hashrate_10m', 'hashrate_1h', 'vrTemp', 'none']);
 
 const WIDGET_DEFAULTS: WidgetDef[] = [
-  { id: 'hashrate',    label: 'Hashrate',            x: 0, y: 0,   w: 3,  h: 5,  minW: 2, minH: 3 },
-  { id: 'efficiency',  label: 'Efficiency',          x: 3, y: 0,   w: 3,  h: 5,  minW: 2, minH: 3 },
-  { id: 'shares',      label: 'Shares',              x: 6, y: 0,   w: 3,  h: 5,  minW: 2, minH: 3 },
-  { id: 'bestdiff',    label: 'Best Difficulty',     x: 9, y: 0,   w: 3,  h: 5,  minW: 2, minH: 3 },
-  { id: 'chart',       label: 'Chart',               x: 0, y: 5,   w: 12, h: 0,  minW: 4, minH: 8 },
-  { id: 'power',       label: 'Power',               x: 0, y: 5,   w: 4,  h: 7,  minW: 2, minH: 3 },
-  { id: 'heat',        label: 'Heat',                x: 4, y: 5,   w: 4,  h: 7,  minW: 2, minH: 3 },
-  { id: 'fan',         label: 'Fan',                 x: 8, y: 5,   w: 4,  h: 7,  minW: 2, minH: 3 },
-  { id: 'pool',        label: 'Pool',                x: 0, y: 12,  w: 4,  h: 6,  minW: 2, minH: 3 },
-  { id: 'blockheader', label: 'Block Header',        x: 4, y: 12,  w: 4,  h: 6,  minW: 2, minH: 3 },
-  { id: 'registers',   label: 'Hashrate Registers',  x: 8, y: 12,  w: 4,  h: 6,  minW: 2, minH: 3 },
-  { id: 'misc',        label: 'Misc',                x: 0, y: 18,  w: 4,  h: 6,  minW: 2, minH: 3 },
+  { id: 'hashrate', label: 'Hashrate', x: 0, y: 0, w: 3, h: 5, minW: 2, minH: 3 },
+  { id: 'efficiency', label: 'Efficiency', x: 3, y: 0, w: 3, h: 5, minW: 2, minH: 3 },
+  { id: 'shares', label: 'Shares', x: 6, y: 0, w: 3, h: 5, minW: 2, minH: 3 },
+  { id: 'bestdiff', label: 'Best Difficulty', x: 9, y: 0, w: 3, h: 5, minW: 2, minH: 3 },
+  { id: 'chart', label: 'Chart', x: 0, y: 5, w: 12, h: 0, minW: 4, minH: 8 },
+  { id: 'power', label: 'Power', x: 0, y: 5, w: 4, h: 7, minW: 2, minH: 3 },
+  { id: 'heat', label: 'Heat', x: 4, y: 5, w: 4, h: 7, minW: 2, minH: 3 },
+  { id: 'fan', label: 'Fan', x: 8, y: 5, w: 4, h: 7, minW: 2, minH: 3 },
+  { id: 'pool', label: 'Pool', x: 0, y: 12, w: 4, h: 6, minW: 2, minH: 3 },
+  { id: 'blockheader', label: 'Block Header', x: 4, y: 12, w: 4, h: 6, minW: 2, minH: 3 },
+  { id: 'registers', label: 'Hashrate Registers', x: 8, y: 12, w: 4, h: 6, minW: 2, minH: 3 },
+  { id: 'misc', label: 'Misc', x: 0, y: 18, w: 4, h: 6, minW: 2, minH: 3 },
 ];
 
 @Component({
-    selector: 'app-home',
-    templateUrl: './home.component.html',
-    styleUrls: ['./home.component.scss'],
-    standalone: false
+  selector: 'app-home',
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.scss'],
+  standalone: false
 })
 export class HomeComponent implements OnInit, OnDestroy {
   public messages: ISystemMessage[] = [];
@@ -180,6 +180,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   public asicDomainsAmount: number = 0;
   public efficiency: number = 0;
   public efficiencyAverage: number = 0;
+  public smoothedEfficiencyAverage: number = 0;
   public expectedEfficiency: number = 0;
   public activePoolUserAddressPart: string = '';
   public activePoolUserSuffixPart: string = '';
@@ -207,6 +208,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   private lastHiddenTime: number = 0;
   private statsLimit: number = 720;
 
+  private displayTickInterval: any;
+  displayInfo: any = null;
+  public lastBestUpdate: Date = new Date();
+
   @Input() uri = '';
 
   constructor(
@@ -221,9 +226,21 @@ export class HomeComponent implements OnInit, OnDestroy {
     private shareRejectReasonsService: ShareRejectionExplanationService,
     private storageService: LocalStorageService,
     private dashboardEditService: DashboardEditService,
-    public layoutService: LayoutService
+    public layoutService: LayoutService,
+    private ngZone: NgZone,
+    private cdr: ChangeDetectorRef
   ) {
     this.initializeChart();
+
+    // Live-Ticker für den Timer (aktualisiert die Anzeige sekündlich)
+    this.ngZone.runOutsideAngular(() => {
+      this.displayTickInterval = setInterval(() => {
+        if (this.displayInfo) {
+          this.displayInfo = { ...this.displayInfo };
+          this.cdr.markForCheck();
+        }
+      }, 1000);
+    });
 
     effect(() => {
       // Refresh grid when wide view toggles
@@ -269,7 +286,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     let dataSources = this.storageService.getItem(HOME_CHART_DATA_SOURCES);
     let parsedConfig: any = { chartY1Unit: 'hashrate', chartY2Unit: 'temperature' };
-    
+
     if (dataSources !== null) {
       try {
         const stored = JSON.parse(dataSources);
@@ -347,6 +364,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     clearTimeout(this.resizeTimer);
     clearInterval(this.staleCheckInterval);
+    clearInterval(this.displayTickInterval);
     this.dashboardEditService.isActive$.next(false);
     this.dashboardEditService.editMode$.next(false);
     this.destroy$.next();
@@ -403,7 +421,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       if (el.gridstackNode?.id === 'chart') {
         const isMobile = window.innerWidth < 768;
         if (!isMobile && el.gridstackNode.h) {
-           el.dataset['desktopH'] = String(el.gridstackNode.h);
+          el.dataset['desktopH'] = String(el.gridstackNode.h);
         }
         setTimeout(() => this.chart?.chart?.resize(), 100);
       }
@@ -498,9 +516,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private isSensorSupported(labelKey: string, info?: ISystemInfo): boolean {
-    switch(labelKey) {
+    switch (labelKey) {
       case 'vrTemp': return info ? (this.lastHasVrTemp || !!info.vrTemp) : this.lastHasVrTemp;
-      case 'asicTemp2' : return info ? (this.lastHasAsicTemp2 || !!(info.temp2 && info.temp2 !== -1)) : this.lastHasAsicTemp2;
+      case 'asicTemp2': return info ? (this.lastHasAsicTemp2 || !!(info.temp2 && info.temp2 !== -1)) : this.lastHasAsicTemp2;
       case 'fanRpm': return info ? (this.lastHasFanRpm || !!info.fanrpm) : this.lastHasFanRpm;
       case 'fan2Rpm': return info ? (this.lastHasFan2Rpm || !!info.fan2rpm) : this.lastHasFan2Rpm;
       default: return true;
@@ -519,8 +537,8 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     return labels.filter(label => this.isSensorSupported(label, this.latestInfo)).map((labelKey, index) => {
       const label = chartLabelValue(labelKey) || labelKey;
-      const borderColor = index === 0 
-        ? baseColor 
+      const borderColor = index === 0
+        ? baseColor
         : `color-mix(in srgb, ${baseColor} ${100 - index * 15}%, ${mixColor} ${index * 15}%)`;
       const backgroundColor = `color-mix(in srgb, ${borderColor}, transparent 81%)`;
 
@@ -636,7 +654,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           display: true,
           position: 'top',
           labels: {
-              color: textColorSecondary
+            color: textColorSecondary
           },
           onClick: (e: any, legendItem: any, legend: any) => {
             const index = legendItem.datasetIndex;
@@ -695,7 +713,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
             const ticks = [];
             const start = new Date(axis.min);
-            
+
             // Align start to the unit boundary (human readable)
             start.setMilliseconds(0);
             if (this.currentInterval.unit === 'second') {
@@ -741,7 +759,7 @@ export class HomeComponent implements OnInit, OnDestroy {
             color: primaryColor,
             callback: (value: number) => {
               const y1Dataset = this.chartData?.datasets?.find((d: any) => d.yAxisID === 'y');
-              return y1Dataset?.label ? HomeComponent.cbFormatValue(value, y1Dataset.label, {tickmark: true}) : value.toString();
+              return y1Dataset?.label ? HomeComponent.cbFormatValue(value, y1Dataset.label, { tickmark: true }) : value.toString();
             }
           },
           grid: {
@@ -758,7 +776,7 @@ export class HomeComponent implements OnInit, OnDestroy {
             color: textColorSecondary,
             callback: (value: number) => {
               const y2Dataset = this.chartData?.datasets?.find((d: any) => d.yAxisID === 'y2');
-              return y2Dataset?.label ? HomeComponent.cbFormatValue(value, y2Dataset.label, {tickmark: true}) : value.toString();
+              return y2Dataset?.label ? HomeComponent.cbFormatValue(value, y2Dataset.label, { tickmark: true }) : value.toString();
             }
           },
           grid: {
@@ -794,6 +812,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           const idxPower = stats.labels.indexOf(chartLabelKey(eChartLabel.power));
           const idxTimestamp = stats.labels.indexOf('timestamp');
 
+          typescript
           stats.labels.forEach((labelKey, labelIdx) => {
             const valEnum = chartLabelValue(labelKey);
             if (valEnum === eChartLabel.asicVoltage || valEnum === eChartLabel.voltage || valEnum === eChartLabel.current) {
@@ -844,12 +863,12 @@ export class HomeComponent implements OnInit, OnDestroy {
           const pointsToInsert = existingPoints.length === 0
             ? backendPoints
             : existingPoints.map((p, i) => ({
-                start: p.timestamp,
-                end: i < existingPoints.length - 1 ? existingPoints[i + 1].timestamp : Date.now()
-              })).flatMap(interval => {
-                const points = backendPoints.filter(bp => bp.timestamp > interval.start && bp.timestamp < interval.end);
-                return points.length >= 3 ? points : [];
-              });
+              start: p.timestamp,
+              end: i < existingPoints.length - 1 ? existingPoints[i + 1].timestamp : Date.now()
+            })).flatMap(interval => {
+              const points = backendPoints.filter(bp => bp.timestamp > interval.start && bp.timestamp < interval.end);
+              return points.length >= 3 ? points : [];
+            });
 
           // 4. Update the chart data arrays
           if (clear || pointsToInsert.length > 0) {
@@ -934,10 +953,38 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.updateChartDataSources(info);
 
         this.efficiency = this.calculateEfficiency(info, 'hashRate');
-        this.efficiencyAverage = this.calculateEfficiency(info, 'hashRate_1m');
+
+        // BERECHNUNG MIT GEGLÄTTETEM FILTER (DÄMPFUNG)
+        if (info && info.power > 0 && info.hashRate_1h > 0) {
+          const currentRawAvg = (info.power * 1000) / info.hashRate_1h;
+
+          // Wenn der Wert zum ersten Mal berechnet wird, nimm den aktuellen Wert
+          if (this.smoothedEfficiencyAverage === 0) {
+            this.smoothedEfficiencyAverage = currentRawAvg;
+          } else {
+            // FILTER: 99% alter Wert + 1% neuer Wert. 
+            // Das schluckt jede sekündliche Schwankung komplett!
+            this.smoothedEfficiencyAverage = (this.smoothedEfficiencyAverage * 0.99) + (currentRawAvg * 0.01);
+          }
+
+          // Weise den geglätteten Wert der Anzeige zu
+          this.efficiencyAverage = this.smoothedEfficiencyAverage;
+        } else {
+          this.efficiencyAverage = 0;
+          this.smoothedEfficiencyAverage = 0;
+        }
+
         this.expectedEfficiency = this.calculateEfficiency(info, 'expectedHashrate');
         this.networkDifficultyPercentage = this.getNetworkDifficultyPercentage(info);
         this.payoutPercentage = this.getPayoutPercentage(info);
+
+        // Timer: Zeit seit dem letzten Session-Best-Diff
+        const currentUptime = Number(info.uptimeSeconds) || 0;
+        const bestScoreUptime = Number(info.bestScoreUptime) || 0;
+        const uptimeSinceBest = Math.max(0, currentUptime - bestScoreUptime);
+        const elapsedMs = uptimeSinceBest * 1000;
+        this.lastBestUpdate = new Date(Date.now() - elapsedMs);
+        this.displayInfo = { ...info, lastBestUpdate: this.lastBestUpdate };
 
         const isFallbackPool = !!info.isUsingFallbackStratum;
         this.activePoolLabel = isFallbackPool ? 'Fallback' : 'Primary';
@@ -952,6 +999,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           this.activePoolProtocol = 'SV1';
         }
         this.responseTime = info.responseTime;
+        info.coreVoltageSet = info.coreVoltageSet / 1000;
 
         this.activePoolUserAddressPart = this.getAddressPart(this.activePoolUser);
         this.activePoolUserSuffixPart = this.getSuffixPart(this.activePoolUser);
@@ -1028,6 +1076,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         formatted.temp = parseFloat(formatted.temp.toFixed(1));
         formatted.temp2 = parseFloat(formatted.temp2.toFixed(1));
         formatted.responseTime = parseFloat(formatted.responseTime.toFixed(1));
+        info.frequency = parseFloat(info.frequency.toFixed(2));
 
         return formatted;
       }),
@@ -1256,7 +1305,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.lastHasFan2Rpm = hasFan2Rpm;
 
       this.chartDataSources = Object.entries(eChartLabel)
-        .filter(([key, ]) => this.isSensorSupported(key))
+        .filter(([key,]) => this.isSensorSupported(key))
         .map(([key, value]) => ({ name: value, value: key }));
 
       this.updateChartUnitGroups();
@@ -1339,7 +1388,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         let high = this.dataLabel.length - 2;
         while (high - low > 1) {
           const midTime = (this.dataLabel[low] + this.dataLabel[high]) / 2;
-          
+
           let split = low;
           for (let i = low; i <= high; i++) {
             if (this.dataLabel[i] >= midTime) {
@@ -1356,12 +1405,12 @@ export class HomeComponent implements OnInit, OnDestroy {
           const rightCount = high - split + 1;
 
           if (leftCount > rightCount) {
-             high = split - 1;
+            high = split - 1;
           } else {
-             low = split;
+            low = split;
           }
         }
-        
+
         // Remove point at index 'low'.
         this.dataLabel.splice(low, 1);
         this.hashrateData.splice(low, 1);
@@ -1383,9 +1432,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     const totalSpanMs = this.dataLabel[this.dataLabel.length - 1] - this.dataLabel[0];
     const maxTicks = Math.min(16, Math.max(3, Math.floor(this.chartWidth / 80)));
 
-    this.currentInterval = HomeComponent.ADAPTIVE_TICK_INTERVALS.find(i => totalSpanMs / i.ms < maxTicks + 1) || 
-                           HomeComponent.ADAPTIVE_TICK_INTERVALS[HomeComponent.ADAPTIVE_TICK_INTERVALS.length - 1];
-    
+    this.currentInterval = HomeComponent.ADAPTIVE_TICK_INTERVALS.find(i => totalSpanMs / i.ms < maxTicks + 1) ||
+      HomeComponent.ADAPTIVE_TICK_INTERVALS[HomeComponent.ADAPTIVE_TICK_INTERVALS.length - 1];
+
     const xAxis = (this.chartOptions.scales as any).x;
     if (xAxis.time.unit !== this.currentInterval.unit || xAxis.time.stepSize !== this.currentInterval.step) {
       xAxis.time.unit = this.currentInterval.unit;
@@ -1398,68 +1447,74 @@ export class HomeComponent implements OnInit, OnDestroy {
       case eChartLabel.hashrate:
       case eChartLabel.hashrate_1m:
       case eChartLabel.hashrate_10m:
-      case eChartLabel.hashrate_1h:      return info.expectedHashrate;
-      case eChartLabel.errorPercentage:  return 1;
+      case eChartLabel.hashrate_1h: return info.expectedHashrate;
+      case eChartLabel.errorPercentage: return 1;
       case eChartLabel.asicTemp:
-      case eChartLabel.asicTemp2:        return this.maxTemp;
-      case eChartLabel.vrTemp:           return this.maxTemp + 25;
-      case eChartLabel.asicVoltage:      return info.coreVoltage;
-      case eChartLabel.voltage:          return info.nominalVoltage + .5;
-      case eChartLabel.power:            return this.maxPower;
-      case eChartLabel.current:          return this.maxPower / info.coreVoltage;
-      case eChartLabel.fanSpeed:         return 100;
-      case eChartLabel.fanRpm:           return 7000;
-      case eChartLabel.fan2Rpm:          return 7000;
-      case eChartLabel.responseTime:     return 50;
-      default:                           return 0;
+      case eChartLabel.asicTemp2: return this.maxTemp;
+      case eChartLabel.vrTemp: return this.maxTemp + 25;
+      case eChartLabel.asicVoltage: return info.coreVoltage;
+      case eChartLabel.asicVoltageSet: return info.coreVoltageSet;
+      case eChartLabel.voltage: return info.nominalVoltage + .5;
+      case eChartLabel.power: return this.maxPower;
+      case eChartLabel.current: return this.maxPower / info.coreVoltage;
+      case eChartLabel.fanSpeed: return 100;
+      case eChartLabel.fanRpm: return 7000;
+      case eChartLabel.fan2Rpm: return 7000;
+      case eChartLabel.responseTime: return 50;
+      case eChartLabel.frequency: return 0;
+      default: return 0;
     }
   }
 
   static getDataForLabel(label: eChartLabel | undefined, info: ISystemInfo): number {
     switch (label) {
-      case eChartLabel.hashrate:           return info.hashRate;
-      case eChartLabel.hashrate_1m:        return info.hashRate_1m;
-      case eChartLabel.hashrate_10m:       return info.hashRate_10m;
-      case eChartLabel.hashrate_1h:        return info.hashRate_1h;
-      case eChartLabel.errorPercentage:    return info.errorPercentage;
-      case eChartLabel.asicTemp:           return info.temp;
-      case eChartLabel.asicTemp2:          return info.temp2;
-      case eChartLabel.vrTemp:             return info.vrTemp;
-      case eChartLabel.asicVoltage:        return info.coreVoltageActual;
-      case eChartLabel.voltage:            return info.voltage;
-      case eChartLabel.power:              return info.power;
-      case eChartLabel.current:            return info.current;
-      case eChartLabel.fanSpeed:           return info.fanspeed;
-      case eChartLabel.fanRpm:             return info.fanrpm;
-      case eChartLabel.fan2Rpm:            return info.fan2rpm;
-      case eChartLabel.wifiRssi:           return info.wifiRSSI;
-      case eChartLabel.freeHeap:           return info.freeHeap;
-      case eChartLabel.responseTime:       return info.responseTime;
-      default:                             return 0.0;
+      case eChartLabel.hashrate: return info.hashRate;
+      case eChartLabel.hashrate_1m: return info.hashRate_1m;
+      case eChartLabel.hashrate_10m: return info.hashRate_10m;
+      case eChartLabel.hashrate_1h: return info.hashRate_1h;
+      case eChartLabel.errorPercentage: return info.errorPercentage;
+      case eChartLabel.asicTemp: return info.temp;
+      case eChartLabel.asicTemp2: return info.temp2;
+      case eChartLabel.vrTemp: return info.vrTemp;
+      case eChartLabel.asicVoltage: return info.coreVoltageActual;
+      case eChartLabel.asicVoltageSet: return info.coreVoltageSet;
+      case eChartLabel.voltage: return info.voltage;
+      case eChartLabel.power: return info.power;
+      case eChartLabel.current: return info.current;
+      case eChartLabel.fanSpeed: return info.fanspeed;
+      case eChartLabel.fanRpm: return info.fanrpm;
+      case eChartLabel.fan2Rpm: return info.fan2rpm;
+      case eChartLabel.wifiRssi: return info.wifiRSSI;
+      case eChartLabel.freeHeap: return info.freeHeap;
+      case eChartLabel.responseTime: return info.responseTime;
+      case eChartLabel.frequency: return info.frequency;
+      default: return 0.0;
     }
   }
 
-  static getSettingsForLabel(label: eChartLabel): {suffix: string; precision: number} {
+  static getSettingsForLabel(label: eChartLabel): { suffix: string; precision: number } {
     switch (label) {
       case eChartLabel.hashrate:
       case eChartLabel.hashrate_1m:
       case eChartLabel.hashrate_10m:
-      case eChartLabel.hashrate_1h:      return {suffix: ' H/s', precision: 0};
-      case eChartLabel.errorPercentage:  return {suffix: ' %', precision: 2};
+      case eChartLabel.hashrate_1h: return { suffix: ' H/s', precision: 0 };
+      case eChartLabel.errorPercentage: return { suffix: ' %', precision: 2 };
       case eChartLabel.asicTemp:
       case eChartLabel.asicTemp2:
-      case eChartLabel.vrTemp:           return {suffix: ' °C', precision: 1};
+      case eChartLabel.vrTemp: return { suffix: ' °C', precision: 1 };
       case eChartLabel.asicVoltage:
-      case eChartLabel.voltage:          return {suffix: ' V', precision: 1};
-      case eChartLabel.power:            return {suffix: ' W', precision: 1};
-      case eChartLabel.current:          return {suffix: ' A', precision: 1};
-      case eChartLabel.fanSpeed:         return {suffix: ' %', precision: 1};
+      case eChartLabel.voltage:
+      case eChartLabel.asicVoltageSet: return { suffix: ' V', precision: 3 };
+      case eChartLabel.power: return { suffix: ' W', precision: 1 };
+      case eChartLabel.current: return { suffix: ' A', precision: 1 };
+      case eChartLabel.fanSpeed: return { suffix: ' %', precision: 1 };
       case eChartLabel.fanRpm:
-      case eChartLabel.fan2Rpm:          return {suffix: ' rpm', precision: 0};
-      case eChartLabel.wifiRssi:         return {suffix: ' dBm', precision: 0};
-      case eChartLabel.freeHeap:         return {suffix: ' B', precision: 0};
-      case eChartLabel.responseTime:     return {suffix: ' ms', precision: 1};
-      default:                           return {suffix: '', precision: 0};
+      case eChartLabel.fan2Rpm: return { suffix: ' rpm', precision: 0 };
+      case eChartLabel.wifiRssi: return { suffix: ' dBm', precision: 0 };
+      case eChartLabel.freeHeap: return { suffix: ' B', precision: 0 };
+      case eChartLabel.responseTime: return { suffix: ' ms', precision: 1 };
+      case eChartLabel.frequency: return { suffix: ' MHz', precision: 1 };
+      default: return { suffix: '', precision: 0 };
     }
   }
 
@@ -1482,6 +1537,15 @@ export class HomeComponent implements OnInit, OnDestroy {
   getAddressPart(user: string): string {
     const dotIndex = user.lastIndexOf('.');
     return dotIndex !== -1 ? user.substring(0, dotIndex) : user;
+  }
+
+  public getElapsedTime(date: Date | undefined): string {
+    if (!date) return 'noch keine Daten';
+    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+    if (seconds < 60) return `${seconds}s ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    return `${Math.floor(minutes / 60)}h ago`;
   }
 
   getSuffixPart(user: string): string {

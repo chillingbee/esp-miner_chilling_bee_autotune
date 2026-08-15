@@ -11,6 +11,10 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--color-text-main) !important;
 }
 
+.p-message-content {
+    justify-content: center;
+}
+
 /* Global element borders */
 fieldset {
     border-color: var(--color-border-content) !important;

@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.16)
 # set(EXTRA_COMPONENT_DIRS $ENV{IDF_PATH}/examples/common_components/protocol_examples_common)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-
-
+# HIER DIE VERSION HÄNDISCH SETZEN (OHNE -DIRTY):
+add_definitions(-DVERSION_STRING="v2.14.01_chilling_bee")
 project(esp-miner)
 
