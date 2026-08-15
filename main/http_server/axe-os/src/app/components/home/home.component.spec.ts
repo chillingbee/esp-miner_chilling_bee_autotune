@@ -131,14 +131,14 @@ const mockSystemApiService = {
 
 const mockLocalStorageService = {
   getItem: () => null,
-  setItem: () => {},
+  setItem: () => { },
   getBool: () => false,
-  setBool: () => {},
+  setBool: () => { },
   getObject: () => null,
-  setObject: () => {},
+  setObject: () => { },
   getNumber: () => null,
-  setNumber: () => {},
-  removeItem: () => {}
+  setNumber: () => { },
+  removeItem: () => { }
 };
 
 
@@ -150,8 +150,6 @@ describe('HomeComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         HomeComponent,
-        TooltipTextIconComponent,
-        TooltipIconComponent,
         ConfettiComponent,
         SnowflakesComponent
       ],
@@ -163,6 +161,8 @@ describe('HomeComponent', () => {
         DropdownComponent,
         ProgressbarComponent,
         TooltipDirective,
+        TooltipTextIconComponent,
+        TooltipIconComponent,
         HashSuffixPipe,
         DiffSuffixPipe,
         DateAgoPipe,
@@ -195,12 +195,12 @@ describe('HomeComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should render the dashboard widgets and dropdowns when info is loaded', () => {
-    fixture.detectChanges();
-    const element = fixture.nativeElement;
-    // Verify that the dropdowns inside *ngIf are rendered
-    expect(element.querySelector('app-dropdown')).toBeTruthy();
-  });
+it('should render the dashboard widgets and dropdowns when info is loaded', () => {
+  fixture.detectChanges();
+  fixture.detectChanges();
+  const element = fixture.nativeElement;
+  expect(element.querySelector('app-dropdown')).toBeTruthy();
+});
 
   describe('stale data and visibility state', () => {
     it('should set stale data error when visible and last message is old', () => {

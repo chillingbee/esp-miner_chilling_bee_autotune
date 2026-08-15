@@ -21,18 +21,17 @@ describe('SwarmComponent', () => {
   let component: SwarmComponent;
   let fixture: ComponentFixture<SwarmComponent>;
   let httpClient: HttpClient;
-
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
         SwarmComponent,
-        ModalComponent,
-        TooltipTextIconComponent
+        ModalComponent
       ],
       imports: [
         ReactiveFormsModule,
         FormsModule,
         TooltipDirective,
+        TooltipTextIconComponent,
         DropdownComponent,
         SliderComponent,
         HashSuffixPipe,
