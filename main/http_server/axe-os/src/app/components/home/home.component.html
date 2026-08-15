@@ -41,7 +41,397 @@
             <span class="font-medium text-2xl whitespace-nowrap">
               {{info.hashRate | hashSuffix}}
             </span>
+<<<<<<< HEAD
             <table class="text-sm">
+=======
+            <span class="text-secondary text-lg">session best</span>
+             <span class="text-sm font-medium mb-4"
+              [style.color]="((displayInfo?.bestSessionDiff || info.bestSessionDiff) >= info.bestDiff) ? '#22c55e' : 'gray'">
+              ({{ getElapsedTime(displayInfo?.lastBestUpdate) }})
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="grid-stack-item" gs-id="chart">
+      <div class="grid-stack-item-content">
+        @if (!info.power_fault) {
+          <div class="card">
+            <form [formGroup]="form">
+              <div class="flex flex-nowrap justify-between mb-3">
+                <app-dropdown
+                  formControlName="chartY1Unit"
+                  [options]="chartUnitGroups"
+                  class="w-40 text-sm">
+                </app-dropdown>
+                <app-dropdown
+                  formControlName="chartY2Unit"
+                  [options]="chartUnitGroups"
+                  class="w-40 text-sm">
+                </app-dropdown>
+              </div>
+
+              <app-chart #chart id="chart" [data]="chartData" [options]="chartOptions"></app-chart>
+            </form>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Power -->
+    <div class="grid-stack-item" gs-id="power">
+      <div class="grid-stack-item-content">
+        <div class="card">
+          <h4 class="text-center font-medium">Power</h4>
+
+          <div class="mb-4">
+            <h6 class="flex justify-between mb-1">
+              Power<span>{{info.power}} W</span>
+            </h6>
+            <app-progressbar [value]="(info.power / info.maxPower) * 100"></app-progressbar>
+          </div>
+
+          <div class="mb-4">
+            <h6 class="flex justify-between mb-1">
+              Input Voltage<span>{{info.voltage}} V</span>
+            </h6>
+            <app-progressbar
+              [value]="((info.voltage / (info.nominalVoltage + .5)) * 100)"
+              [markers]="[{ value: (info.nominalVoltage / (info.nominalVoltage + .5)) * 100, label: info.nominalVoltage + ' V' }]">
+            </app-progressbar>
+            @if (info.voltage < (info.nominalVoltage + .5) * 0.87) {
+              <strong class="text-red-500">
+                Danger: Low Voltage
+              </strong>
+            }
+          </div>
+
+          <div class="mb-4">
+            <h6 class="flex justify-between mb-1">
+              ASIC Frequency<span>{{info.actualFrequency | number: '1.0-4'}} MHz</span>
+            </h6>
+            <app-progressbar [value]="(info.actualFrequency / maxFrequency) * 100"></app-progressbar>
+          </div>
+
+          <div>
+            <h6 class="flex justify-between mb-1">
+              Measured ASIC Voltage<span>{{info.coreVoltageActual}} V</span>
+            </h6>
+            <app-progressbar [value]="(info.coreVoltageActual / 1.8) * 100"></app-progressbar>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Heat -->
+    <div class="grid-stack-item" gs-id="heat">
+      <div class="grid-stack-item-content">
+        <div class="card">
+          <h4 class="text-center font-medium">Heat</h4>
+
+          <div class="mb-4">
+            <h6 class="flex justify-between mb-1">
+              @if (info.temp2 > 0) {
+                ASIC Temperature 1
+              } @else {
+                ASIC Temperature
+              }
+              <span>
+                @if (info.temp > 0) {
+                  {{info.temp}} °C
+                } @else {
+                  --
+                }
+              </span>
+            </h6>
+            <app-progressbar
+              [value]="(info.temp / maxTemp) * 100"
+              [markers]="[{ value: (info.temptarget / maxTemp) * 100, label: info.temptarget + ' °C', visible: info.autofanspeed === 1 && 0 >= info.temp2 }]">
+            </app-progressbar>
+
+            @if (info.temp >= 70) {
+              <strong class="text-red-500">
+                Danger: High Temperature
+              </strong>
+            }
+          </div>
+
+          @if (info.temp2 > 0) {
+            <div class="mb-4">
+              <h6 class="flex justify-between mb-1">
+                ASIC Temperature 2
+                <span>
+                  {{info.temp2}} °C
+                </span>
+              </h6>
+              <app-progressbar
+                [value]="(info.temp2 / maxTemp) * 100"
+                [markers]="[{ value: (info.temptarget / maxTemp) * 100, label: info.temptarget + ' °C', visible: info.autofanspeed === 1 }]">
+              </app-progressbar>
+
+              @if (info.temp2 >= 70) {
+                <strong class="text-red-500">
+                  Danger: High Temperature
+                </strong>
+              }
+            </div>
+          }
+
+          @if (info.vrTemp > 0) {
+            <div class="mb-4">
+              <h6 class="flex justify-between mb-1">
+                Voltage Regulator Temperature<span>{{info.vrTemp}} °C</span>
+              </h6>
+              <app-progressbar [value]="(info.vrTemp / 120) * 100"></app-progressbar>
+
+              @if (info.vrTemp >= 105) {
+                <strong class="text-red-500">
+                  Danger: High Temperature
+                </strong>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Fan -->
+    <div class="grid-stack-item" gs-id="fan">
+      <div class="grid-stack-item-content">
+        <div class="card">
+          <h4 class="text-center font-medium">Fan</h4>
+
+          <div class="mb-4">
+            <h6 class="flex justify-between mb-1" tooltipPosition="top"
+                appTooltip="{{info.fan2rpm > 0 ? 'Fan 1: ' : ''}}{{info.fanrpm}} RPM{{info.fan2rpm > 0 ? '<br>Fan 2: ' + info.fan2rpm + ' RPM' : ''}}">
+
+              @if (info.fan2rpm > 0) {
+                Fan Speeds
+              } @else {
+                Fan Speed
+              }
+
+              <span>{{info.fanspeed.toFixed(1)}} %</span>
+            </h6>
+            <app-progressbar [value]="info.fanspeed"></app-progressbar>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pool -->
+    <div class="grid-stack-item" gs-id="pool">
+      <div class="grid-stack-item-content">
+        @if (activePoolUser) {
+          <div class="card">
+            <div class="flex flex-nowrap justify-between relative">
+              <h4 class="font-medium">
+                Pool
+                @if ((quickLink$ | async); as quickLink) {
+                  <a
+                    [href]="quickLink"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="ml-1 text-white"
+                    [attr.aria-label]="'Open pool dashboard in new tab'"
+                    appTooltip="Open pool dashboard"
+                    tooltipPosition="top"
+                  >
+                    <i class="pi pi-external-link text-base text-primary"></i>
+                  </a>
+                }
+              </h4>
+              <app-dropdown
+                [ngModel]="activePoolLabel"
+                (ngModelChange)="activePoolLabel = $event; onPoolChange({value: $event})"
+                [ngModelOptions]="{standalone: true}"
+                [options]="(pools$ | async) ?? []"
+                class="w-28 text-sm">
+              </app-dropdown>
+            </div>
+
+            <div class="flex flex-nowrap">
+              <div class="w-24 shrink-0 text-secondary">
+                <span>URL</span>
+              </div>
+              <div>
+                <tooltip-text-icon
+                  text="{{ activePoolURL }}:{{activePoolPort}}"
+                  tooltip="{{ info.poolConnectionInfo }}"
+                />
+              </div>
+            </div>
+
+            <div class="flex flex-nowrap items-baseline">
+              <div class="w-24 shrink-0 text-secondary">
+                User
+              </div>
+
+              <div appTooltip="{{ activePoolUser }}" tooltipPosition="top" sensitive-data>
+                <span class="font-mono font-bold text-base">{{ activePoolUserAddressPart | address }}</span>{{ activePoolUserSuffixPart }}
+              </div>
+            </div>
+
+            <div class="flex flex-nowrap">
+              <div class="w-24 shrink-0 text-secondary">
+                <tooltip-text-icon
+                  text="Time"
+                  tooltip="Time it takes for the pool to respond to a share"
+                />
+              </div>
+              @if (info.responseTime > 0) {
+                {{ info.responseTime | number:'1.1-1' }} ms
+                @if ((info.responseShareBatch ?? 0) > 1) {
+                  <span class="text-neutral-500" appTooltip="The pool acknowledged {{ info.responseShareBatch }} shares in one batch; the time reflects the most recent share, so it may include the pool's batching window" tooltipPosition="top">&nbsp;(batched ×{{ info.responseShareBatch }})</span>
+                }
+              } @else {
+                --
+              }
+            </div>
+            @if ((info.coinbaseOutputs?.length ?? 0) > 0) {
+              <div class="flex flex-nowrap">
+                @let percentage = payoutPercentage;
+                @if (percentage >= 95) {
+                  <div class="w-24 shrink-0 text-secondary">
+                    <tooltip-text-icon text="Fee" tooltip="Percentage of the bitcoin block reward that will be paid out to the pool if you find a block." />
+                  </div>
+                  <div [style.color]="percentage < 100 ? 'inherit' : 'green'">
+                    {{ 100 - percentage | number:'1.0-1' }}%
+                  </div>
+                } @else {
+                  <div class="w-24 shrink-0 text-secondary">
+                    <tooltip-text-icon text="Share" tooltip="Percentage of the bitcoin block reward that will be paid out to your address if you find a block." />
+                  </div>
+                  @if (percentage !== -1) {
+                    <div [style.color]="'red'">
+                      {{ percentage | number:'1.0-1' }}%
+                    </div>
+                  } @else {
+                    --
+                  }
+                }
+              </div>
+            }
+            <div class="flex flex-nowrap">
+              <div class="w-24 shrink-0 text-secondary">
+                <span>Difficulty</span>
+              </div>
+              @if (info.poolDifficulty > 0) {
+                {{ info.poolDifficulty }}
+              } @else {
+                --
+              }
+            </div>
+            <div class="flex flex-nowrap">
+              <div class="w-24 shrink-0 text-neutral-500">
+                <span>Mode</span>
+              </div>
+              <div>{{ activePoolProtocol }}</div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Block Header -->
+    <div class="grid-stack-item" gs-id="blockheader">
+      <div class="grid-stack-item-content">
+        <div class="card">
+          <h4 class="whitespace-nowrap overflow-hidden text-ellipsis font-medium">
+            Block Header
+            <i class="pi pi-arrow-down transition-opacity duration-500 ml-2 text-sm align-middle text-blue-500" [ngClass]="{'opacity-100': flashWorkReceived, 'opacity-0': !flashWorkReceived}" appTooltip="Work Received" tooltipPosition="top"></i>
+            @if (info.blockSignals && info.blockSignals.length > 0) {
+              <span class="align-bottom ml-2">
+                @for (signal of info.blockSignals; track signal) {
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-green-500 text-white ml-1">{{ signal }}</span>
+                }
+              </span>
+            }
+          </h4>
+
+          <div class="flex flex-nowrap">
+            <div class="w-24 shrink-0 text-secondary">
+              <span>Height</span>
+            </div>
+            <div>
+              {{ info.blockHeight }}
+            </div>
+          </div>
+
+          <div class="flex flex-nowrap">
+            <div class="w-24 shrink-0 text-secondary">
+              <span>Difficulty</span>
+            </div>
+            @if (info.networkDifficulty) {
+              <div class="cursor-pointer" appTooltip="{{info.networkDifficulty | number:'1.0-0'}}" tooltipPosition="bottom">
+                {{ info.networkDifficulty | diffSuffix }}
+              </div>
+            }
+          </div>
+
+          <div class="flex flex-nowrap items-baseline">
+            <div class="w-24 shrink-0 text-secondary">
+              <span>Scriptsig</span>
+            </div>
+            <div class="font-mono text-sm">
+              {{ info.scriptsig }}
+            </div>
+          </div>
+          @if ((info.coinbaseOutputs?.length ?? 0) > 0) {
+            <div class="flex flex-nowrap justify-between">
+              <div class="w-24 shrink-0 text-secondary">
+                <tooltip-text-icon text="Value" tooltip="Total value of transaction outputs in BTC. For non-bitcoin chains, disable 'Decode Coinbase Tx' in Advanced Pool Options." />
+              </div>
+              @if (info.coinbaseValueTotalSatoshis && info.coinbaseValueTotalSatoshis > 0) {
+                {{ info.coinbaseValueTotalSatoshis | sats }}
+              }
+            </div>
+            <div class="flex flex-nowrap items-baseline">
+              <div class="w-24 shrink-0 text-secondary">
+                <span>Outputs</span>
+              </div>
+              <div class="w-full">
+                @for (output of info.coinbaseOutputs; track output; let i = $index) {
+                  <div class="flex justify-between">
+                    @if (output.value > 0) {
+                      @if (output.address === activePoolUserAddressPart) {
+                        <span><span class="font-mono text-sm font-bold" appTooltip="Your payout address" tooltipPosition="top" sensitive-data>{{ output.address | address }}</span>&nbsp;<i class="pi pi-star-fill text-xs"></i></span>
+                      } @else {
+                        <span class="font-mono text-sm" appTooltip="{{ output.address }}" tooltipPosition="top">{{ output.address | address }}</span>
+                      }
+                      <span class="text-sm">{{ output.value | sats }}</span>
+                    } @else {
+                      <span class="font-mono text-xs">{{ output.address }}</span>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          } @else {
+            <div class="flex flex-nowrap items-baseline">
+              <div class="w-24 shrink-0 text-secondary">
+                Amount
+              </div>
+              @if (info.coinbaseValueTotalSatoshis && info.coinbaseValueTotalSatoshis > 0) {
+                {{ info.coinbaseValueTotalSatoshis / 100_000_000 }}
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Hashrate Registers -->
+    <div class="grid-stack-item" gs-id="registers">
+      <div class="grid-stack-item-content">
+        <div class="card">
+          <h4 class="whitespace-nowrap overflow-hidden text-ellipsis font-medium">Hashrate Registers</h4>
+
+          @if (asicsAmount; as asicAmount) {
+            <table class="heatmap text-{{asicAmount <= 2 ? 'sm' : 'xs'}} w-full">
+>>>>>>> master
               <thead>
                 <tr>
                   <th class="p-0 text-secondary font-normal leading-none">

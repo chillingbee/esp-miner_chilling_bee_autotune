@@ -1,15 +1,18 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { HttpErrorResponse } from '@angular/common/http'
+
 import { LoadingService } from 'src/app/services/loading.service';
+
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin } from 'rxjs';
 import { AutotuneSettings, SystemInfo } from 'src/app/generated/models';
 import { SystemApiService } from 'src/app/services/system.service';
-import { TooltipTextIconComponent } from '../tooltip-text-icon/tooltip-text-icon.component'; // Pfad ggf. anpassen
-import { CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA } from '@angular/core';
 
+// PrimeNG & Eigene UI-Element-Imports für das Template
+
+import { TooltipTextIconComponent } from '../tooltip-text-icon/tooltip-text-icon.component';
 
 interface SliderConfig {
   formControlName: string;
@@ -23,8 +26,13 @@ interface SliderConfig {
 
 @Component({
   selector: 'autotune',
-  standalone: false,
   templateUrl: './autotune.component.html',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    TooltipTextIconComponent
+  ]
 })
 export class AutotuneComponent implements OnInit {
   public autotuneForm!: FormGroup;
@@ -170,12 +178,6 @@ export class AutotuneComponent implements OnInit {
   }
 
   public updateAutotune(): void {
-    if (this.autotuneForm.invalid) {
-      this.autotuneForm.markAllAsTouched();
-      this.toastr.error('Please fix the invalid fields before saving');
-      return;
-    }
-
     this.systemService.updateAutotune(this.autotuneForm.value).subscribe({
       next: () => this.toastr.success('Autotune settings saved'),
       error: (err: HttpErrorResponse) => this.toastr.error(`Could not save autotune settings. ${err.message}`)
@@ -185,9 +187,9 @@ export class AutotuneComponent implements OnInit {
   private updateSliderMinForPid(info: SystemInfo): void {
     const isPidActive = info.autofanspeed === 1;
 
-    const minTemp = isPidActive ? ((info.temptarget ?? 19) + 1) : 20;
-    const minFanspeed = isPidActive ? ((info.minFanSpeed ?? 19) + 1) : 20;
-    const maxPower = info.maxPower ?? 40;
+    const minTemp = isPidActive ? (info.temptarget + 1) : 20;
+    const minFanspeed = isPidActive ? (info.minFanSpeed + 1) : 20;
+    const maxPower = info.maxPower;
 
     this.sliderConfigs.forEach(config => {
       if (config.formControlName === 'max_temp_asic') {

@@ -67,6 +67,7 @@
             <app-slider [min]="35" [max]="66" formControlName="temptarget"></app-slider>
           </div>
         </div>
+<<<<<<< HEAD
         <div class="flex flex-col md:flex-row md:items-center mb-4 gap-2">
           <label class="hidden md:flex w-full md:w-2/12 font-medium">Minimum Fan Speed</label>
           <div class="w-full md:w-10/12">
@@ -75,6 +76,17 @@
             </label>
             <app-slider [min]="0" [max]="99" formControlName="minfanspeed"></app-slider>
           </div>
+=======
+
+        <div *ngIf="form.controls['autofanspeed'].value" class="grid p-fluid my-2">
+            <label class="hidden md:flex md:col-2 md:m-0 hover-next-input">Target Temperature</label>
+            <div class="col-12 md:col-10">
+                <label class="block mb-1">
+                    <span class="md:hidden mr-1">Target Temperature:</span>{{form.controls['temptarget'].value}} &deg;C
+                </label>
+                <p-slider [min]="35" [max]="66" formControlName="temptarget"></p-slider>
+            </div>
+>>>>>>> 6958c53028be8f0485c9d8a5b6db5562366cb17e
         </div>
       } @else {
         <div class="flex flex-col md:flex-row md:items-center mb-4 gap-2">

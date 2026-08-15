@@ -1,53 +1,67 @@
-#include <stdio.h>
-#include <string.h>
-#include "esp_partition.h"
-#include "esp_image_format.h"
-#include "esp_wifi.h"
-#include "esp_ota_ops.h"
-#include "esp_system.h"
-#include "esp_heap_caps.h"
-#include "esp_timer.h"
-#include "global_state.h"
 #include "system_api_json.h"
-#include "nvs_config.h"
-#include "sv2_protocol.h"
-#include "vcore.h"
-#include "connect.h"
-#include "hashrate_monitor_task.h"
 #include "cjson_utils.h"
+#include "connect.h"
+#include "esp_heap_caps.h"
+#include "esp_image_format.h"
+#include "esp_ota_ops.h"
+#include "esp_partition.h"
+#include "esp_system.h"
+#include "esp_timer.h"
+#include "esp_wifi.h"
+#include "global_state.h"
+#include "hashrate_monitor_task.h"
+#include "nvs_config.h"
 #include "statistics_task.h"
 #include "stratum_v2_task.h"
+#include "sv2_protocol.h"
+#include "vcore.h"
+#include <stdio.h>
+#include <string.h>
 
-
-static const char *get_reset_reason_str(esp_reset_reason_t reason)
+static const char * get_reset_reason_str(esp_reset_reason_t reason)
 {
     switch (reason) {
-        case ESP_RST_UNKNOWN:    return "Reset reason can not be determined";
-        case ESP_RST_POWERON:    return "Reset due to power-on event";
-        case ESP_RST_EXT:        return "Reset by external pin (not applicable for ESP32)";
-        case ESP_RST_SW:         return "Software reset via esp_restart";
-        case ESP_RST_PANIC:      return "Software reset due to exception/panic";
-        case ESP_RST_INT_WDT:    return "Reset (software or hardware) due to interrupt watchdog";
-        case ESP_RST_TASK_WDT:   return "Reset due to task watchdog";
-        case ESP_RST_WDT:        return "Reset due to other watchdogs";
-        case ESP_RST_DEEPSLEEP:  return "Reset after exiting deep sleep mode";
-        case ESP_RST_BROWNOUT:   return "Brownout reset (software or hardware)";
-        case ESP_RST_SDIO:       return "Reset over SDIO";
-        case ESP_RST_USB:        return "Reset by USB peripheral";
-        case ESP_RST_JTAG:       return "Reset by JTAG";
-        case ESP_RST_EFUSE:      return "Reset due to efuse error";
-        case ESP_RST_PWR_GLITCH: return "Reset due to power glitch detected";
-        case ESP_RST_CPU_LOCKUP: return "Reset due to CPU lock up (double exception)";
-        default:                 return "Unknown reset";
+    case ESP_RST_UNKNOWN:
+        return "Reset reason can not be determined";
+    case ESP_RST_POWERON:
+        return "Reset due to power-on event";
+    case ESP_RST_EXT:
+        return "Reset by external pin (not applicable for ESP32)";
+    case ESP_RST_SW:
+        return "Software reset via esp_restart";
+    case ESP_RST_PANIC:
+        return "Software reset due to exception/panic";
+    case ESP_RST_INT_WDT:
+        return "Reset (software or hardware) due to interrupt watchdog";
+    case ESP_RST_TASK_WDT:
+        return "Reset due to task watchdog";
+    case ESP_RST_WDT:
+        return "Reset due to other watchdogs";
+    case ESP_RST_DEEPSLEEP:
+        return "Reset after exiting deep sleep mode";
+    case ESP_RST_BROWNOUT:
+        return "Brownout reset (software or hardware)";
+    case ESP_RST_SDIO:
+        return "Reset over SDIO";
+    case ESP_RST_USB:
+        return "Reset by USB peripheral";
+    case ESP_RST_JTAG:
+        return "Reset by JTAG";
+    case ESP_RST_EFUSE:
+        return "Reset due to efuse error";
+    case ESP_RST_PWR_GLITCH:
+        return "Reset due to power glitch detected";
+    case ESP_RST_CPU_LOCKUP:
+        return "Reset due to CPU lock up (double exception)";
+    default:
+        return "Unknown reset";
     }
 }
 
-// Statische Variablen für das Highscore-Uptime-Tracking (müssen außerhalb der Funktion stehen!)
-static uint64_t last_tracked_best_diff = 0;
-static uint32_t best_score_uptime = 0;
-
-static void system_api_add_telemetry(cJSON *root, GlobalState *g) {
-    if (!root || !g) return;
+static void system_api_add_telemetry(cJSON * root, GlobalState * g)
+{
+    if (!root || !g)
+        return;
 
     // Power Group
     cJSON_AddFloatToObject(root, "power", g->POWER_MANAGEMENT_MODULE.power);
@@ -92,8 +106,19 @@ static void system_api_add_telemetry(cJSON *root, GlobalState *g) {
         cJSON_AddNumberToObject(root, "coinbaseValueUserSatoshis", g->coinbase_value_user_satoshis);
     }
 
-    // Dynamic System Stats & Highscore Uptime Logik
-    uint32_t current_uptime = (uint32_t)((esp_timer_get_time() - g->SYSTEM_MODULE.start_time) / 1000000);
+    // Statische Variablen für das Highscore-Uptime-Tracking (müssen außerhalb der Funktion stehen!)
+    static uint64_t last_tracked_best_diff = 0;
+    static uint32_t best_score_uptime = 0;
+
+    // Dynamic System Stats
+    cJSON_AddNumberToObject(root, "freeHeap", esp_get_free_heap_size());
+    cJSON_AddNumberToObject(root, "freeHeapInternal", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
+    cJSON_AddNumberToObject(root, "freeHeapSpiram", heap_caps_get_free_size(MALLOC_CAP_SPIRAM));
+    cJSON_AddNumberToObject(root, "minFreeHeap", esp_get_minimum_free_heap_size());
+    cJSON_AddNumberToObject(root, "maxAllocHeap", heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL));
+
+    // Highscore Uptime Logik
+    uint32_t current_uptime = (uint32_t) ((esp_timer_get_time() - g->SYSTEM_MODULE.start_time) / 1000000);
     uint64_t current_best_diff = g->SYSTEM_MODULE.best_session_nonce_diff;
 
     // Wenn Miner neu gestartet wurde oder erster Lauf
@@ -108,14 +133,9 @@ static void system_api_add_telemetry(cJSON *root, GlobalState *g) {
         best_score_uptime = current_uptime;
     }
 
-    cJSON_AddNumberToObject(root, "freeHeap", esp_get_free_heap_size());
-    cJSON_AddNumberToObject(root, "freeHeapInternal", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
-    cJSON_AddNumberToObject(root, "freeHeapSpiram", heap_caps_get_free_size(MALLOC_CAP_SPIRAM));
-    cJSON_AddNumberToObject(root, "minFreeHeap", esp_get_minimum_free_heap_size());
-    cJSON_AddNumberToObject(root, "maxAllocHeap", heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL));
-    cJSON_AddNumberToObject(root, "uptimeSeconds", current_uptime);
-    cJSON_AddNumberToObject(root, "bestScoreUptime", best_score_uptime); // <--- Übergabe an den Webserver/Browser
-    
+        cJSON_AddNumberToObject(root, "uptimeSeconds", current_uptime);
+    cJSON_AddNumberToObject(root, "bestScoreUptime", best_score_uptime);
+
     cJSON_AddFloatToObject(root, "cpuUsage", g->SYSTEM_MODULE.cpu_usage);
     cJSON_AddBoolToObject(root, "miningPaused", g->SYSTEM_MODULE.mining_paused);
     cJSON_AddNumberToObject(root, "overheat_mode", g->SYSTEM_MODULE.overheat_mode ? 1 : 0);
@@ -134,8 +154,10 @@ static void system_api_add_telemetry(cJSON *root, GlobalState *g) {
     }
 }
 
-static void system_api_add_config(cJSON *root, GlobalState *g) {
-    if (!root || !g) return;
+static void system_api_add_config(cJSON * root, GlobalState * g)
+{
+    if (!root || !g)
+        return;
 
     // Versions
     cJSON_AddStringToObject(root, "version", g->SYSTEM_MODULE.version ? g->SYSTEM_MODULE.version : "Unknown");
@@ -150,8 +172,8 @@ static void system_api_add_config(cJSON *root, GlobalState *g) {
     cJSON_AddStringToObject(root, "ASICModel", g->DEVICE_CONFIG.family.asic.name ? g->DEVICE_CONFIG.family.asic.name : "Unknown");
     cJSON_AddNumberToObject(root, "isPSRAMAvailable", g->psram_is_available ? 1 : 0);
     cJSON_AddStringToObject(root, "resetReason", get_reset_reason_str(esp_reset_reason()));
-    
-    const esp_partition_t *running = esp_ota_get_running_partition();
+
+    const esp_partition_t * running = esp_ota_get_running_partition();
     cJSON_AddStringToObject(root, "runningPartition", running ? running->label : "Unknown");
 
     uint8_t mac[6];
@@ -160,12 +182,12 @@ static void system_api_add_config(cJSON *root, GlobalState *g) {
     snprintf(formattedMac, sizeof(formattedMac), "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
     cJSON_AddStringToObject(root, "macAddr", formattedMac);
 
-    char *hostname = nvs_config_get_string(NVS_CONFIG_HOSTNAME);
+    char * hostname = nvs_config_get_string(NVS_CONFIG_HOSTNAME);
     cJSON_AddStringToObject(root, "hostname", hostname ? hostname : "Unknown");
     free(hostname);
 
     // Network Config
-    char *ssid = nvs_config_get_string(NVS_CONFIG_WIFI_SSID);
+    char * ssid = nvs_config_get_string(NVS_CONFIG_WIFI_SSID);
     cJSON_AddStringToObject(root, "ssid", ssid ? ssid : "Unknown");
     free(ssid);
 
@@ -176,7 +198,7 @@ static void system_api_add_config(cJSON *root, GlobalState *g) {
     // Pool Configuration
     cJSON_AddStringToObject(root, "poolConnectionInfo", g->SYSTEM_MODULE.pool_connection_info);
     cJSON_AddNumberToObject(root, "isUsingFallbackStratum", g->SYSTEM_MODULE.is_using_fallback ? 1 : 0);
-    
+
     uint16_t prim_idx = g->SYSTEM_MODULE.primary_pool_index;
     uint16_t sec_idx = g->SYSTEM_MODULE.secondary_pool_index;
 
@@ -184,12 +206,12 @@ static void system_api_add_config(cJSON *root, GlobalState *g) {
     cJSON_AddNumberToObject(root, "secondaryPoolIndex", sec_idx);
     cJSON_AddNumberToObject(root, "useFallbackStratum", g->SYSTEM_MODULE.use_fallback_stratum ? 1 : 0);
 
-    cJSON *pools_arr = cJSON_CreateArray();
+    cJSON * pools_arr = cJSON_CreateArray();
     cJSON_AddItemToObject(root, "pools", pools_arr);
     for (int i = 0; i < MAX_POOLS; i++) {
-        PoolConfig *p = &g->SYSTEM_MODULE.pools[i];
+        PoolConfig * p = &g->SYSTEM_MODULE.pools[i];
         if (p->url && strlen(p->url) > 0) {
-            cJSON *p_obj = cJSON_CreateObject();
+            cJSON * p_obj = cJSON_CreateObject();
             cJSON_AddNumberToObject(p_obj, "id", i);
             cJSON_AddStringToObject(p_obj, "stratumProtocol", p->protocol == STRATUM_PROTOCOL_V2 ? STRATUM_V2 : STRATUM_V1);
             cJSON_AddStringToObject(p_obj, "stratumURL", p->url);
@@ -201,7 +223,9 @@ static void system_api_add_config(cJSON *root, GlobalState *g) {
             cJSON_AddNumberToObject(p_obj, "stratumTLS", p->tls);
             cJSON_AddStringToObject(p_obj, "stratumCert", p->cert ? p->cert : "");
             cJSON_AddBoolToObject(p_obj, "stratumDecodeCoinbase", p->decode_coinbase_tx);
-            cJSON_AddStringToObject(p_obj, "stratumV2ChannelType", p->sv2_channel_type == SV2_CHANNEL_STANDARD ? SV2_CHANNEL_TYPE_STANDARD : SV2_CHANNEL_TYPE_EXTENDED);
+            cJSON_AddStringToObject(p_obj, "stratumV2ChannelType",
+                                    p->sv2_channel_type == SV2_CHANNEL_STANDARD ? SV2_CHANNEL_TYPE_STANDARD
+                                                                                : SV2_CHANNEL_TYPE_EXTENDED);
             cJSON_AddStringToObject(p_obj, "stratumV2AuthorityPubkey", p->sv2_authority_pubkey ? p->sv2_authority_pubkey : "");
             cJSON_AddBoolToObject(p_obj, "stratumV2RequireAuth", p->sv2_require_auth);
 
@@ -210,8 +234,8 @@ static void system_api_add_config(cJSON *root, GlobalState *g) {
     }
 
     // Legacy fields for backwards compatibility
-    PoolConfig *prim_pool = &g->SYSTEM_MODULE.pools[prim_idx];
-    PoolConfig *sec_pool = &g->SYSTEM_MODULE.pools[sec_idx];
+    PoolConfig * prim_pool = &g->SYSTEM_MODULE.pools[prim_idx];
+    PoolConfig * sec_pool = &g->SYSTEM_MODULE.pools[sec_idx];
 
     cJSON_AddStringToObject(root, "stratumURL", prim_pool->url ? prim_pool->url : "");
     cJSON_AddNumberToObject(root, "stratumPort", prim_pool->port);
@@ -222,8 +246,11 @@ static void system_api_add_config(cJSON *root, GlobalState *g) {
     cJSON_AddStringToObject(root, "stratumCert", prim_pool->cert ? prim_pool->cert : "");
     cJSON_AddBoolToObject(root, "stratumDecodeCoinbase", prim_pool->decode_coinbase_tx);
     cJSON_AddStringToObject(root, "stratumProtocol", prim_pool->protocol == STRATUM_PROTOCOL_V2 ? STRATUM_V2 : STRATUM_V1);
-    cJSON_AddStringToObject(root, "stratumV2AuthorityPubkey", prim_pool->sv2_authority_pubkey ? prim_pool->sv2_authority_pubkey : "");
-    cJSON_AddStringToObject(root, "stratumV2ChannelType", prim_pool->sv2_channel_type == SV2_CHANNEL_STANDARD ? SV2_CHANNEL_TYPE_STANDARD : SV2_CHANNEL_TYPE_EXTENDED);
+    cJSON_AddStringToObject(root, "stratumV2AuthorityPubkey",
+                            prim_pool->sv2_authority_pubkey ? prim_pool->sv2_authority_pubkey : "");
+    cJSON_AddStringToObject(root, "stratumV2ChannelType",
+                            prim_pool->sv2_channel_type == SV2_CHANNEL_STANDARD ? SV2_CHANNEL_TYPE_STANDARD
+                                                                                : SV2_CHANNEL_TYPE_EXTENDED);
 
     cJSON_AddStringToObject(root, "fallbackStratumURL", sec_pool->url ? sec_pool->url : "");
     cJSON_AddNumberToObject(root, "fallbackStratumPort", sec_pool->port);
@@ -234,13 +261,16 @@ static void system_api_add_config(cJSON *root, GlobalState *g) {
     cJSON_AddStringToObject(root, "fallbackStratumCert", sec_pool->cert ? sec_pool->cert : "");
     cJSON_AddBoolToObject(root, "fallbackStratumDecodeCoinbase", sec_pool->decode_coinbase_tx);
     cJSON_AddStringToObject(root, "fallbackStratumProtocol", sec_pool->protocol == STRATUM_PROTOCOL_V2 ? STRATUM_V2 : STRATUM_V1);
-    cJSON_AddStringToObject(root, "fallbackStratumV2AuthorityPubkey", sec_pool->sv2_authority_pubkey ? sec_pool->sv2_authority_pubkey : "");
-    cJSON_AddStringToObject(root, "fallbackStratumV2ChannelType", sec_pool->sv2_channel_type == SV2_CHANNEL_STANDARD ? SV2_CHANNEL_TYPE_STANDARD : SV2_CHANNEL_TYPE_EXTENDED);
+    cJSON_AddStringToObject(root, "fallbackStratumV2AuthorityPubkey",
+                            sec_pool->sv2_authority_pubkey ? sec_pool->sv2_authority_pubkey : "");
+    cJSON_AddStringToObject(root, "fallbackStratumV2ChannelType",
+                            sec_pool->sv2_channel_type == SV2_CHANNEL_STANDARD ? SV2_CHANNEL_TYPE_STANDARD
+                                                                               : SV2_CHANNEL_TYPE_EXTENDED);
 
     // User Preferences
     cJSON_AddNumberToObject(root, "useCustomWWW", nvs_config_get_bool(NVS_CONFIG_USE_CUSTOM_WWW) ? 1 : 0);
     cJSON_AddNumberToObject(root, "overclockEnabled", nvs_config_get_bool(NVS_CONFIG_OVERCLOCK_ENABLED) ? 1 : 0);
-    char *disp_name = nvs_config_get_string(NVS_CONFIG_DISPLAY);
+    char * disp_name = nvs_config_get_string(NVS_CONFIG_DISPLAY);
     cJSON_AddStringToObject(root, "display", disp_name ? disp_name : "");
     free(disp_name);
     cJSON_AddNumberToObject(root, "rotation", nvs_config_get_u16(NVS_CONFIG_ROTATION));
@@ -256,26 +286,28 @@ static void system_api_add_config(cJSON *root, GlobalState *g) {
     cJSON_AddNumberToObject(root, "statsLimit", MAX_STATISTICS_COUNT);
 }
 
-static void system_api_add_hashrate_monitor(cJSON *root, GlobalState *g) {
-    if (!root || !g || !g->HASHRATE_MONITOR_MODULE.is_initialized) return;
+static void system_api_add_hashrate_monitor(cJSON * root, GlobalState * g)
+{
+    if (!root || !g || !g->HASHRATE_MONITOR_MODULE.is_initialized)
+        return;
 
-    cJSON *monitor = cJSON_CreateObject();
+    cJSON * monitor = cJSON_CreateObject();
     cJSON_AddItemToObject(root, "hashrateMonitor", monitor);
-    
-    cJSON *asics = cJSON_CreateArray();
+
+    cJSON * asics = cJSON_CreateArray();
     cJSON_AddItemToObject(monitor, "asics", asics);
 
     int asic_count = g->DEVICE_CONFIG.family.asic_count;
     int hash_domains = g->DEVICE_CONFIG.family.asic.hash_domains;
 
     for (int i = 0; i < asic_count; i++) {
-        cJSON *asic = cJSON_CreateObject();
+        cJSON * asic = cJSON_CreateObject();
         cJSON_AddItemToArray(asics, asic);
-        
+
         cJSON_AddNumberToObject(asic, "total", g->HASHRATE_MONITOR_MODULE.total_measurement[i].hashrate);
         cJSON_AddNumberToObject(asic, "errorCount", g->HASHRATE_MONITOR_MODULE.error_measurement[i].value);
-        
-        cJSON *domains = cJSON_CreateArray();
+
+        cJSON * domains = cJSON_CreateArray();
         cJSON_AddItemToObject(asic, "domains", domains);
         for (int j = 0; j < hash_domains; j++) {
             cJSON_AddItemToArray(domains, cJSON_CreateNumber(g->HASHRATE_MONITOR_MODULE.domain_measurements[i][j].hashrate));
@@ -283,13 +315,15 @@ static void system_api_add_hashrate_monitor(cJSON *root, GlobalState *g) {
     }
 }
 
-static void system_api_add_rejected_reasons(cJSON *root, GlobalState *g) {
-    if (!root || !g) return;
-    cJSON *rejected_reasons = cJSON_CreateArray();
+static void system_api_add_rejected_reasons(cJSON * root, GlobalState * g)
+{
+    if (!root || !g)
+        return;
+    cJSON * rejected_reasons = cJSON_CreateArray();
     if (rejected_reasons) {
         cJSON_AddItemToObject(root, "sharesRejectedReasons", rejected_reasons);
         for (int i = 0; i < g->SYSTEM_MODULE.rejected_reason_stats_count; i++) {
-            cJSON *obj = cJSON_CreateObject();
+            cJSON * obj = cJSON_CreateObject();
             if (obj) {
                 cJSON_AddStringToObject(obj, "message", g->SYSTEM_MODULE.rejected_reason_stats[i].message);
                 cJSON_AddNumberToObject(obj, "count", g->SYSTEM_MODULE.rejected_reason_stats[i].count);
@@ -299,10 +333,12 @@ static void system_api_add_rejected_reasons(cJSON *root, GlobalState *g) {
     }
 }
 
-static void system_api_add_block_info(cJSON *root, GlobalState *g) {
-    if (!root || !g || g->block_height <= 0) return;
+static void system_api_add_block_info(cJSON * root, GlobalState * g)
+{
+    if (!root || !g || g->block_height <= 0)
+        return;
 
-    cJSON *signals = cJSON_CreateArray();
+    cJSON * signals = cJSON_CreateArray();
     if (signals) {
         for (int i = 0; i < g->block_signals_count; i++) {
             cJSON_AddItemToArray(signals, cJSON_CreateString(g->block_signals[i]));
@@ -310,10 +346,10 @@ static void system_api_add_block_info(cJSON *root, GlobalState *g) {
         cJSON_AddItemToObject(root, "blockSignals", signals);
     }
 
-    cJSON *outputs = cJSON_CreateArray();
+    cJSON * outputs = cJSON_CreateArray();
     if (outputs) {
         for (int i = 0; i < g->coinbase_output_count; i++) {
-            cJSON *obj = cJSON_CreateObject();
+            cJSON * obj = cJSON_CreateObject();
             if (obj) {
                 cJSON_AddNumberToObject(obj, "value", g->coinbase_outputs[i].value_satoshis);
                 cJSON_AddStringToObject(obj, "address", g->coinbase_outputs[i].address);
@@ -324,17 +360,20 @@ static void system_api_add_block_info(cJSON *root, GlobalState *g) {
     }
 }
 
-static void system_api_add_partitions(cJSON *root, GlobalState * GLOBAL_STATE) {
-    if (!root || !GLOBAL_STATE) return;
+static void system_api_add_partitions(cJSON * root, GlobalState * GLOBAL_STATE)
+{
+    if (!root || !GLOBAL_STATE)
+        return;
 
-    cJSON *partitions_array = cJSON_CreateArray();
+    cJSON * partitions_array = cJSON_CreateArray();
     cJSON_AddItemToObject(root, "partitions", partitions_array);
 
     for (int i = 0; i < GLOBAL_STATE->SYSTEM_MODULE.cached_partitions_count; i++) {
-        cached_partition_t *cp = &GLOBAL_STATE->SYSTEM_MODULE.cached_partitions[i];
-        if (cp->part == NULL) continue;
+        cached_partition_t * cp = &GLOBAL_STATE->SYSTEM_MODULE.cached_partitions[i];
+        if (cp->part == NULL)
+            continue;
 
-        cJSON *p_obj = cJSON_CreateObject();
+        cJSON * p_obj = cJSON_CreateObject();
         cJSON_AddStringToObject(p_obj, "label", cp->part->label);
         cJSON_AddBoolToObject(p_obj, "isCurrent", cp->isCurrent);
         cJSON_AddBoolToObject(p_obj, "isFactory", cp->part->subtype == ESP_PARTITION_SUBTYPE_APP_FACTORY);
@@ -358,10 +397,13 @@ static void system_api_add_partitions(cJSON *root, GlobalState * GLOBAL_STATE) {
     }
 }
 
-cJSON* system_api_get_full_json(GlobalState * GLOBAL_STATE) {
-    if (!GLOBAL_STATE) return NULL;
-    cJSON *root = cJSON_CreateObject();
-    if (root == NULL) return NULL;
+cJSON * system_api_get_full_json(GlobalState * GLOBAL_STATE)
+{
+    if (!GLOBAL_STATE)
+        return NULL;
+    cJSON * root = cJSON_CreateObject();
+    if (root == NULL)
+        return NULL;
 
     system_api_add_telemetry(root, GLOBAL_STATE);
     system_api_add_config(root, GLOBAL_STATE);

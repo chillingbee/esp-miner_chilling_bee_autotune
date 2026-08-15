@@ -1,10 +1,13 @@
 import { Component, Input, HostListener } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { TooltipModule } from 'primeng/tooltip'; // <-- HIER IMPORTIEREN
 
 @Component({
     selector: 'tooltip-icon',
     templateUrl: './tooltip-icon.component.html',
     styleUrls: ['./tooltip-icon.component.scss'],
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, TooltipModule] // <-- HIER HINZUFÜGEN
 })
 export class TooltipIconComponent {
   @Input() tooltip: string = '';

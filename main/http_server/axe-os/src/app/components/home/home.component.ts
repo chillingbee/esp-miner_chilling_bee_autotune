@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, Input, OnDestroy, ElementRef, HostListener, effect } from '@angular/core';
+import { Component, OnInit, ViewChild, Input, OnDestroy, ElementRef, HostListener, effect, NgZone, ChangeDetectorRef } from '@angular/core';
 import { map, Observable, shareReplay, Subscription, switchMap, tap, first, Subject, takeUntil, BehaviorSubject, filter, combineLatest } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { getHttpErrorMessage } from 'src/app/utils/error-handler';
@@ -216,6 +216,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   private lastHiddenTime: number = 0;
   private statsLimit: number = 720;
 
+  private displayTickInterval: any;
+
   @Input() uri = '';
 
   constructor(
@@ -230,9 +232,21 @@ export class HomeComponent implements OnInit, OnDestroy {
     private shareRejectReasonsService: ShareRejectionExplanationService,
     private storageService: LocalStorageService,
     private dashboardEditService: DashboardEditService,
-    public layoutService: LayoutService
+    public layoutService: LayoutService,
+    private ngZone: NgZone,
+    private cdr: ChangeDetectorRef
   ) {
     this.initializeChart();
+
+    // Live-Ticker für den Timer (aktualisiert die Anzeige sekündlich)
+    this.ngZone.runOutsideAngular(() => {
+      this.displayTickInterval = setInterval(() => {
+        if (this.displayInfo) {
+          this.displayInfo = { ...this.displayInfo };
+          this.cdr.markForCheck();
+        }
+      }, 1000);
+    });
 
     effect(() => {
       // Refresh grid when wide view toggles
@@ -356,6 +370,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     clearTimeout(this.resizeTimer);
     clearInterval(this.staleCheckInterval);
+    clearInterval(this.displayTickInterval);
     this.dashboardEditService.isActive$.next(false);
     this.dashboardEditService.editMode$.next(false);
     this.destroy$.next();
@@ -802,7 +817,6 @@ export class HomeComponent implements OnInit, OnDestroy {
           const idxHashrate = stats.labels.indexOf(chartLabelKey(eChartLabel.hashrate));
           const idxPower = stats.labels.indexOf(chartLabelKey(eChartLabel.power));
           const idxTimestamp = stats.labels.indexOf('timestamp');
-
           stats.labels.forEach((labelKey, labelIdx) => {
             const valEnum = chartLabelValue(labelKey);
             if (valEnum === eChartLabel.asicVoltage || valEnum === eChartLabel.voltage || valEnum === eChartLabel.current) {
@@ -943,10 +957,38 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.updateChartDataSources(info);
 
         this.efficiency = this.calculateEfficiency(info, 'hashRate');
-        this.efficiencyAverage = this.calculateEfficiency(info, 'hashRate_1m');
+
+        // BERECHNUNG MIT GEGLÄTTETEM FILTER (DÄMPFUNG)
+        if (info && info.power > 0 && info.hashRate_1h > 0) {
+          const currentRawAvg = (info.power * 1000) / info.hashRate_1h;
+
+          // Wenn der Wert zum ersten Mal berechnet wird, nimm den aktuellen Wert
+          if (this.smoothedEfficiencyAverage === 0) {
+            this.smoothedEfficiencyAverage = currentRawAvg;
+          } else {
+            // FILTER: 99% alter Wert + 1% neuer Wert. 
+            // Das schluckt jede sekündliche Schwankung komplett!
+            this.smoothedEfficiencyAverage = (this.smoothedEfficiencyAverage * 0.99) + (currentRawAvg * 0.01);
+          }
+
+          // Weise den geglätteten Wert der Anzeige zu
+          this.efficiencyAverage = this.smoothedEfficiencyAverage;
+        } else {
+          this.efficiencyAverage = 0;
+          this.smoothedEfficiencyAverage = 0;
+        }
+
         this.expectedEfficiency = this.calculateEfficiency(info, 'expectedHashrate');
         this.networkDifficultyPercentage = this.getNetworkDifficultyPercentage(info);
         this.payoutPercentage = this.getPayoutPercentage(info);
+
+        // Timer: Zeit seit dem letzten Session-Best-Diff
+        const currentUptime = Number(info.uptimeSeconds) || 0;
+        const bestScoreUptime = Number(info.bestScoreUptime) || 0;
+        const uptimeSinceBest = Math.max(0, currentUptime - bestScoreUptime);
+        const elapsedMs = uptimeSinceBest * 1000;
+        this.lastBestUpdate = new Date(Date.now() - elapsedMs);
+        this.displayInfo = { ...info, lastBestUpdate: this.lastBestUpdate };
 
         const isFallbackPool = !!info.isUsingFallbackStratum;
         this.activePoolLabel = isFallbackPool ? 'Fallback' : 'Primary';
@@ -961,6 +1003,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           this.activePoolProtocol = 'SV1';
         }
         this.responseTime = info.responseTime;
+        info.coreVoltageSet = info.coreVoltageSet / 1000;
 
         this.activePoolUserAddressPart = this.getAddressPart(this.activePoolUser);
         this.activePoolUserSuffixPart = this.getSuffixPart(this.activePoolUser);
@@ -1027,13 +1070,6 @@ export class HomeComponent implements OnInit, OnDestroy {
         }
         this.lastWorkReceived = currentWorkReceived;
 
-        // --- Timer-Logik ---
-        const currentUptime = Number(info.uptimeSeconds) || 0;
-        const bestScoreUptime = Number((info as any).bestScoreUptime) || 0;
-        const uptimeSinceBest = Math.max(0, currentUptime - bestScoreUptime);
-        const elapsedMs = uptimeSinceBest * 1000;
-        this.lastBestUpdate = new Date(Date.now() - elapsedMs);
-
         // Display-Info für das UI aktualisieren
         this.displayInfo = {
           ...info,
@@ -1065,6 +1101,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         formatted.temp = parseFloat(formatted.temp.toFixed(1));
         formatted.temp2 = parseFloat(formatted.temp2.toFixed(1));
         formatted.responseTime = parseFloat(formatted.responseTime.toFixed(1));
+        info.frequency = parseFloat(info.frequency.toFixed(2));
 
         return formatted;
       }),
@@ -1441,6 +1478,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       case eChartLabel.asicTemp2: return this.maxTemp;
       case eChartLabel.vrTemp: return this.maxTemp + 25;
       case eChartLabel.asicVoltage: return info.coreVoltage;
+      case eChartLabel.asicVoltageSet: return info.coreVoltageSet;
       case eChartLabel.voltage: return info.nominalVoltage + .5;
       case eChartLabel.power: return this.maxPower;
       case eChartLabel.current: return this.maxPower / info.coreVoltage;
@@ -1448,6 +1486,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       case eChartLabel.fanRpm: return 7000;
       case eChartLabel.fan2Rpm: return 7000;
       case eChartLabel.responseTime: return 50;
+      case eChartLabel.frequency: return 0;
       default: return 0;
     }
   }
@@ -1463,6 +1502,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       case eChartLabel.asicTemp2: return info.temp2;
       case eChartLabel.vrTemp: return info.vrTemp;
       case eChartLabel.asicVoltage: return info.coreVoltageActual;
+      case eChartLabel.asicVoltageSet: return info.coreVoltageSet;
       case eChartLabel.voltage: return info.voltage;
       case eChartLabel.power: return info.power;
       case eChartLabel.current: return info.current;
@@ -1472,6 +1512,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       case eChartLabel.wifiRssi: return info.wifiRSSI;
       case eChartLabel.freeHeap: return info.freeHeap;
       case eChartLabel.responseTime: return info.responseTime;
+      case eChartLabel.frequency: return info.frequency;
       default: return 0.0;
     }
   }
@@ -1487,7 +1528,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       case eChartLabel.asicTemp2:
       case eChartLabel.vrTemp: return { suffix: ' °C', precision: 1 };
       case eChartLabel.asicVoltage:
-      case eChartLabel.voltage: return { suffix: ' V', precision: 1 };
+      case eChartLabel.voltage:
+      case eChartLabel.asicVoltageSet: return { suffix: ' V', precision: 3 };
       case eChartLabel.power: return { suffix: ' W', precision: 1 };
       case eChartLabel.current: return { suffix: ' A', precision: 1 };
       case eChartLabel.fanSpeed: return { suffix: ' %', precision: 1 };
@@ -1496,6 +1538,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       case eChartLabel.wifiRssi: return { suffix: ' dBm', precision: 0 };
       case eChartLabel.freeHeap: return { suffix: ' B', precision: 0 };
       case eChartLabel.responseTime: return { suffix: ' ms', precision: 1 };
+      case eChartLabel.frequency: return { suffix: ' MHz', precision: 1 };
       default: return { suffix: '', precision: 0 };
     }
   }

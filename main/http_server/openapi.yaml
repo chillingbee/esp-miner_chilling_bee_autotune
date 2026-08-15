@@ -280,6 +280,7 @@ components:
         - autofanspeed
         - bestDiff
         - bestSessionDiff
+        - bestScoreUptime
         - boardVersion
         - coreVoltage
         - coreVoltageActual
@@ -389,6 +390,9 @@ components:
         bestSessionDiff:
           type: number
           description: Best difficulty achieved in current session
+        bestScoreUptime:
+          type: number
+          description: Uptime in seconds at the point the current best session difficulty was achieved
         boardVersion:
           type: string
           description: Hardware board version

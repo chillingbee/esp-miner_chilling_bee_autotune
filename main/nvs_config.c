@@ -105,10 +105,11 @@ static Settings settings[NVS_CONFIG_COUNT] = {
     [NVS_CONFIG_TPS546]                                = {.nvs_key_name = "TPS546",          .type = TYPE_BOOL},
     [NVS_CONFIG_TMP1075]                               = {.nvs_key_name = "TMP1075",         .type = TYPE_BOOL},
     [NVS_CONFIG_POWER_CONSUMPTION_TARGET]              = {.nvs_key_name = "power_cons_tgt",  .type = TYPE_U16},
-    [NVS_CONFIG_SELF_TEST_TEMP_TARGET]                 = {.nvs_key_name = "selftest_temp",   .type = TYPE_U16,   .default_value = {.u16 = 65}},
+ [NVS_CONFIG_SELF_TEST_TEMP_TARGET]                 = {.nvs_key_name = "selftest_temp",   .type = TYPE_U16,   .default_value = {.u16 = 65}},
     [NVS_CONFIG_SELF_TEST_TEMP_WARMUP]                 = {.nvs_key_name = "selftest_warm",   .type = TYPE_U16,   .default_value = {.u16 = 55}},
     [NVS_CONFIG_SELF_TEST_TEMP_MAX]                    = {.nvs_key_name = "selftest_max",    .type = TYPE_U16,   .default_value = {.u16 = 70}},
     [NVS_CONFIG_SELF_TEST_FAN_SPEED]                   = {.nvs_key_name = "selftest_fan",    .type = TYPE_U16,   .default_value = {.u16 = 1000}},
+<<<<<<< HEAD
     [NVS_CONFIG_TPS546_PHASE]                          = {.nvs_key_name = "tps546_phase",    .type = TYPE_U16},
     [NVS_CONFIG_TPS546_VIN_ON]                         = {.nvs_key_name = "tps546_vin_on",   .type = TYPE_FLOAT},
     [NVS_CONFIG_TPS546_VIN_OFF]                        = {.nvs_key_name = "tps546_vin_off",  .type = TYPE_FLOAT},
@@ -124,6 +125,8 @@ static Settings settings[NVS_CONFIG_COUNT] = {
     [NVS_CONFIG_TPS546_SYNC_CONFIG]                    = {.nvs_key_name = "tps546_sync",    .type = TYPE_U16},
     [NVS_CONFIG_TPS546_FREQUENCY]                      = {.nvs_key_name = "tps546_freq",    .type = TYPE_U16},
 
+=======
+>>>>>>> master
     [NVS_CONFIG_KEY_POWER_LIMIT]                       = {.nvs_key_name = "power_limit",     .type = TYPE_U16,   .default_value = {.u16 = 20}},
     [NVS_CONFIG_KEY_FAN_LIMIT]                         = {.nvs_key_name = "fan_limit",       .type = TYPE_U16,   .default_value = {.u16 = 75},},
     [NVS_CONFIG_KEY_MAX_VOLTAGE_ASIC]                  = {.nvs_key_name = "max_volt_asic",   .type = TYPE_U16,   .default_value = {.u16 = 1400},},
