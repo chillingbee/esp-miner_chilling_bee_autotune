@@ -811,8 +811,6 @@ export class HomeComponent implements OnInit, OnDestroy {
           const idxHashrate = stats.labels.indexOf(chartLabelKey(eChartLabel.hashrate));
           const idxPower = stats.labels.indexOf(chartLabelKey(eChartLabel.power));
           const idxTimestamp = stats.labels.indexOf('timestamp');
-
-          typescript
           stats.labels.forEach((labelKey, labelIdx) => {
             const valEnum = chartLabelValue(labelKey);
             if (valEnum === eChartLabel.asicVoltage || valEnum === eChartLabel.voltage || valEnum === eChartLabel.current) {

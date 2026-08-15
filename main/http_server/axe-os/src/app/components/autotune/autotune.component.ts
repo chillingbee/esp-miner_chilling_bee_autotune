@@ -11,9 +11,8 @@ import { AutotuneSettings, SystemInfo } from 'src/app/generated/models';
 import { SystemApiService } from 'src/app/services/system.service';
 
 // PrimeNG & Eigene UI-Element-Imports für das Template
-import { CheckboxModule } from 'primeng/checkbox';
-import { MessageModule } from 'primeng/message';
-import { SliderModule } from 'primeng/slider';
+import { CheckboxComponent } from '../checkbox/checkbox.component';
+import { SliderComponent } from '../slider/slider.component';
 import { TooltipTextIconComponent } from '../tooltip-text-icon/tooltip-text-icon.component';
 
 interface SliderConfig {
@@ -33,9 +32,11 @@ interface SliderConfig {
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    CheckboxModule,
-    MessageModule,
-    SliderModule,
+    CheckboxComponent,
+    SliderComponent,
+    TooltipTextIconComponent,
+    CommonModule,
+    ReactiveFormsModule,
     TooltipTextIconComponent
   ]
 })
