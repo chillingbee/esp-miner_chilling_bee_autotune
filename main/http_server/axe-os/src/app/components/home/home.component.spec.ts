@@ -105,7 +105,8 @@ const mockSystemInfo: ISystemInfo = {
   fallbackStratumUser: 'worker.fallback',
   fallbackStratumPort: 3333,
   fallbackStratumProtocol: 'SV1',
-  isUsingFallbackStratum: false
+  isUsingFallbackStratum: false,
+  frequency: 600,
 } as any;
 
 const mockSystemStatistics: ISystemStatistics = {
@@ -195,12 +196,12 @@ describe('HomeComponent', () => {
     expect(component).toBeTruthy();
   });
 
-it('should render the dashboard widgets and dropdowns when info is loaded', () => {
-  fixture.detectChanges();
-  fixture.detectChanges();
-  const element = fixture.nativeElement;
-  expect(element.querySelector('app-dropdown')).toBeTruthy();
-});
+  it('should render the dashboard widgets and dropdowns when info is loaded', () => {
+    fixture.detectChanges();
+    fixture.detectChanges();
+    const element = fixture.nativeElement;
+    expect(element.querySelector('app-dropdown')).toBeTruthy();
+  });
 
   describe('stale data and visibility state', () => {
     it('should set stale data error when visible and last message is old', () => {
