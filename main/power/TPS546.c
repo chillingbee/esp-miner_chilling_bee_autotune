@@ -787,8 +787,8 @@ esp_err_t TPS546_check_status(GlobalState * GLOBAL_STATE) {
     uint16_t status;
 
     ESP_RETURN_ON_ERROR(smb_read_word(PMBUS_STATUS_WORD, &status), TAG, "Failed to read STATUS_WORD");
-    //determine if this is a fault we care about
-    if (status & (TPS546_STATUS_OFF | TPS546_STATUS_VOUT_OV | TPS546_STATUS_IOUT_OC | TPS546_STATUS_VIN_UV | TPS546_STATUS_TEMP)) {
+    //determine if this is a fault we care about (exclude STATUS_OFF - regulator off is normal when not mining)
+    if (status & (TPS546_STATUS_VOUT_OV | TPS546_STATUS_IOUT_OC | TPS546_STATUS_VIN_UV | TPS546_STATUS_TEMP)) {
         if (SYSTEM_MODULE->power_fault == 0) {
             ESP_RETURN_ON_ERROR(TPS546_parse_status(status), TAG, "Failed to parse STATUS_WORD");
             SYSTEM_MODULE->power_fault = 1;
@@ -817,9 +817,12 @@ static esp_err_t TPS546_parse_status(uint16_t status) {
         ESP_LOGE(TAG, "Voltage regulator was busy and unable to respond");
         return ESP_OK;
     }
-    
+
     if (status & TPS546_STATUS_OFF) {
-        ESP_LOGE(TAG, "The voltage regulator is turned off");
+        // STATUS_OFF is normal when regulator is intentionally off (e.g., not mining)
+        // Do not treat as fault, just log at debug level
+        ESP_LOGD(TAG, "The voltage regulator is turned off (normal if not mining)");
+        return ESP_OK;
     }
     
     if (status & TPS546_STATUS_VOUT_OV) {
