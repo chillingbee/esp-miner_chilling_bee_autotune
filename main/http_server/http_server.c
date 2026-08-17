@@ -235,7 +235,7 @@ typedef struct rest_server_context
     char scratch[SCRATCH_BUFSIZE];
 } rest_server_context_t;
 
-#define CHECK_FILE_EXTENSION(filename, ext) (strcasecmp(&filename[strlen(filename) - strlen(ext)], ext) == 0)
+#define CHECK_FILE_EXTENSION(filename, ext) (strlen(filename) >= strlen(ext) && strcasecmp(&filename[strlen(filename) - strlen(ext)], ext) == 0)
 
 static esp_err_t ip_in_private_range(uint32_t address) {
     uint32_t ip_address = ntohl(address);
