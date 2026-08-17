@@ -48,6 +48,9 @@ static void theme_apply(lv_theme_t *theme, lv_obj_t *obj) {
 static esp_err_t read_display_config(GlobalState * GLOBAL_STATE)
 {
     char * display_config_name = nvs_config_get_string(NVS_CONFIG_DISPLAY);
+    if (!display_config_name) {
+        return ESP_FAIL;
+    }
     const DisplayConfig * display_config = get_display_config(display_config_name);
 
     if (display_config) {
