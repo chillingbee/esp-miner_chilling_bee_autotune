@@ -96,7 +96,9 @@ uint16_t EMC2103_get_fan_speed(void)
 
     reading = tach_lsb | (tach_msb << 8);
     reading >>= 3;
-
+    if (reading == 0) {
+        return 0;
+    }
     //RPM = (3,932,160 * m)/reading
     //m is the multipler, which is default 2
     RPM = 7864320 / reading;
