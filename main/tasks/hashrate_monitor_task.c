@@ -216,25 +216,37 @@ void hashrate_monitor_register_read(void *pvParameters, register_type_t register
 
     pthread_mutex_lock(&HASHRATE_MONITOR_MODULE->lock);
 
+    int hash_domains = GLOBAL_STATE->DEVICE_CONFIG.family.asic.hash_domains;
+
     switch(register_type) {
         case REGISTER_HASHRATE:
             update_hashrate(&HASHRATE_MONITOR_MODULE->total_measurement[asic_nr], value);
-            update_hashrate(&HASHRATE_MONITOR_MODULE->domain_measurements[asic_nr][0], value);
+            if (hash_domains > 0) {
+                update_hashrate(&HASHRATE_MONITOR_MODULE->domain_measurements[asic_nr][0], value);
+            }
             break;
         case REGISTER_TOTAL_COUNT:
             update_hash_counter(&HASHRATE_MONITOR_MODULE->total_measurement[asic_nr], value, timestamp_us);
             break;
         case REGISTER_DOMAIN_0_COUNT:
-            update_hash_counter(&HASHRATE_MONITOR_MODULE->domain_measurements[asic_nr][0], value, timestamp_us);
+            if (hash_domains > 0) {
+                update_hash_counter(&HASHRATE_MONITOR_MODULE->domain_measurements[asic_nr][0], value, timestamp_us);
+            }
             break;
         case REGISTER_DOMAIN_1_COUNT:
-            update_hash_counter(&HASHRATE_MONITOR_MODULE->domain_measurements[asic_nr][1], value, timestamp_us);
+            if (hash_domains > 1) {
+                update_hash_counter(&HASHRATE_MONITOR_MODULE->domain_measurements[asic_nr][1], value, timestamp_us);
+            }
             break;
         case REGISTER_DOMAIN_2_COUNT:
-            update_hash_counter(&HASHRATE_MONITOR_MODULE->domain_measurements[asic_nr][2], value, timestamp_us);
+            if (hash_domains > 2) {
+                update_hash_counter(&HASHRATE_MONITOR_MODULE->domain_measurements[asic_nr][2], value, timestamp_us);
+            }
             break;
         case REGISTER_DOMAIN_3_COUNT:
-            update_hash_counter(&HASHRATE_MONITOR_MODULE->domain_measurements[asic_nr][3], value, timestamp_us);
+            if (hash_domains > 3) {
+                update_hash_counter(&HASHRATE_MONITOR_MODULE->domain_measurements[asic_nr][3], value, timestamp_us);
+            }
             break;
         case REGISTER_ERROR_COUNT:
             update_hash_counter(&HASHRATE_MONITOR_MODULE->error_measurement[asic_nr], value, timestamp_us);
