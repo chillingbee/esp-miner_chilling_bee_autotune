@@ -41,7 +41,7 @@ extern void BAP_parse_message(const char *message);
 void BAP_send_message(bap_command_t cmd, const char *parameter, const char *value) {
     char message[BAP_MAX_MESSAGE_LEN];
     char sentence_body[BAP_MAX_MESSAGE_LEN];
-    int len;
+    int n;
 
     if (value && strlen(value) > 0) {
         snprintf(sentence_body, sizeof(sentence_body), "BAP,%s,%s,%s",
@@ -53,12 +53,17 @@ void BAP_send_message(bap_command_t cmd, const char *parameter, const char *valu
 
     uint8_t checksum = BAP_calculate_checksum(sentence_body);
 
-    len = snprintf(message, sizeof(message), "$%s*%02X\r\n", sentence_body, checksum);
+    n = snprintf(message, sizeof(message), "$%s*%02X\r\n", sentence_body, checksum);
+    if (n < 0 || (size_t)n >= sizeof(message)) {
+        ESP_LOGW(TAG, "BAP message too long, dropping");
+        return;
+    }
+    size_t len = (size_t)n;
 
     if (bap_uart_send_mutex != NULL && xSemaphoreTake(bap_uart_send_mutex, pdMS_TO_TICKS(100)) == pdTRUE) {
         uart_write_bytes(BAP_UART_NUM, message, len);
         xSemaphoreGive(bap_uart_send_mutex);
-        
+
         //ESP_LOGI(TAG, "Sent: %s", message);
     } else {
         ESP_LOGW(TAG, "Failed to take UART mutex for immediate send, message dropped");
@@ -68,7 +73,7 @@ void BAP_send_message(bap_command_t cmd, const char *parameter, const char *valu
 void BAP_send_message_with_queue(bap_command_t cmd, const char *parameter, const char *value) {
     char message[BAP_MAX_MESSAGE_LEN];
     char sentence_body[BAP_MAX_MESSAGE_LEN];
-    int len;
+    int n;
     bap_message_t msg;
 
     if (value && strlen(value) > 0) {
@@ -81,14 +86,19 @@ void BAP_send_message_with_queue(bap_command_t cmd, const char *parameter, const
 
     uint8_t checksum = BAP_calculate_checksum(sentence_body);
 
-    len = snprintf(message, sizeof(message), "$%s*%02X\r\n", sentence_body, checksum);
+    n = snprintf(message, sizeof(message), "$%s*%02X\r\n", sentence_body, checksum);
+    if (n < 0 || (size_t)n >= sizeof(message)) {
+        ESP_LOGW(TAG, "BAP message too long, dropping");
+        return;
+    }
+    size_t len = (size_t)n;
 
     msg.message = malloc(len + 1);
     if (msg.message == NULL) {
         ESP_LOGE(TAG, "Failed to allocate memory for message");
         return;
     }
-    
+
     strncpy(msg.message, message, len);
     msg.message[len] = '\0';
     msg.length = len;
