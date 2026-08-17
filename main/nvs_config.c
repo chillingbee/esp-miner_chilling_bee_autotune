@@ -164,9 +164,11 @@ static Settings settings[NVS_CONFIG_COUNT] =
                                     .max = 1},
      [NVS_CONFIG_LAST_FW_FINGERPRINT] = {.nvs_key_name = "last_fw_fp", .type = TYPE_STR, .default_value = {.str = ""}},
 
-     [NVS_CONFIG_STATISTICS_FREQUENCY] =
+[NVS_CONFIG_STATISTICS_FREQUENCY] =
          {.nvs_key_name = "statsFrequency", .type = TYPE_U16, .rest_name = "statsFrequency", .min = 0, .max = UINT16_MAX},
-
+     [NVS_CONFIG_TOTAL_UPTIME] = {.nvs_key_name = "total_uptime", .type = TYPE_U64},
+     [NVS_CONFIG_CUMULATIVE_HASHES_HIGH] = {.nvs_key_name = "cum_hashes_hi", .type = TYPE_U64},
+     [NVS_CONFIG_CUMULATIVE_HASHES_LOW] = {.nvs_key_name = "cum_hashes_lo", .type = TYPE_U64},
      [NVS_CONFIG_BEST_DIFF] = {.nvs_key_name = "bestdiff", .type = TYPE_U64},
      [NVS_CONFIG_SELF_TEST] = {.nvs_key_name = "selftest", .type = TYPE_BOOL},
      [NVS_CONFIG_SWARM] = {.nvs_key_name = "swarmconfig", .type = TYPE_STR},
@@ -599,7 +601,7 @@ esp_err_t nvs_config_init(void)
             get_nvs_key_name(setting, idx, nvs_key);
 
             switch (setting->type) {
-            case TYPE_STR: {
+case TYPE_STR: {
                 size_t len = 0;
                 esp_err_t ret = nvs_get_str(handle, nvs_key, NULL, &len);
                 if (ret == ESP_OK && len > 1) {
@@ -614,7 +616,11 @@ esp_err_t nvs_config_init(void)
                         free(buf);
                     }
                 }
-                const char * def = setting->default_value.str ? setting->default_value.str : "";
+                        }
+                        free(buf);
+                    }
+                }
+const char * def = setting->default_value.str ? setting->default_value.str : "";
                 setting->value[idx].str = strdup(def);
                 break;
             }
@@ -678,6 +684,14 @@ esp_err_t nvs_config_init(void)
                     setting->is_set = true;
                 } else {
                     setting->value[idx].b = setting->default_value.b;
+                }
+                break;
+            }
+            default:
+                break;
+            }
+        }
+    }
                 }
                 break;
             }
