@@ -164,7 +164,7 @@ static Settings settings[NVS_CONFIG_COUNT] =
                                     .max = 1},
      [NVS_CONFIG_LAST_FW_FINGERPRINT] = {.nvs_key_name = "last_fw_fp", .type = TYPE_STR, .default_value = {.str = ""}},
 
-[NVS_CONFIG_STATISTICS_FREQUENCY] =
+     [NVS_CONFIG_STATISTICS_FREQUENCY] =
          {.nvs_key_name = "statsFrequency", .type = TYPE_U16, .rest_name = "statsFrequency", .min = 0, .max = UINT16_MAX},
      [NVS_CONFIG_TOTAL_UPTIME] = {.nvs_key_name = "total_uptime", .type = TYPE_U64},
      [NVS_CONFIG_CUMULATIVE_HASHES_HIGH] = {.nvs_key_name = "cum_hashes_hi", .type = TYPE_U64},
@@ -254,7 +254,8 @@ static Settings settings[NVS_CONFIG_COUNT] =
          .nvs_key_name = "max_temp_vr",
          .type = TYPE_U16,
          .default_value = {.u16 = 85},
-     }};
+     },
+     [NVS_CONFIG_NOMINAL_VOLTAGE] = {.nvs_key_name = "nominal_volt", .type = TYPE_U16}};
 
 Settings * nvs_config_get_settings(NvsConfigKey key)
 {
@@ -601,7 +602,7 @@ esp_err_t nvs_config_init(void)
             get_nvs_key_name(setting, idx, nvs_key);
 
             switch (setting->type) {
-case TYPE_STR: {
+            case TYPE_STR: {
                 size_t len = 0;
                 esp_err_t ret = nvs_get_str(handle, nvs_key, NULL, &len);
                 if (ret == ESP_OK && len > 1) {
@@ -616,11 +617,7 @@ case TYPE_STR: {
                         free(buf);
                     }
                 }
-                        }
-                        free(buf);
-                    }
-                }
-const char * def = setting->default_value.str ? setting->default_value.str : "";
+                const char * def = setting->default_value.str ? setting->default_value.str : "";
                 setting->value[idx].str = strdup(def);
                 break;
             }
@@ -691,37 +688,30 @@ const char * def = setting->default_value.str ? setting->default_value.str : "";
                 break;
             }
         }
-    }
-                }
-                break;
-            }
-            default:
-                break;
-            }
-        }
-    }
+}
 
-    // Erst NACHDEM alle Settings geladen wurden, Queue, Mutex und Task ein einziges Mal initialisieren:
-    nvs_save_queue = xQueueCreate(20, sizeof(ConfigUpdate));
-    if (!nvs_save_queue) {
-        ESP_LOGE(TAG, "Failed to create nvs_save_queue");
-        return ESP_FAIL;
-    }
 
-    nvs_cache_mutex = xSemaphoreCreateMutex();
-    if (!nvs_cache_mutex) {
-        ESP_LOGE(TAG, "Failed to create nvs_cache_mutex");
-        return ESP_FAIL;
-    }
+// Erst NACHDEM alle Settings geladen wurden, Queue, Mutex und Task ein einziges Mal initialisieren:
+nvs_save_queue = xQueueCreate(20, sizeof(ConfigUpdate));
+if (!nvs_save_queue) {
+    ESP_LOGE(TAG, "Failed to create nvs_save_queue");
+    return ESP_FAIL;
+}
 
-    TaskHandle_t task_handle;
-    BaseType_t task_result = xTaskCreate(nvs_task, "nvs_task", 8192, NULL, 5, &task_handle);
-    if (task_result != pdPASS) {
-        ESP_LOGE(TAG, "Failed to create nvs_task");
-        return ESP_FAIL;
-    }
+nvs_cache_mutex = xSemaphoreCreateMutex();
+if (!nvs_cache_mutex) {
+    ESP_LOGE(TAG, "Failed to create nvs_cache_mutex");
+    return ESP_FAIL;
+}
 
-    return ESP_OK;
+TaskHandle_t task_handle;
+BaseType_t task_result = xTaskCreate(nvs_task, "nvs_task", 8192, NULL, 5, &task_handle);
+if (task_result != pdPASS) {
+    ESP_LOGE(TAG, "Failed to create nvs_task");
+    return ESP_FAIL;
+}
+
+return ESP_OK;
 }
 
 char * nvs_config_get_string(NvsConfigKey key)
