@@ -198,14 +198,16 @@ const accentColors = ThemeService.generateThemeVariables(defaultPrimary);
         });
 
         // Toggle theme CSS classes
-        root.classList.remove('theme-dark', 'theme-light', 'theme-white', 'theme-cyberpunk');
+        root.classList.remove('theme-dark', 'theme-light', 'theme-white', 'theme-cyberpunk', 'theme-ios', 'theme-ios-light', 'theme-ios-dark');
         root.classList.add(`theme-${config.colorScheme}`);
 
-        // Toggle dark-mode class for PrimeNG Aura Theme (cyberpunk is also dark-based)
-        if (config.colorScheme === 'white' || config.colorScheme === 'light') {
-            document.documentElement.classList.remove('dark-mode');
+        // Toggle dark-mode class for theme switching
+        const isDarkScheme = ['dark', 'cyberpunk', 'ios-dark'].includes(config.colorScheme);
+        const isIosAutoDark = config.colorScheme === 'ios' && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (isDarkScheme || isIosAutoDark) {
+            root.classList.add('dark-mode');
         } else {
-            document.documentElement.classList.add('dark-mode');
+            root.classList.remove('dark-mode');
         }
 
         // Load theme settings from NVS

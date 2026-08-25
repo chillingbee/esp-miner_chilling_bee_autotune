@@ -112,3 +112,315 @@
     --glass-blur: blur(16px) saturate(180%);
     --glass-shadow: 0 4px 24px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
+
+.theme-cyberpunk {
+    /* Theme color variables for Cyberpunk Theme - High-tech low-life neon dystopia */
+    --color-bg-content: #05050A;        /* near-black with blue tint */
+    --color-bg-card: rgba(10, 8, 18, 0.85);
+    --color-border-content: rgba(255, 0, 128, 0.15);  /* hot pink border tint */
+    --card-border: rgba(255, 0, 128, 0.25);
+    --surface-border: rgba(0, 255, 255, 0.15);
+    --color-text-main: #F0F0F5;         /* off-white with slight blue */
+    --color-text-secondary: #A0A0B0;    /* muted cyan-gray */
+    --color-mask-bg: rgba(5, 5, 10, 0.7);
+    --color-overlay-select-bg: rgba(15, 10, 25, 0.9);
+    --color-overlay-select-border: rgba(255, 0, 128, 0.3);
+
+    /* Theme Settings & Sizing - sharper, more angular */
+    --color-bg-hover: rgba(255, 0, 128, 0.06);
+    --border-radius: 3px;               /* sharper corners = more tech */
+    --font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Monaco, monospace;  /* mono = terminal aesthetic */
+    --mono-font: 'JetBrains Mono', 'Fira Code', 'SF Mono', Monaco, monospace;
+    --transition-duration: 0.15s;       /* snappier transitions */
+
+    /* Layout & Sizing */
+    font-size: 13px;                    /* slightly smaller = more data density */
+    --topbar-height: 4.5rem;
+    --sidebar-width: 13.5rem;
+    --card-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.5),
+        0 2px 4px -2px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 0, 128, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.02),
+        /* cyberpunk scanline hint */
+        0 0 0 1px rgba(0, 255, 255, 0.03);
+
+    /* Cyberpunk Branding - Hot Pink primary, Cyan secondary */
+    --color-primary: #FF0080;           /* hot pink/magenta */
+    --color-primary-text: #05050A;
+    --color-primary-hover: oklch(from var(--color-primary) calc(l + 0.08) c h);
+    --color-primary-glow: oklch(from var(--color-primary) l c h / 0.5);
+
+    /* Cyberpunk accent palette */
+    --color-neon-cyan: #00FFFF;         /* pure cyan */
+    --color-neon-green: #39FF14;        /* matrix green */
+    --color-neon-violet: #BC13FE;       /* electric violet */
+    --color-neon-pink: #FF0080;         /* hot pink (same as primary) */
+    --color-neon-red: #FF0033;          /* danger red */
+    --color-neon-orange: #FF6600;       /* warning orange */
+    --color-neon-yellow: #FFEE00;       /* caution yellow */
+
+    /* Dynamic Theme variables calculated from --color-primary */
+    --focus-ring: 0 0 0 2px oklch(from var(--color-primary) l c h / 0.4), 0 0 16px oklch(from var(--color-primary) l c h / 0.6), 0 0 32px oklch(from var(--color-neon-cyan) l c h / 0.3);
+    --slider-bg: rgba(20, 10, 30, 0.6);
+    --slider-handle-glow: 0 0 12px oklch(from var(--color-primary) l c h / 0.8), 0 0 24px oklch(from var(--color-neon-cyan) l c h / 0.4);
+
+    /* Glassmorphism - more transparent glass look, content stays crisp */
+    --glass-bg: rgba(8, 6, 16, 0.45);
+    --glass-border: rgba(255, 0, 128, 0.25);
+    --glass-blur: blur(24px) saturate(220%);
+    --glass-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.02),
+        0 0 0 1px rgba(0, 255, 255, 0.08);
+
+    /* Custom Message severity styles - Cyberpunk adapted */
+    --color-message-warn-bg: rgba(255, 102, 0, 0.18);
+    --color-message-warn-text: #FFCC00;
+    --color-message-warn-border: rgba(255, 102, 0, 0.4);
+    --color-message-error-bg: rgba(255, 0, 51, 0.18);
+    --color-message-error-text: #FF3366;
+    --color-message-error-border: rgba(255, 0, 51, 0.4);
+    --color-message-info-bg: rgba(0, 255, 255, 0.12);
+    --color-message-info-text: #00FFFF;
+    --color-message-info-border: rgba(0, 255, 255, 0.35);
+    --color-message-success-bg: rgba(57, 255, 20, 0.12);
+    --color-message-success-text: #39FF14;
+    --color-message-success-border: rgba(57, 255, 20, 0.35);
+
+    /* Cyberpunk specific: scanline overlay for cards */
+    --scanline-opacity: 0.04;
+    --grid-opacity: 0.03;
+    --glitch-intensity: 1;
+}
+
+/* =============================================================================
+   iOS THEME — Apple Human Interface Guidelines inspired
+   Supports: .theme-ios-light, .theme-ios-dark, .theme-ios (auto via prefers-color-scheme)
+   ============================================================================= */
+
+// Shared iOS base variables (both light & dark)
+.theme-ios {
+    /* Layout & Sizing — iOS native feel */
+    --border-radius: 12px;                    // iOS standard corner radius
+    --radius-sm: 8px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --font-family: -apple-system, BlinkMacSystemFont, 'SF Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --mono-font: 'SF Mono', 'Fira Code', 'Monaco', monospace;
+    --transition-duration: 0.2s;              // iOS standard animation timing
+
+    /* Layout */
+    font-size: 14px;
+    --topbar-height: 4.5rem;
+    --sidebar-width: 14rem;
+
+    /* Glassmorphism — iOS style (more subtle, layered) */
+    --glass-blur: blur(20px) saturate(180%);
+    --glass-shadow-card:
+        0 1px 2px rgba(0, 0, 0, 0.04),
+        0 1px 3px rgba(0, 0, 0, 0.06);
+    --glass-shadow-elevated:
+        0 4px 12px rgba(0, 0, 0, 0.08),
+        0 2px 6px rgba(0, 0, 0, 0.06);
+    --glass-shadow-modal:
+        0 12px 40px rgba(0, 0, 0, 0.15),
+        0 4px 16px rgba(0, 0, 0, 0.1);
+
+    /* iOS System Colors (semantic) */
+    --ios-blue: #007AFF;
+    --ios-blue-dark: #0A84FF;
+    --ios-green: #34C759;
+    --ios-green-dark: #30D158;
+    --ios-indigo: #5856D6;
+    --ios-indigo-dark: #5E5CE6;
+    --ios-orange: #FF9F0A;
+    --ios-orange-dark: #FF9F0A;
+    --ios-pink: #FF2D55;
+    --ios-pink-dark: #FF375F;
+    --ios-purple: #AF52DE;
+    --ios-purple-dark: #BF5AF2;
+    --ios-red: #FF3B30;
+    --ios-red-dark: #FF453A;
+    --ios-teal: #5AC8FA;
+    --ios-teal-dark: #64D2FF;
+    --ios-yellow: #FFCC00;
+    --ios-yellow-dark: #FFD60A;
+    --ios-gray: #8E8E93;
+    --ios-gray-dark: #8E8E93;
+    --ios-gray2: #AEAEB2;
+    --ios-gray2-dark: #636366;
+    --ios-gray3: #C7C7CC;
+    --ios-gray3-dark: #48484A;
+    --ios-gray4: #D1D1D6;
+    --ios-gray4-dark: #3A3A3C;
+    --ios-gray5: #E5E5EA;
+    --ios-gray5-dark: #2C2C2E;
+    --ios-gray6: #F2F2F7;
+    --ios-gray6-dark: #1C1C1E;
+
+    /* Accent color (overridden by user selection via --color-primary) */
+    --color-primary: var(--ios-blue);
+    --color-primary-text: #FFFFFF;
+    --color-primary-hover: var(--ios-blue-dark);
+    --color-primary-glow: oklch(from var(--color-primary) l c h / 0.3);
+
+    /* Focus ring — iOS style */
+    --focus-ring: 0 0 0 3px oklch(from var(--color-primary) l c h / 0.3);
+
+    /* Slider */
+    --slider-bg: var(--ios-gray4);
+    --slider-handle-glow: 0 0 0 4px oklch(from var(--color-primary) l c h / 0.2);
+
+    /* Message severity */
+    --color-message-warn-bg: rgba(255, 204, 0, 0.15);
+    --color-message-warn-text: var(--ios-yellow);
+    --color-message-warn-border: rgba(255, 204, 0, 0.3);
+    --color-message-error-bg: rgba(255, 59, 48, 0.15);
+    --color-message-error-text: var(--ios-red);
+    --color-message-error-border: rgba(255, 59, 48, 0.3);
+    --color-message-info-bg: rgba(0, 122, 255, 0.15);
+    --color-message-info-text: var(--ios-blue);
+    --color-message-info-border: rgba(0, 122, 255, 0.3);
+    --color-message-success-bg: rgba(52, 199, 89, 0.15);
+    --color-message-success-text: var(--ios-green);
+    --color-message-success-border: rgba(52, 199, 89, 0.3);
+}
+
+/* ---------------------------------------------------------
+   iOS LIGHT MODE (explicit .theme-ios-light OR default .theme-ios)
+   --------------------------------------------------------- */
+.theme-ios-light,
+.theme-ios:not(.theme-ios-dark) {
+    /* Backgrounds */
+    --color-bg-content: #F2F2F7;              // iOS systemGroupedBackground
+    --color-bg-card: rgba(255, 255, 255, 0.85);
+    --color-bg-hover: rgba(0, 0, 0, 0.03);
+    --color-bg-elevated: #FFFFFF;             // iOS systemBackground
+
+    /* Text */
+    --color-text-main: #1C1C1E;               // iOS label
+    --color-text-secondary: #3C3C43;          // iOS secondaryLabel (60% opacity)
+    --color-text-tertiary: #3C3C4399;         // iOS tertiaryLabel (30% opacity)
+    --color-text-quaternary: #3C3C434D;       // iOS quaternaryLabel (18% opacity)
+
+    /* Borders & Separators */
+    --color-border-content: rgba(0, 0, 0, 0.08);
+    --card-border: rgba(0, 0, 0, 0.06);
+    --surface-border: rgba(0, 0, 0, 0.1);
+    --separator-color: rgba(0, 0, 0, 0.1);
+    --separator-color-opaque: #C6C6C8;        // iOS separator
+
+    /* Glass */
+    --glass-bg: rgba(255, 255, 255, 0.75);
+    --glass-border: rgba(0, 0, 0, 0.06);
+    --glass-shadow: var(--glass-shadow-card);
+
+    /* Overlay / Modal */
+    --color-mask-bg: rgba(0, 0, 0, 0.4);
+    --color-overlay-select-bg: rgba(255, 255, 255, 0.95);
+    --color-overlay-select-border: rgba(0, 0, 0, 0.1);
+
+    /* Accent defaults (can be overridden by user color picker) */
+    --color-primary: var(--ios-blue);
+    --color-primary-hover: var(--ios-blue-dark);
+
+    /* Card shadows — light mode */
+    --card-shadow: var(--glass-shadow-card);
+    --card-shadow-hover: var(--glass-shadow-elevated);
+}
+
+/* ---------------------------------------------------------
+   iOS DARK MODE (explicit .theme-ios-dark)
+   --------------------------------------------------------- */
+.theme-ios-dark {
+    /* Backgrounds */
+    --color-bg-content: #000000;          // iOS systemGroupedBackground (dark)
+    --color-bg-card: rgba(28, 28, 30, 0.85);
+    --color-bg-hover: rgba(255, 255, 255, 0.05);
+    --color-bg-elevated: #1C1C1E;         // iOS systemBackground (dark)
+
+    /* Text */
+    --color-text-main: #F2F2F2;           // iOS label (dark)
+    --color-text-secondary: #EBEBF599;    // iOS secondaryLabel (60% opacity)
+    --color-text-tertiary: #EBEBF563;     // iOS tertiaryLabel (30% opacity)
+    --color-text-quaternary: #EBEBF530;   // iOS quaternaryLabel (18% opacity)
+
+    /* Borders & Separators */
+    --color-border-content: rgba(255, 255, 255, 0.12);
+    --card-border: rgba(255, 255, 255, 0.1);
+    --surface-border: rgba(255, 255, 255, 0.15);
+    --separator-color: rgba(255, 255, 255, 0.15);
+    --separator-color-opaque: #38383A;    // iOS separator (dark)
+
+    /* Glass */
+    --glass-bg: rgba(28, 28, 30, 0.75);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-shadow: var(--glass-shadow-card);
+
+    /* Overlay / Modal */
+    --color-mask-bg: rgba(0, 0, 0, 0.6);
+    --color-overlay-select-bg: rgba(28, 28, 30, 0.95);
+    --color-overlay-select-border: rgba(255, 255, 255, 0.15);
+
+    /* Accent defaults (can be overridden by user color picker) */
+    --color-primary: var(--ios-blue-dark);
+    --color-primary-hover: var(--ios-blue);
+
+    /* Card shadows — dark mode (subtler) */
+    --card-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.3),
+        0 1px 3px rgba(0, 0, 0, 0.2);
+    --card-shadow-hover:
+        0 4px 12px rgba(0, 0, 0, 0.4),
+        0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* ---------------------------------------------------------
+   iOS AUTO DARK MODE (via prefers-color-scheme when using .theme-ios without explicit light/dark)
+   --------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+    .theme-ios:not(.theme-ios-light):not(.theme-ios-dark) {
+        /* Backgrounds */
+        --color-bg-content: #000000;          // iOS systemGroupedBackground (dark)
+        --color-bg-card: rgba(28, 28, 30, 0.85);
+        --color-bg-hover: rgba(255, 255, 255, 0.05);
+        --color-bg-elevated: #1C1C1E;         // iOS systemBackground (dark)
+
+        /* Text */
+        --color-text-main: #F2F2F2;           // iOS label (dark)
+        --color-text-secondary: #EBEBF599;    // iOS secondaryLabel (60% opacity)
+        --color-text-tertiary: #EBEBF563;     // iOS tertiaryLabel (30% opacity)
+        --color-text-quaternary: #EBEBF530;   // iOS quaternaryLabel (18% opacity)
+
+        /* Borders & Separators */
+        --color-border-content: rgba(255, 255, 255, 0.12);
+        --card-border: rgba(255, 255, 255, 0.1);
+        --surface-border: rgba(255, 255, 255, 0.15);
+        --separator-color: rgba(255, 255, 255, 0.15);
+        --separator-color-opaque: #38383A;    // iOS separator (dark)
+
+        /* Glass */
+        --glass-bg: rgba(28, 28, 30, 0.75);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --glass-shadow: var(--glass-shadow-card);
+
+        /* Overlay / Modal */
+        --color-mask-bg: rgba(0, 0, 0, 0.6);
+        --color-overlay-select-bg: rgba(28, 28, 30, 0.95);
+        --color-overlay-select-border: rgba(255, 255, 255, 0.15);
+
+        /* Accent defaults (can be overridden by user color picker) */
+        --color-primary: var(--ios-blue-dark);
+        --color-primary-hover: var(--ios-blue);
+
+        /* Card shadows — dark mode (subtler) */
+        --card-shadow:
+            0 1px 2px rgba(0, 0, 0, 0.3),
+            0 1px 3px rgba(0, 0, 0, 0.2);
+        --card-shadow-hover:
+            0 4px 12px rgba(0, 0, 0, 0.4),
+            0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+}

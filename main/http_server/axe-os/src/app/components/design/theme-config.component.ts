@@ -29,7 +29,10 @@ export class ThemeConfigComponent implements OnInit, OnDestroy {
     { value: 'dark', label: 'Dark', description: 'Glassmorphism/Neon - Deep slate with vibrant accents' },
     { value: 'light', label: 'Light', description: 'Soft warm glassmorphism - Slate-100 base' },
     { value: 'white', label: 'White', description: 'Pure high-contrast glassmorphism - Clean white' },
-    { value: 'cyberpunk', label: 'Cyberpunk', description: 'High-tech low-life - Hot pink/cyan grid, scanlines, glitch' }
+    { value: 'cyberpunk', label: 'Cyberpunk', description: 'High-tech low-life - Hot pink/cyan grid, scanlines, glitch' },
+    { value: 'ios-light', label: 'iOS Light', description: 'Apple HIG - Rounded, layered, system fonts, subtle glass' },
+    { value: 'ios-dark', label: 'iOS Dark', description: 'Apple HIG Dark - True black, layered glass, system colors' },
+    { value: 'ios', label: 'iOS Auto', description: 'Apple HIG Auto - Follows system prefers-color-scheme' }
   ];
 
   themes: ThemeOption[] = [
