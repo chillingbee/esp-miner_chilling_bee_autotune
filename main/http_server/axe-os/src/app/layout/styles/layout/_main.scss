@@ -11,12 +11,165 @@ body {
     font-family: var(--font-family);
     color: var(--color-text-main);
     background-color: var(--color-bg-content);
+    background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, oklch(from var(--color-primary) l c h / 0.08), transparent),
+        radial-gradient(ellipse 60% 40% at 100% 100%, oklch(from var(--color-neon-cyan) l c h / 0.06), transparent),
+        radial-gradient(ellipse 40% 30% at 0% 50%, oklch(from var(--color-neon-violet) l c h / 0.05), transparent);
+    background-attachment: fixed;
     line-height: 1.3;
     margin: 0;
     padding: 0;
     min-height: 100%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+/* Theme-specific ambient backgrounds - Light: soft warm, White: minimal/clean */
+.theme-light body {
+    background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, oklch(from var(--color-primary) l c h / 0.04), transparent),
+        radial-gradient(ellipse 60% 40% at 100% 100%, oklch(from var(--color-neon-cyan) l c h / 0.03), transparent);
+}
+
+.theme-white body {
+    background-image: none; /* Pure clean white - no ambient gradients */
+    background-color: #FFFFFF;
+}
+
+.theme-cyberpunk body {
+    /* Cyberpunk ambient background - dark grid with neon glow */
+    background-image:
+        /* Deep grid pattern */
+        linear-gradient(rgba(0, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 255, 0.02) 1px, transparent 1px),
+        /* Neon radial glows */
+        radial-gradient(ellipse 60% 40% at 20% 20%, oklch(from var(--color-primary) l c h / 0.08), transparent),
+        radial-gradient(ellipse 50% 35% at 80% 80%, oklch(from var(--color-neon-cyan) l c h / 0.06), transparent),
+        radial-gradient(ellipse 40% 30% at 50% 50%, oklch(from var(--color-neon-violet) l c h / 0.04), transparent),
+        /* Subtle vignette */
+        radial-gradient(ellipse at center, transparent 60%, rgba(5, 5, 10, 0.4) 100%);
+    background-size:
+        60px 60px,
+        60px 60px,
+        cover,
+        cover,
+        cover,
+        cover;
+    background-attachment: fixed;
+    background-color: #05050A;
+
+    /* Optional: subtle scanline overlay on entire page */
+    &::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background-image: repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 3px,
+            rgba(255, 0, 128, 0.02) 3px,
+            rgba(255, 0, 128, 0.02) 6px
+        );
+        pointer-events: none;
+        z-index: -1;
+        opacity: 0.5;
+    }
+}
+
+/* Cyberpunk utility classes for components */
+.cyberpunk-terminal {
+    font-family: var(--mono-font);
+    background: rgba(5, 5, 10, 0.9);
+    border: 1px solid var(--color-neon-cyan);
+    border-radius: var(--border-radius, 3px);
+    box-shadow:
+        var(--glass-shadow),
+        0 0 24px oklch(from var(--color-neon-cyan) l c h / 0.15),
+        inset 0 0 24px oklch(from var(--color-primary) l c h / 0.05);
+    padding: 1rem;
+    color: var(--color-neon-green);
+    text-shadow: 0 0 8px oklch(from var(--color-neon-green) l c h / 0.5);
+}
+
+.cyberpunk-panel {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: calc(var(--border-radius, 3px) * 1.5);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-shadow);
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image:
+            repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(255, 0, 128, var(--scanline-opacity)) 2px,
+                rgba(255, 0, 128, var(--scanline-opacity)) 4px
+            );
+        pointer-events: none;
+        border-radius: inherit;
+        opacity: 0.5;
+        z-index: 0;
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(
+            90deg,
+            transparent,
+            var(--color-primary),
+            var(--color-neon-cyan),
+            var(--color-neon-violet),
+            transparent
+        );
+        opacity: 0.6;
+        z-index: 1;
+    }
+
+    > * {
+        position: relative;
+        z-index: 2;
+    }
+}
+
+.cyberpunk-border {
+    position: relative;
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: -1px;
+        background: linear-gradient(
+            45deg,
+            var(--color-primary),
+            var(--color-neon-cyan),
+            var(--color-neon-violet),
+            var(--color-primary)
+        );
+        background-size: 400% 400%;
+        border-radius: inherit;
+        z-index: -1;
+        animation: cyberpunk-border-shift 4s ease infinite;
+        opacity: 0.5;
+        filter: blur(4px);
+    }
+}
+
+@keyframes cyberpunk-border-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
 }
 
 a {

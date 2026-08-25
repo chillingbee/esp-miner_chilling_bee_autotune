@@ -9,16 +9,39 @@ interface ThemeOption {
   primaryColor: string;
 }
 
+interface ColorSchemeOption {
+  value: string;
+  label: string;
+  description: string;
+}
+
 @Component({
   selector: 'app-theme-config',
   templateUrl: './theme-config.component.html',
   styleUrls: ['./design-component.scss'],
   standalone: false
 })
-export class ThemeConfigComponent implements OnInit {
+export class ThemeConfigComponent implements OnInit, OnDestroy {
   selectedScheme: string;
   currentColor: string = '';
+
+  colorSchemes: ColorSchemeOption[] = [
+    { value: 'dark', label: 'Dark', description: 'Glassmorphism/Neon - Deep slate with vibrant accents' },
+    { value: 'light', label: 'Light', description: 'Soft warm glassmorphism - Slate-100 base' },
+    { value: 'white', label: 'White', description: 'Pure high-contrast glassmorphism - Clean white' },
+    { value: 'cyberpunk', label: 'Cyberpunk', description: 'High-tech low-life - Hot pink/cyan grid, scanlines, glitch' }
+  ];
+
   themes: ThemeOption[] = [
+    // === CYBERPUNK SPECIFIC (top priority for cyberpunk theme) ===
+    { name: 'Hot Pink', primaryColor: '#FF0080' },
+    { name: 'Pure Cyan', primaryColor: '#00FFFF' },
+    { name: 'Electric Violet', primaryColor: '#BC13FE' },
+    { name: 'Matrix Green', primaryColor: '#39FF14' },
+    { name: 'Danger Red', primaryColor: '#FF0033' },
+    { name: 'Warning Orange', primaryColor: '#FF6600' },
+    { name: 'Caution Yellow', primaryColor: '#FFEE00' },
+
     // === Reds & Oranges (energetic & warm) ===
     { name: 'Bright Red', primaryColor: '#F80421' },
     { name: 'Coral Red', primaryColor: '#FF5252' },

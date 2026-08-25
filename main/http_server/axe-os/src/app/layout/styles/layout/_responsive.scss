@@ -28,10 +28,31 @@
                 height: 100vh;
                 border-top-left-radius: 0;
                 border-bottom-left-radius: 0;
-            }
+                background: var(--glass-bg);
+                border-right: 1px solid var(--glass-border);
+                backdrop-filter: var(--glass-blur);
+                -webkit-backdrop-filter: var(--glass-blur);
+                box-shadow: var(--glass-shadow);
 
-            &.layout-overlay-active {
-                .layout-sidebar {
+                .theme-dark & {
+                    box-shadow:
+                        var(--glass-shadow),
+                        32px 0 64px rgba(0, 0, 0, 0.3);
+                }
+
+                .theme-light & {
+                    box-shadow:
+                        var(--glass-shadow),
+                        32px 0 48px rgba(15, 23, 42, 0.12);
+                }
+
+                .theme-white & {
+                    box-shadow:
+                        var(--glass-shadow),
+                        32px 0 32px rgba(15, 23, 42, 0.08);
+                }
+
+                &.layout-overlay-active {
                     transform: translateX(0);
                 }
             }
@@ -40,6 +61,7 @@
         &.layout-static {
             .layout-main-container {
                 margin-left: calc(var(--sidebar-width) + 2rem);
+                transition: margin-left var(--transition-duration);
             }
 
             &.layout-static-inactive {
@@ -78,6 +100,11 @@
             height: 100vh;
             border-top-left-radius: 0;
             border-bottom-left-radius: 0;
+            background: var(--glass-bg);
+            border-right: 1px solid var(--glass-border);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            box-shadow: var(--glass-shadow);
         }
 
         .layout-mask {
@@ -88,18 +115,154 @@
             z-index: 998;
             width: 100%;
             height: 100%;
-            background-color: var(--color-mask-bg);
+            background: var(--color-mask-bg);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
 
         &.layout-mobile-active {
             .layout-sidebar {
                 transform: translateX(0);
+                box-shadow:
+                    var(--glass-shadow),
+                    32px 0 64px rgba(0, 0, 0, 0.4);
+            }
+
+            .theme-light &.layout-mobile-active {
+                .layout-sidebar {
+                    box-shadow:
+                        var(--glass-shadow),
+                        32px 0 48px rgba(15, 23, 42, 0.15);
+                }
+            }
+
+            .theme-white &.layout-mobile-active {
+                .layout-sidebar {
+                    box-shadow:
+                        var(--glass-shadow),
+                        32px 0 32px rgba(15, 23, 42, 0.1);
+                }
             }
 
             .layout-mask {
                 display: block;
-                animation: fadein $transitionDuration;
+                animation: fadein var(--transition-duration);
             }
+        }
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* High contrast mode adjustments */
+@media (prefers-contrast: high) {
+    :root {
+        --glass-bg: var(--color-bg-card);
+        --glass-border: var(--card-border);
+        --glass-blur: none;
+        --glass-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn {
+        border: 2px solid currentColor;
+    }
+}
+
+/* Cyberpunk theme responsive adjustments */
+.theme-cyberpunk {
+    @media (min-width: 992px) {
+        .layout-wrapper {
+            &.layout-overlay {
+                .layout-sidebar {
+                    border-right: 1px solid var(--color-neon-cyan);
+                    box-shadow:
+                        var(--glass-shadow),
+                        32px 0 64px rgba(0, 0, 0, 0.5),
+                        0 0 64px oklch(from var(--color-primary) l c h / 0.15);
+                }
+            }
+
+            &.layout-static {
+                .layout-main-container {
+                    margin-left: calc(var(--sidebar-width) + 2rem);
+                }
+            }
+
+            .layout-mask {
+                display: none;
+            }
+        }
+    }
+
+    @media (max-width: 991px) {
+        .layout-wrapper {
+            .layout-sidebar {
+                border-right: 1px solid var(--color-neon-cyan);
+                box-shadow: var(--glass-shadow);
+            }
+
+            .layout-mask {
+                background: var(--color-mask-bg);
+            }
+
+            &.layout-mobile-active {
+                .layout-sidebar {
+                    box-shadow:
+                        var(--glass-shadow),
+                        32px 0 64px rgba(0, 0, 0, 0.6),
+                        0 0 80px oklch(from var(--color-primary) l c h / 0.2);
+                }
+
+                .layout-mask {
+                    display: block;
+                }
+            }
+        }
+    }
+
+    /* Reduced motion - disable cyberpunk animations */
+    @media (prefers-reduced-motion: reduce) {
+        .badge.badge-primary,
+        .progress-bar .progress-value,
+        .stats-grid .stat-value.neon {
+            animation: none !important;
+        }
+
+        .cyberpunk-glitch::before,
+        .cyberpunk-glitch::after {
+            animation: none !important;
+        }
+    }
+
+    /* High contrast mode for cyberpunk */
+    @media (prefers-contrast: high) {
+        :root {
+            --glass-bg: var(--color-bg-card);
+            --glass-border: var(--color-neon-cyan);
+            --glass-blur: none;
+            --glass-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+            --scanline-opacity: 0;
+            --grid-opacity: 0;
+        }
+
+        .btn {
+            border: 2px solid currentColor;
+        }
+
+        .card-elevated::before,
+        .grid-stack-item-content::before,
+        .page-wrapper::before {
+            display: none;
         }
     }
 }
