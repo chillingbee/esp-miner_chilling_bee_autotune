@@ -116,58 +116,6 @@
             0 0 24px oklch(from var(--color-primary) l c h / 0.08);
     }
 
-    /* Cyberpunk GridStack items - permanent glow, no hover - MAXIMUM SPECIFICITY */
-    .theme-cyberpunk .grid-stack .grid-stack-item,
-    .theme-cyberpunk .grid-stack-item[gs-id] {
-        /* Kill hover lift on the grid item itself */
-        &:hover {
-            transform: none !important;
-            will-change: auto !important;
-        }
-    }
-
-    .theme-cyberpunk .grid-stack .grid-stack-item:hover,
-    .theme-cyberpunk .grid-stack-item[gs-id]:hover {
-        transform: none !important;
-    }
-
-    .theme-cyberpunk .grid-stack-item-content {
-        border: 1px solid rgba(255, 0, 128, 0.6);
-        box-shadow:
-            var(--glass-shadow),
-            0 0 0 1px rgba(255, 0, 128, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.06),
-            0 0 40px oklch(from var(--color-primary) l c h / 0.25),
-            0 0 80px oklch(from var(--color-neon-cyan) l c h / 0.15),
-            0 0 120px oklch(from var(--color-primary) l c h / 0.08);
-        transition: none !important; /* Disable all transitions */
-
-        &:hover {
-            box-shadow:
-                var(--glass-shadow),
-                0 0 0 1px rgba(255, 0, 128, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.06),
-                0 0 40px oklch(from var(--color-primary) l c h / 0.25),
-                0 0 80px oklch(from var(--color-neon-cyan) l c h / 0.15),
-                0 0 120px oklch(from var(--color-primary) l c h / 0.08) !important;
-            transform: none !important;
-        }
-    }
-
-    /* Override base theme's .grid-stack-item:hover .grid-stack-item-content with MAX specificity */
-    .theme-cyberpunk .grid-stack .grid-stack-item:hover .grid-stack-item-content,
-    .theme-cyberpunk .grid-stack-item[gs-id]:hover .grid-stack-item-content {
-        box-shadow:
-            var(--glass-shadow),
-            0 0 0 1px rgba(255, 0, 128, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.06),
-            0 0 40px oklch(from var(--color-primary) l c h / 0.25),
-            0 0 80px oklch(from var(--color-neon-cyan) l c h / 0.15),
-            0 0 120px oklch(from var(--color-primary) l c h / 0.08) !important;
-        transform: none !important;
-        transition: none !important;
-    }
-
     .grid-stack-item-resizing .grid-stack-item-content,
     .grid-stack-item-moving .grid-stack-item-content {
         box-shadow:

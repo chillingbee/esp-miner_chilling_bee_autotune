@@ -11,6 +11,7 @@
 @layer layout {
     @import "./app/layout/styles/layout/layout.scss";
     @import "./app/layout/styles/layout/theme";
+    @import "./app/layout/styles/layout/components";
 }
 
 @import "./app/layout/styles/modules/primeicons";
@@ -18,5 +19,3 @@
 @layer axe-os {
     @import "./app/layout/styles/layout/axe-os";
 }
-
-@import "./app/layout/styles/layout/components";

@@ -34,8 +34,6 @@
   --color-neon-violet: var(--color-neon-violet, #A855F7);
   --color-neon-pink: var(--color-neon-pink, #EC4899);
   --color-neon-red: var(--color-neon-red, #EF4444);
-  --color-neon-orange: var(--color-neon-orange, #FF6600);
-  --color-neon-yellow: var(--color-neon-yellow, #FFEE00);
 
   /* Glassmorphism */
   --glass-bg: var(--glass-bg);

@@ -6,14 +6,39 @@
     user-select: none;
     top: calc(var(--topbar-height) + 2rem);
     left: 2rem;
-    transition: transform $transitionDuration, left $transitionDuration;
-    background-color: var(--color-bg-card);
-    border-radius: $borderRadius;
+    transition: transform var(--transition-duration), left var(--transition-duration);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: calc($borderRadius * 1.5);
     padding: 1.5rem;
-    box-shadow: 0px 3px 5px rgba(0, 0, 0, .02), 0px 0px 2px rgba(0, 0, 0, .05), 0px 1px 4px rgba(0, 0, 0, .08);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-shadow);
 
     @media screen and (min-width: 992px) {
         width: var(--sidebar-width);
+    }
+
+    /* Neon glow border on hover - theme specific */
+    .theme-dark &:hover {
+        border-color: rgba(148, 163, 184, 0.3);
+        box-shadow:
+            var(--glass-shadow),
+            0 0 32px oklch(from var(--color-primary) l c h / 0.1);
+    }
+
+    .theme-light &:hover {
+        border-color: rgba(100, 116, 139, 0.25);
+        box-shadow:
+            var(--glass-shadow),
+            0 0 24px oklch(from var(--color-primary) l c h / 0.08);
+    }
+
+    .theme-white &:hover {
+        border-color: rgba(226, 232, 240, 0.5);
+        box-shadow:
+            var(--glass-shadow),
+            0 0 16px oklch(from var(--color-primary) l c h / 0.05);
     }
 }
 
@@ -30,6 +55,7 @@
             color: var(--color-text-secondary);
             margin: .5rem 0;
             line-height: 1.3rem;
+            letter-spacing: 0.05em;
         }
 
         >a {
@@ -69,25 +95,56 @@
             cursor: pointer;
             padding: .75rem 1rem;
             border-radius: $borderRadius;
-            transition: background-color $transitionDuration, box-shadow $transitionDuration;
+            transition: background-color var(--transition-duration), box-shadow var(--transition-duration), color var(--transition-duration), transform var(--transition-duration);
 
             .layout-menuitem-icon {
                 margin-right: .5rem;
+                color: var(--color-text-secondary);
+                transition: color var(--transition-duration);
             }
 
             .layout-submenu-toggler {
                 font-size: 75%;
                 margin-left: auto;
-                transition: transform $transitionDuration;
+                transition: transform var(--transition-duration);
+                color: var(--color-text-secondary);
             }
 
             &.active-route {
                 font-weight: 700;
                 color: var(--color-primary);
+                background: rgba(148, 163, 184, 0.08);
+
+                .layout-menuitem-icon {
+                    color: var(--color-primary);
+                }
+
+                .layout-submenu-toggler {
+                    color: var(--color-primary);
+                }
+
+                &::before {
+                    content: '';
+                    position: absolute;
+                    left: 0;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    width: 3px;
+                    height: 70%;
+                    background: linear-gradient(180deg, var(--color-primary), var(--color-neon-cyan));
+                    border-radius: 0 3px 3px 0;
+                    box-shadow: 0 0 8px oklch(from var(--color-primary) l c h / 0.5);
+                }
             }
 
             &:hover {
                 background-color: var(--color-bg-hover);
+                color: var(--color-primary);
+                transform: translateX(4px);
+
+                .layout-menuitem-icon {
+                    color: var(--color-primary);
+                }
             }
 
             &:focus {
@@ -135,5 +192,29 @@
                 }
             }
         }
+    }
+}
+
+/* Menu toggle button animation */
+.menu-toggle-btn {
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, var(--color-primary), var(--color-neon-cyan));
+        opacity: 0;
+        transition: opacity var(--transition-duration);
+        z-index: -1;
+    }
+
+    &:hover::before {
+        opacity: 0.15;
+    }
+
+    &:hover {
+        box-shadow: 0 0 20px oklch(from var(--color-primary) l c h / 0.3);
     }
 }

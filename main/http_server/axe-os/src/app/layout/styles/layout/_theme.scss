@@ -1,159 +1,114 @@
 :root, .theme-dark {
-    /* Theme color variables for Dark Theme (Default) */
-    --color-bg-content: #070D17;
-    --color-bg-card: #0B1219;
-    --color-border-content: #454d59;
-    --card-border: #1A2632;
-    --surface-border: #192730;
-    --color-text-main: rgba(255, 255, 255, 0.87);
-    --color-text-secondary: rgba(255, 255, 255, 0.6);
-    --color-mask-bg: rgba(0, 0, 0, 0.4);
-    --color-overlay-select-bg: #0B1219;
-    --color-overlay-select-border: #1A2632;
+    /* Theme color variables for Dark Theme (Default) - Glassmorphism/Neon */
+    --color-bg-content: #030712;
+    --color-bg-card: rgba(11, 18, 32, 0.7);
+    --color-border-content: rgba(100, 116, 139, 0.25);
+    --card-border: rgba(100, 116, 139, 0.3);
+    --surface-border: rgba(100, 116, 139, 0.2);
+    --color-text-main: rgba(248, 250, 252, 0.95);
+    --color-text-secondary: rgba(203, 213, 225, 0.7);
+    --color-mask-bg: rgba(3, 7, 18, 0.6);
+    --color-overlay-select-bg: rgba(11, 18, 32, 0.85);
+    --color-overlay-select-border: rgba(100, 116, 139, 0.35);
 
     /* Theme Settings & Sizing Defaults */
-    --color-bg-hover: rgba(255, 255, 255, 0.05);
-    --border-radius: 2px;
-    --font-family: 'Nippo-Regular';
+    --color-bg-hover: rgba(255, 255, 255, 0.04);
+    --border-radius: 6px;
+    --font-family: 'Nippo-Regular', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --mono-font: 'JetBrains Mono', 'Fira Code', 'SF Mono', Monaco, monospace;
 
     /* Layout & Sizing */
     font-size: 14px;
-    --topbar-height: 5.5rem;
-    --sidebar-width: 12rem;
-    --transition-duration: 0.2s;
-    --card-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.12);
+    --topbar-height: 5rem;
+    --sidebar-width: 14rem;
+    --transition-duration: 0.25s;
+    --card-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.3),
+        0 2px 4px -2px rgba(0, 0, 0, 0.2),
+        0 0 0 1px rgba(100, 116, 139, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.03);
 
-    /* Branding Source Variables (Reactive via JS) */
-    --color-primary: #F80421;
-    --color-primary-text: #ffffff;
-    --color-primary-hover: oklch(from var(--color-primary) calc(l - 0.08) c h);
+    /* Branding Source Variables (Reactive via JS) - Neon Bitcoin Orange default */
+    --color-primary: #F7931A;
+    --color-primary-text: #030712;
+    --color-primary-hover: oklch(from var(--color-primary) calc(l + 0.05) c h);
+    --color-primary-glow: oklch(from var(--color-primary) l c h / 0.4);
+
+    /* Neon accent variants */
+    --color-neon-cyan: #06B6D4;
+    --color-neon-green: #22C55E;
+    --color-neon-violet: #A855F7;
+    --color-neon-pink: #EC4899;
+    --color-neon-red: #EF4444;
+
+    /* Dropdown/Select Option (List Items) */
+    --p-select-option-selected-background: var(--primary-color);
+    --p-select-option-selected-focus-background: var(--primary-color);
+    --p-select-option-selected-color: #ffffff;
+    
+    --p-select-list-background: var(--p-card-background);
+    --p-select-list-border-color: var(--p-content-border-color);
 
     /* Dynamic Theme variables calculated from --color-primary */
-    --focus-ring: 0 0 0 0.2rem oklch(from var(--color-primary) l c h / 0.2);
-    --slider-bg: #dee2e6;
+    --focus-ring: 0 0 0 2px oklch(from var(--color-primary) l c h / 0.35), 0 0 12px oklch(from var(--color-primary) l c h / 0.5);
+    --slider-bg: rgba(71, 85, 105, 0.4);
+    --slider-handle-glow: 0 0 8px oklch(from var(--color-primary) l c h / 0.6), 0 0 16px oklch(from var(--color-primary) l c h / 0.3);
 
-    /* Custom Message severity styles */
-    --color-message-warn-bg: #ffecb3;
-    --color-message-warn-text: #614a00;
-    --color-message-warn-border: #ffe082;
-    --color-message-error-bg: #ffcdd2;
-    --color-message-error-text: #73000c;
-    --color-message-error-border: #ef9a9a;
-    --color-message-info-bg: #b3e5fc;
-    --color-message-info-text: #01579b;
-    --color-message-info-border: #81d4fa;
-    --color-message-success-bg: #c8e6c9;
-    --color-message-success-text: #256029;
-    --color-message-success-border: #a5d6a7;
+    /* Glassmorphism specific */
+    --glass-bg: rgba(15, 23, 42, 0.55);
+    --glass-border: rgba(148, 163, 184, 0.12);
+    --glass-blur: blur(16px) saturate(180%);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+    /* Custom Message severity styles - Neon adapted */
+    --color-message-warn-bg: rgba(251, 191, 36, 0.15);
+    --color-message-warn-text: #FBBF24;
+    --color-message-warn-border: rgba(251, 191, 36, 0.35);
+    --color-message-error-bg: rgba(239, 68, 68, 0.15);
+    --color-message-error-text: #F87171;
+    --color-message-error-border: rgba(239, 68, 68, 0.35);
+    --color-message-info-bg: rgba(6, 182, 212, 0.15);
+    --color-message-info-text: #22D3EE;
+    --color-message-info-border: rgba(6, 182, 212, 0.35);
+    --color-message-success-bg: rgba(34, 197, 94, 0.15);
+    --color-message-success-text: #4ADE80;
+    --color-message-success-border: rgba(34, 197, 94, 0.35);
 }
 
 .theme-light {
-    /* Theme color variables for Light Theme */
-    --color-bg-content: #243447;
-    --color-bg-card: #1a2632;
-    --color-border-content: #454d59;
-    --card-border: #2f4562;
-    --surface-border: #2f4562;
-    --color-text-main: rgba(255, 255, 255, 0.9);
-    --color-text-secondary: rgba(255, 255, 255, 0.7);
-    --color-mask-bg: rgba(0, 0, 0, 0.2);
-    --color-overlay-select-bg: #1a2632;
-    --color-overlay-select-border: #2f4562;
-    --color-bg-hover: rgba(255, 255, 255, 0.05);
+    /* Theme color variables for Light Theme - Soft warm off-white / slate Glassmorphism */
+    --color-bg-content: #F1F5F9;        /* slate-100 - soft warm gray */
+    --color-bg-card: rgba(255, 255, 255, 0.9);
+    --color-border-content: rgba(100, 116, 139, 0.18);
+    --card-border: rgba(100, 116, 139, 0.22);
+    --surface-border: rgba(100, 116, 139, 0.12);
+    --color-text-main: #1E293B;         /* slate-800 */
+    --color-text-secondary: #475569;    /* slate-600 */
+    --color-mask-bg: rgba(15, 23, 42, 0.12);
+    --color-overlay-select-bg: rgba(255, 255, 255, 0.95);
+    --color-overlay-select-border: rgba(100, 116, 139, 0.18);
+    --color-bg-hover: rgba(15, 23, 42, 0.04);
+    --glass-bg: rgba(255, 255, 255, 0.75);
+    --glass-border: rgba(100, 116, 139, 0.12);
+    --glass-blur: blur(16px) saturate(180%);
+    --glass-shadow: 0 8px 32px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .theme-white {
-    /* Theme color variables for White Theme */
-    --color-bg-content: #f8fafc;
-    --color-bg-card: #f1f5f9;
-    --color-border-content: #e2e8f0;
-    --card-border: #e2e8f0;
-    --surface-border: #cbd5e1;
-    --color-text-main: #0f172a;
-    --color-text-secondary: #64748b;
-    --color-mask-bg: rgba(0, 0, 0, 0.2);
-    --color-overlay-select-bg: #f1f5f9;
-    --color-overlay-select-border: #e2e8f0;
-    --color-bg-hover: rgba(0, 0, 0, 0.04);
-}
-
-.theme-cyberpunk {
-    /* Theme color variables for Cyberpunk Theme - High-tech low-life neon dystopia */
-    --color-bg-content: #05050A;        /* near-black with blue tint */
-    --color-bg-card: rgba(10, 8, 18, 0.85);
-    --color-border-content: rgba(255, 0, 128, 0.15);  /* hot pink border tint */
-    --card-border: rgba(255, 0, 128, 0.25);
-    --surface-border: rgba(0, 255, 255, 0.15);
-    --color-text-main: #F0F0F5;         /* off-white with slight blue */
-    --color-text-secondary: #A0A0B0;    /* muted cyan-gray */
-    --color-mask-bg: rgba(5, 5, 10, 0.7);
-    --color-overlay-select-bg: rgba(15, 10, 25, 0.9);
-    --color-overlay-select-border: rgba(255, 0, 128, 0.3);
-
-    /* Theme Settings & Sizing - sharper, more angular */
-    --color-bg-hover: rgba(255, 0, 128, 0.06);
-    --border-radius: 3px;               /* sharper corners = more tech */
-    --font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Monaco, monospace;  /* mono = terminal aesthetic */
-    --mono-font: 'JetBrains Mono', 'Fira Code', 'SF Mono', Monaco, monospace;
-    --transition-duration: 0.15s;       /* snappier transitions */
-
-    /* Layout & Sizing */
-    font-size: 13px;                    /* slightly smaller = more data density */
-    --topbar-height: 4.5rem;
-    --sidebar-width: 13.5rem;
-    --card-shadow:
-        0 4px 6px -1px rgba(0, 0, 0, 0.5),
-        0 2px 4px -2px rgba(0, 0, 0, 0.3),
-        0 0 0 1px rgba(255, 0, 128, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.02),
-        /* cyberpunk scanline hint */
-        0 0 0 1px rgba(0, 255, 255, 0.03);
-
-    /* Cyberpunk Branding - Hot Pink primary, Cyan secondary */
-    --color-primary: #FF0080;           /* hot pink/magenta */
-    --color-primary-text: #05050A;
-    --color-primary-hover: oklch(from var(--color-primary) calc(l + 0.08) c h);
-    --color-primary-glow: oklch(from var(--color-primary) l c h / 0.5);
-
-    /* Cyberpunk accent palette */
-    --color-neon-cyan: #00FFFF;         /* pure cyan */
-    --color-neon-green: #39FF14;        /* matrix green */
-    --color-neon-violet: #BC13FE;       /* electric violet */
-    --color-neon-pink: #FF0080;         /* hot pink (same as primary) */
-    --color-neon-red: #FF0033;          /* danger red */
-    --color-neon-orange: #FF6600;       /* warning orange */
-    --color-neon-yellow: #FFEE00;       /* caution yellow */
-
-    /* Dynamic Theme variables calculated from --color-primary */
-    --focus-ring: 0 0 0 2px oklch(from var(--color-primary) l c h / 0.4), 0 0 16px oklch(from var(--color-primary) l c h / 0.6), 0 0 32px oklch(from var(--color-neon-cyan) l c h / 0.3);
-    --slider-bg: rgba(20, 10, 30, 0.6);
-    --slider-handle-glow: 0 0 12px oklch(from var(--color-primary) l c h / 0.8), 0 0 24px oklch(from var(--color-neon-cyan) l c h / 0.4);
-
-    /* Glassmorphism - darker, more opaque, scanline texture */
-    --glass-bg: rgba(8, 6, 16, 0.75);
-    --glass-border: rgba(255, 0, 128, 0.18);
-    --glass-blur: blur(20px) saturate(200%);
-    --glass-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.6),
-        inset 0 1px 0 rgba(255, 255, 255, 0.03),
-        0 0 0 1px rgba(0, 255, 255, 0.05);
-
-    /* Custom Message severity styles - Cyberpunk adapted */
-    --color-message-warn-bg: rgba(255, 102, 0, 0.18);
-    --color-message-warn-text: #FFCC00;
-    --color-message-warn-border: rgba(255, 102, 0, 0.4);
-    --color-message-error-bg: rgba(255, 0, 51, 0.18);
-    --color-message-error-text: #FF3366;
-    --color-message-error-border: rgba(255, 0, 51, 0.4);
-    --color-message-info-bg: rgba(0, 255, 255, 0.12);
-    --color-message-info-text: #00FFFF;
-    --color-message-info-border: rgba(0, 255, 255, 0.35);
-    --color-message-success-bg: rgba(57, 255, 20, 0.12);
-    --color-message-success-text: #39FF14;
-    --color-message-success-border: rgba(57, 255, 20, 0.35);
-
-    /* Cyberpunk specific: scanline overlay for cards */
-    --scanline-opacity: 0.04;
-    --grid-opacity: 0.03;
-    --glitch-intensity: 1;
+    /* Theme color variables for White Theme - Pure high-contrast white Glassmorphism */
+    --color-bg-content: #FFFFFF;        /* pure white */
+    --color-bg-card: rgba(255, 255, 255, 0.95);
+    --color-border-content: rgba(226, 232, 240, 0.6);  /* slate-200 */
+    --card-border: rgba(226, 232, 240, 0.7);
+    --surface-border: rgba(226, 232, 240, 0.5);
+    --color-text-main: #0F172A;         /* slate-900 - max contrast */
+    --color-text-secondary: #334155;    /* slate-700 */
+    --color-mask-bg: rgba(15, 23, 42, 0.08);
+    --color-overlay-select-bg: #FFFFFF;
+    --color-overlay-select-border: rgba(226, 232, 240, 0.6);
+    --color-bg-hover: rgba(15, 23, 42, 0.02);
+    --glass-bg: rgba(255, 255, 255, 0.9);
+    --glass-border: rgba(226, 232, 240, 0.4);
+    --glass-blur: blur(16px) saturate(180%);
+    --glass-shadow: 0 4px 24px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }

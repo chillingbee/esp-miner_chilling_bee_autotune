@@ -2,7 +2,7 @@
     --text-color: var(--color-text-main);
     --text-color-secondary: var(--color-text-secondary);
     --font-family: 'Nippo-Regular';
-    --border-radius: 2px;
+    --border-radius: 6px;
 
     --color-surface-border: var(--color-border-content);
 }
@@ -11,10 +11,900 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--color-text-main) !important;
 }
 
+* {
+    font-family: 'Nippo-Regular';
+}
+
+/* PrimeNG Message component theming */
+.p-message-content {
+    justify-content: center;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius, 6px);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-shadow);
+    color: var(--color-text-main);
+}
+
+/* Neon message variants */
+.p-message {
+    &.p-message-success {
+        .p-message-content {
+            border-color: oklch(from var(--color-neon-green) l c h / 0.3);
+            background: oklch(from var(--color-neon-green) l c h / 0.1);
+            color: var(--color-neon-green);
+            box-shadow:
+                var(--glass-shadow),
+                0 0 24px oklch(from var(--color-neon-green) l c h / 0.15);
+        }
+    }
+
+    &.p-message-error, &.p-message-danger {
+        .p-message-content {
+            border-color: oklch(from var(--color-neon-red) l c h / 0.3);
+            background: oklch(from var(--color-neon-red) l c h / 0.1);
+            color: var(--color-neon-red);
+            box-shadow:
+                var(--glass-shadow),
+                0 0 24px oklch(from var(--color-neon-red) l c h / 0.15);
+        }
+    }
+
+    &.p-message-warn, &.p-message-warning {
+        .p-message-content {
+            border-color: oklch(from #FBBF24 l c h / 0.3);
+            background: oklch(from #FBBF24 l c h / 0.1);
+            color: #FBBF24;
+            box-shadow:
+                var(--glass-shadow),
+                0 0 24px oklch(from #FBBF24 l c h / 0.15);
+        }
+    }
+
+    &.p-message-info {
+        .p-message-content {
+            border-color: oklch(from var(--color-neon-cyan) l c h / 0.3);
+            background: oklch(from var(--color-neon-cyan) l c h / 0.1);
+            color: var(--color-neon-cyan);
+            box-shadow:
+                var(--glass-shadow),
+                0 0 24px oklch(from var(--color-neon-cyan) l c h / 0.15);
+        }
+    }
+}
+
+/* PrimeNG Toast */
+.p-toast {
+    .p-toast-message {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius, 6px);
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        box-shadow: var(--glass-shadow);
+        color: var(--color-text-main);
+
+        .p-toast-message-content {
+            gap: 0.75rem;
+        }
+
+        .p-toast-icon, .p-toast-summary, .p-toast-detail {
+            color: var(--color-text-main);
+        }
+
+        &.p-toast-message-success {
+            border-color: oklch(from var(--color-neon-green) l c h / 0.3);
+            box-shadow:
+                var(--glass-shadow),
+                0 0 24px oklch(from var(--color-neon-green) l c h / 0.15);
+        }
+
+        &.p-toast-message-error {
+            border-color: oklch(from var(--color-neon-red) l c h / 0.3);
+            box-shadow:
+                var(--glass-shadow),
+                0 0 24px oklch(from var(--color-neon-red) l c h / 0.15);
+        }
+    }
+}
+
+/* PrimeNG Dialog/Modal */
+.p-dialog {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: calc(var(--border-radius, 6px) * 2);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow:
+        0 32px 96px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(148, 163, 184, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+    .p-dialog-header {
+        background: transparent;
+        border-bottom: 1px solid var(--glass-border);
+        color: var(--color-text-main);
+
+        .p-dialog-title {
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--color-text-main), var(--color-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .p-dialog-header-icon {
+            color: var(--color-text-secondary);
+            border-radius: 50%;
+            transition: all var(--transition-duration);
+
+            &:hover {
+                color: var(--color-primary);
+                background: var(--color-bg-hover);
+            }
+        }
+    }
+
+    .p-dialog-content {
+        background: transparent;
+        color: var(--color-text-main);
+    }
+
+    .p-dialog-footer {
+        border-top: 1px solid var(--glass-border);
+        background: transparent;
+    }
+}
+
+/* PrimeNG Inputs */
+.p-inputtext {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius, 6px);
+    color: var(--color-text-main);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    transition: all var(--transition-duration);
+
+    &::placeholder {
+        color: var(--color-text-secondary);
+        opacity: 0.7;
+    }
+
+    &:enabled:hover {
+        border-color: rgba(148, 163, 184, 0.3);
+    }
+
+    &:enabled:focus {
+        border-color: var(--color-primary);
+        box-shadow:
+            0 0 0 3px oklch(from var(--color-primary) l c h / 0.25),
+            0 0 20px oklch(from var(--color-primary) l c h / 0.1);
+        outline: none;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+    }
+}
+
+/* PrimeNG Dropdown */
+.p-dropdown {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius, 6px);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    transition: all var(--transition-duration);
+
+    .p-dropdown-label {
+        color: var(--color-text-main);
+    }
+
+    .p-dropdown-trigger {
+        color: var(--color-text-secondary);
+    }
+
+    &:not(.p-disabled):hover {
+        border-color: rgba(148, 163, 184, 0.3);
+    }
+
+    &:not(.p-disabled).p-focus, &:not(.p-disabled).p-dropdown-open {
+        border-color: var(--color-primary);
+        box-shadow:
+            0 0 0 3px oklch(from var(--color-primary) l c h / 0.25),
+            0 0 20px oklch(from var(--color-primary) l c h / 0.1);
+    }
+
+    .p-dropdown-panel {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius, 6px);
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        box-shadow: var(--glass-shadow);
+
+        .p-dropdown-item {
+            color: var(--color-text-main);
+            transition: all var(--transition-duration);
+
+            &:hover {
+                background: var(--color-bg-hover);
+                color: var(--color-primary);
+            }
+
+            &.p-highlight {
+                background: oklch(from var(--color-primary) l c h / 0.15);
+                color: var(--color-primary);
+            }
+        }
+    }
+}
+
+/* PrimeNG Button */
+.p-button {
+    border-radius: var(--border-radius, 6px);
+    transition: all var(--transition-duration) ease;
+    font-weight: 600;
+
+    &:not(.p-button-text):not(.p-button-link) {
+        background: linear-gradient(135deg, var(--color-primary), oklch(from var(--color-primary) calc(l + 0.05) c h));
+        border: none;
+        color: var(--color-primary-text);
+        box-shadow:
+            0 4px 16px oklch(from var(--color-primary) l c h / 0.3),
+            0 2px 4px oklch(from var(--color-primary) l c h / 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+
+        &:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow:
+                0 8px 24px oklch(from var(--color-primary) l c h / 0.4),
+                0 4px 8px oklch(from var(--color-primary) l c h / 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                0 0 20px oklch(from var(--color-primary) l c h / 0.3);
+        }
+
+        &:active:not(:disabled) {
+            transform: translateY(0) scale(0.98);
+        }
+    }
+
+    &.p-button-text, &.p-button-link {
+        color: var(--color-primary);
+
+        &:hover:not(:disabled) {
+            background: oklch(from var(--color-primary) l c h / 0.1);
+            box-shadow: 0 0 16px oklch(from var(--color-primary) l c h / 0.2);
+        }
+    }
+
+    &.p-button-outlined {
+        color: var(--color-primary);
+        border-color: oklch(from var(--color-primary) l c h / 0.5);
+
+        &:hover:not(:disabled) {
+            background: oklch(from var(--color-primary) l c h / 0.1);
+            box-shadow: 0 0 16px oklch(from var(--color-primary) l c h / 0.2);
+        }
+    }
+
+    &.p-button-danger {
+        &:not(.p-button-text):not(.p-button-link) {
+            background: linear-gradient(135deg, var(--color-neon-red), #dc2626);
+            box-shadow:
+                0 4px 16px oklch(from var(--color-neon-red) l c h / 0.3),
+                0 2px 4px oklch(from var(--color-neon-red) l c h / 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+
+            &:hover:not(:disabled) {
+                box-shadow:
+                    0 8px 24px oklch(from var(--color-neon-red) l c h / 0.4),
+                    0 4px 8px oklch(from var(--color-neon-red) l c h / 0.3),
+                    0 0 20px oklch(from var(--color-neon-red) l c h / 0.3);
+            }
+        }
+    }
+}
+
+/* PrimeNG ToggleSwitch */
+.p-toggleswitch {
+    .p-toggleswitch-slider {
+        background: var(--slider-bg);
+        transition: all var(--transition-duration);
+    }
+
+    &.p-toggleswitch-checked {
+        .p-toggleswitch-slider {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-neon-cyan));
+            box-shadow: 0 0 12px oklch(from var(--color-primary) l c h / 0.5);
+        }
+
+        .p-toggleswitch-handle {
+            background: var(--color-primary-text);
+        }
+    }
+}
+
+/* PrimeNG Slider */
+.p-slider {
+    .p-slider-range {
+        background: linear-gradient(90deg, var(--color-primary), var(--color-neon-cyan));
+        box-shadow: 0 0 12px oklch(from var(--color-primary) l c h / 0.5);
+    }
+
+    .p-slider-handle {
+        background: var(--color-primary);
+        border: none;
+        box-shadow:
+            0 2px 8px oklch(from var(--color-primary) l c h / 0.4),
+            0 0 0 4px oklch(from var(--color-primary) l c h / 0.2);
+        transition: all var(--transition-duration);
+
+        &:hover {
+            transform: scale(1.15);
+            box-shadow:
+                0 4px 16px oklch(from var(--color-primary) l c h / 0.5),
+                0 0 0 6px oklch(from var(--color-primary) l c h / 0.25),
+                var(--slider-handle-glow);
+        }
+    }
+}
+
+/* PrimeNG Table */
+.p-datatable {
+    .p-datatable-thead > tr > th {
+        background: var(--color-bg-hover);
+        color: var(--color-text-secondary);
+        border-color: var(--surface-border);
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+    }
+
+    .p-datatable-tbody > tr {
+        background: transparent;
+        color: var(--color-text-main);
+        border-color: var(--surface-border);
+        transition: all var(--transition-duration);
+
+        &:hover {
+            background: var(--color-bg-hover);
+        }
+
+        > td {
+            border-color: var(--surface-border);
+        }
+    }
+
+    .p-datatable-wrapper {
+        border-radius: var(--border-radius, 6px);
+        overflow: hidden;
+    }
+}
+
+/* PrimeNG TabView */
+.p-tabview {
+    .p-tabview-nav {
+        border-color: var(--surface-border);
+
+        li {
+            .p-tabview-nav-link {
+                background: transparent;
+                color: var(--color-text-secondary);
+                border-color: transparent;
+                transition: all var(--transition-duration);
+
+                &:hover {
+                    color: var(--color-primary);
+                    background: var(--color-bg-hover);
+                }
+            }
+
+            &.p-highlight {
+                .p-tabview-nav-link {
+                    color: var(--color-primary);
+                    border-color: var(--color-primary);
+                }
+            }
+        }
+    }
+
+    .p-tabview-panels {
+        background: transparent;
+        color: var(--color-text-main);
+        border-color: var(--surface-border);
+    }
+}
+
+/* PrimeNG Card */
+.p-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius, 6px);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-shadow);
+    color: var(--color-text-main);
+    transition: all var(--transition-duration) ease;
+
+    &:hover {
+        box-shadow:
+            0 12px 40px rgba(0, 0, 0, 0.45),
+            0 4px 16px rgba(0, 0, 0, 0.3),
+            0 0 0 1px rgba(148, 163, 184, 0.18),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06),
+            0 0 24px oklch(from var(--color-primary) l c h / 0.15);
+        border-color: rgba(148, 163, 184, 0.25);
+        transform: translateY(-2px);
+    }
+
+    .p-card-header {
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .p-card-body {
+        padding: 1.5rem;
+    }
+}
+
+/* PrimeNG Chart */
+.p-chart {
+    canvas {
+        filter: drop-shadow(0 0 8px oklch(from var(--color-primary) l c h / 0.1));
+    }
+}
+
+/* PrimeNG ProgressBar */
+.p-progressbar {
+    background: var(--slider-bg);
+    border-radius: 3px;
+
+    .p-progressbar-value {
+        background: linear-gradient(90deg, var(--color-primary), var(--color-neon-cyan));
+        box-shadow: 0 0 12px oklch(from var(--color-primary) l c h / 0.5);
+    }
+}
+
+/* PrimeNG Accordion */
+.p-accordion {
+    .p-accordion-header {
+        .p-accordion-header-link {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius, 6px);
+            color: var(--color-text-main);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            transition: all var(--transition-duration);
+
+            &:hover {
+                background: var(--color-bg-hover);
+                color: var(--color-primary);
+            }
+        }
+
+        &.p-highlight {
+            .p-accordion-header-link {
+                color: var(--color-primary);
+                border-color: oklch(from var(--color-primary) l c h / 0.3);
+            }
+        }
+    }
+
+    .p-accordion-content {
+        background: transparent;
+        color: var(--color-text-main);
+        border: 1px solid var(--glass-border);
+        border-top: none;
+        border-radius: 0 0 var(--border-radius, 6px) var(--border-radius, 6px);
+    }
+}
+
+/* PrimeNG OverlayPanel */
+.p-overlaypanel {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius, 6px);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-shadow);
+    color: var(--color-text-main);
+
+    .p-overlaypanel-content {
+        color: var(--color-text-main);
+    }
+}
+
+/* PrimeNG Tooltip */
+.p-tooltip {
+    .p-tooltip-text {
+        background: var(--tooltipBg);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--border-radius, 6px);
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        box-shadow: var(--glass-shadow);
+        color: var(--color-text-main);
+    }
+}
+
+.p-inputtext {
+    width: 100%;
+    background: transparent !important;
+    transition: none;
+    box-shadow: none;
+    outline: none;
+}
+
+/* Progress Bar */
+.p-progressbar {
+    &--thin {
+        height: 6px;
+    }
+}
+
+.progressbar-marker {
+    position: absolute;
+    width: 1px;
+    height: 10px;
+    top: -2px;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.85);
+    z-index: 2;
+
+    &-label {
+        position: absolute;
+        bottom: -0.9rem;
+        left: 50%;
+        transform: translateX(-50%);
+        color: var(--text-color-secondary);
+        white-space: nowrap;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+}
+
+/* Select - Base Reset */
+.p-select {
+    background: transparent !important;
+}
+.p-select,
+.p-select-panel, .p-select-overlay {
+    transition: none;
+    box-shadow: none;
+    outline: none;
+
+    .p-select-label {
+        overflow: visible !important;
+    }
+}
+
+/* Small Variant Modifier */
+.p-select--small {
+    font-size: small !important;
+
+    .p-select-label,
+    .p-select-input {
+        font-size: small !important;
+        padding: 0.3rem 0 0.3rem 0.7rem !important;
+    }
+
+    .p-select-option {
+        font-size: small !important;
+    }
+}
+
+/* Panel & Overlay Logic */
+.p-select-panel, .p-select-overlay {
+    background-color: var(--p-card-background) !important;
+    border: 1px solid var(--card-border) !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+    width: max-content !important;
+    min-width: 100%;
+    z-index: 20000 !important;
+
+    .p-select-list {
+        padding: 0.25rem 0;
+        background: var(--p-card-background);
+    }
+
+    .p-select-option {
+        padding: 0.5rem 1rem;
+        color: var(--text-color);
+        transition: background-color 0.1s;
+        border: 0 none;
+        margin: 0;
+        border-radius: 0;
+        white-space: nowrap !important;
+
+        &:hover, &.p-focus, &.p-select-option-focused {
+            background-color: color-mix(in srgb, var(--primary-color), black 40%) !important;
+            color: #ffffff !important;
+        }
+
+        &.p-select-option-selected {
+            background-color: var(--primary-color) !important;
+            color: #ffffff !important;
+        }
+    }
+}
+
+/* PrimeNG 19 - Fix for Autocomplete/InputText/Select */
+.p-inputtext,
+.p-autocomplete-input,
+.p-select {
+    background: transparent !important;
+    border: 1px solid var(--color-border-content);
+    color: var(--text-color);
+    outline: none;
+    box-shadow: none;
+}
+
+.p-inputtext:focus,
+.p-autocomplete-input:focus,
+.p-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem var(--focus-ring);
+}
+
+/* Card */
+.p-card {
+    background: var(--p-card-background) !important;
+    border: 1px solid var(--card-border) !important;
+    box-shadow: var(--card-shadow);
+}
+
+.p-card .p-card-body {
+    padding: 1rem;
+}
+
+/* Message */
+.p-message {
+    border-radius: var(--border-radius);
+    border: 1px solid var(--color-border-content);
+    background: var(--p-card-background);
+}
+
+/* ProgressBar */
+.p-progressbar {
+    background: var(--p-content-border-color);
+    border-radius: var(--border-radius);
+    height: 10px;
+}
+
+.p-progressbar-value {
+    background: var(--primary-color);
+    border-radius: var(--border-radius);
+}
+
+/* OverlayPanel */
+.p-overlaypanel {
+    background: var(--p-overlay-select-background);
+    border: 1px solid var(--p-overlay-select-border-color);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+/* Tooltip */
+.p-tooltip {
+    background: var(--p-content-background);
+    border: 1px solid var(--p-content-border-color);
+    color: var(--p-text-color);
+}
+
+/* Dialog */
+.p-dialog {
+    background: var(--p-overlay-select-background);
+    border: 1px solid var(--p-overlay-select-border-color);
+}
+
+/* ConfirmDialog */
+.p-confirm-dialog {
+    background: var(--p-overlay-select-background);
+    border: 1px solid var(--p-overlay-select-border-color);
+}
+
+/* Sidebar */
+.p-sidebar {
+    background: var(--p-content-background);
+    border-right: 1px solid var(--p-content-border-color);
+}
+
+/* TabView */
+.p-tabview .p-tabview-nav {
+    border-bottom: 1px solid var(--p-content-border-color);
+}
+
+.p-tabview .p-tabview-nav li .p-tabview-nav-link {
+    color: var(--p-text-muted-color);
+}
+
+.p-tabview .p-tabview-nav li .p-tabview-nav-link.p-highlight {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+/* Accordion */
+.p-accordion .p-accordion-header {
+    background: transparent;
+    border-color: var(--p-content-border-color);
+    color: var(--p-text-color);
+}
+
+.p-accordion .p-accordion-content {
+    border-color: var(--p-content-border-color);
+}
+
+/* Fieldset */
+.p-fieldset {
+    border: 1px solid var(--p-content-border-color);
+}
+
+.p-fieldset .p-fieldset-legend {
+    background: var(--p-content-background);
+    color: var(--p-text-color);
+}
+
+/* Toolbar */
+.p-toolbar {
+    background: var(--p-content-background);
+    border: 1px solid var(--p-content-border-color);
+}
+
+/* Breadcrumb */
+.p-breadcrumb {
+    background: transparent;
+}
+
+.p-breadcrumb-item,
+.p-breadcrumb-separator {
+    color: var(--p-text-muted-color);
+}
+
+/* Paginator */
+.p-paginator {
+    border-color: var(--p-content-border-color);
+}
+
+/* DataTable */
+.p-datatable {
+    border-color: var(--p-content-border-color);
+}
+
+.p-datatable .p-datatable-header,
+.p-datatable .p-datatable-footer {
+    background: var(--p-content-background);
+    border-color: var(--p-content-border-color);
+}
+
+.p-datatable .p-column-header {
+    background: var(--p-content-background);
+    border-color: var(--p-content-border-color);
+    color: var(--p-text-color);
+}
+
+.p-datatable .p-datatable-tbody > tr {
+    border-color: var(--p-content-border-color);
+}
+
+.p-datatable .p-datatable-tbody > tr.p-highlight {
+    background: color-mix(in srgb, var(--primary-color), transparent 90%);
+}
+
+/* Chip */
+.p-chip {
+    background: color-mix(in srgb, var(--primary-color), transparent 85%);
+    color: var(--primary-color-text);
+}
+
+/* Badge */
+.p-badge {
+    background: var(--primary-color);
+}
+
+/* Tag */
+.p-tag {
+    background: color-mix(in srgb, var(--primary-color), transparent 85%);
+    color: var(--primary-color-text);
+}
+
+/* Divider */
+.p-divider {
+    border-color: var(--p-content-border-color);
+}
+
+/* Splitter */
+.p-splitter {
+    background: var(--p-content-background);
+}
+
+.p-splitter .p-splitter-gutter {
+    background: var(--p-content-border-color);
+}
+
+/* Tree */
+.p-treenode-content {
+    border-color: var(--p-content-border-color);
+}
+
+/* Listbox */
+.p-listbox {
+    background: var(--p-overlay-select-background);
+    border: 1px solid var(--p-overlay-select-border-color);
+}
+
+.p-listbox-item {
+    border-color: var(--p-content-border-color);
+}
+
+/* OrderList / PickList */
+.p-orderlist,
+.p-picklist {
+    .p-orderlist-list,
+    .p-picklist-list {
+        background: var(--p-overlay-select-background);
+        border: 1px solid var(--p-overlay-select-border-color);
+    }
+}
+
+/* Terminal */
+.p-terminal {
+    background: #1e1e1e;
+    color: #d4d4d4;
+}
+
+/* Focus trap */
+.p-focus-trap {
+    outline: none;
+}
+
+/* Ripple effect */
+.p-ink {
+    background: color-mix(in srgb, var(--primary-color), transparent 90%);
+}
+
 /* Global element borders */
 fieldset {
     border-color: var(--color-border-content) !important;
 }
+
 table.border-1 {
     border-color: var(--card-border) !important;
+}
+
+.p-fileupload-basic {
+    justify-content: inherit;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-bg-content);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--surface-border);
+    border-radius: 5px;
+    transition: background var(--transition-duration);
+
+    &:hover {
+        background: var(--color-primary);
+    }
+}
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--surface-border) var(--color-bg-content);
+}
+
+/* Selection */
+::selection {
+    background: oklch(from var(--color-primary) l c h / 0.3);
+    color: var(--color-primary-text);
 }

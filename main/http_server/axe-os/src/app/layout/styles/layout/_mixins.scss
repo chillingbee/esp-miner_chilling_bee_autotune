@@ -1,13 +1,172 @@
 @mixin focused() {
     outline: 0 none;
     outline-offset: 0;
-    transition: box-shadow .2s;
+    transition: box-shadow var(--transition-duration);
     box-shadow: var(--focus-ring);
 }
 
 @mixin focused-inset() {
     outline: 0 none;
     outline-offset: 0;
-    transition: box-shadow .2s;
+    transition: box-shadow var(--transition-duration);
     box-shadow: inset var(--focus-ring);
+}
+
+/* Glassmorphism card mixin */
+@mixin glass-card($strength: default) {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-radius: $borderRadius;
+    transition: all var(--transition-duration) ease;
+
+    @if $strength == strong {
+        background: rgba(15, 23, 42, 0.7);
+        border-color: rgba(148, 163, 184, 0.18);
+        box-shadow:
+            0 16px 48px rgba(0, 0, 0, 0.5),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    } @else if $strength == subtle {
+        background: rgba(15, 23, 42, 0.4);
+        border-color: rgba(148, 163, 184, 0.08);
+        box-shadow:
+            0 8px 24px rgba(0, 0, 0, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    } @else {
+        box-shadow: var(--glass-shadow);
+    }
+
+    &:hover {
+        @if $strength != subtle {
+            transform: translateY(-2px);
+        }
+        box-shadow:
+            0 12px 40px rgba(0, 0, 0, 0.45),
+            0 4px 16px rgba(0, 0, 0, 0.3),
+            0 0 0 1px rgba(148, 163, 184, 0.18),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06),
+            0 0 24px oklch(from var(--color-primary) l c h / 0.15);
+        border-color: rgba(148, 163, 184, 0.25);
+    }
+}
+
+/* Neon glow mixin */
+@mixin neon-glow($color: primary, $intensity: medium) {
+    --glow-color: var(--color-#{$color});
+
+    @if $intensity == strong {
+        box-shadow:
+            0 0 24px oklch(from var(--glow-color) l c h / 0.5),
+            0 0 48px oklch(from var(--glow-color) l c h / 0.3),
+            inset 0 0 24px oklch(from var(--glow-color) l c h / 0.1);
+    } @else if $intensity == subtle {
+        box-shadow:
+            0 0 8px oklch(from var(--glow-color) l c h / 0.4),
+            0 0 16px oklch(from var(--glow-color) l c h / 0.2);
+    } @else {
+        box-shadow:
+            0 0 12px oklch(from var(--glow-color) l c h / 0.5),
+            0 0 24px oklch(from var(--glow-color) l c h / 0.25);
+    }
+}
+
+/* Animated gradient border */
+@mixin gradient-border($animation-speed: 4s) {
+    position: relative;
+    border-radius: $borderRadius;
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: -1px;
+        border-radius: inherit;
+        background: linear-gradient(
+            90deg,
+            var(--color-primary),
+            var(--color-neon-cyan),
+            var(--color-neon-violet),
+            var(--color-primary)
+        );
+        background-size: 300% 100%;
+        animation: gradient-shift #{$animation-speed} linear infinite;
+        opacity: 0;
+        z-index: -1;
+        transition: opacity var(--transition-duration);
+    }
+
+    &:hover::before {
+        opacity: 1;
+    }
+}
+
+/* Neon text glow */
+@mixin neon-text($color: primary) {
+    color: var(--color-#{$color});
+    text-shadow:
+        0 0 4px oklch(from var(--color-#{$color}) l c h / 0.8),
+        0 0 8px oklch(from var(--color-#{$color}) l c h / 0.5),
+        0 0 16px oklch(from var(--color-#{$color}) l c h / 0.3);
+}
+
+/* Pulse animation */
+@mixin pulse-animation($duration: 2s, $color: primary) {
+    animation: pulse-#{$color} #{$duration} ease-in-out infinite;
+}
+
+/* Scrollbar styling mixin */
+@mixin custom-scrollbar($width: 10px) {
+    &::-webkit-scrollbar {
+        width: #{$width};
+        height: #{$width};
+    }
+
+    &::-webkit-scrollbar-track {
+        background: var(--color-bg-content);
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--surface-border);
+        border-radius: #{$width / 2};
+        transition: background var(--transition-duration);
+
+        &:hover {
+            background: var(--color-primary);
+        }
+    }
+
+    scrollbar-width: thin;
+    scrollbar-color: var(--surface-border) var(--color-bg-content);
+}
+
+/* GridStack item glassmorphism */
+@mixin gridstack-item-glass {
+    .grid-stack-item-content {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: $borderRadius;
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        box-shadow: var(--glass-shadow);
+        transition: all var(--transition-duration) ease;
+    }
+
+    &:hover .grid-stack-item-content {
+        box-shadow:
+            0 20px 64px rgba(0, 0, 0, 0.5),
+            0 8px 24px rgba(0, 0, 0, 0.35),
+            0 0 0 1px rgba(148, 163, 184, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06),
+            0 0 40px oklch(from var(--color-primary) l c h / 0.15);
+    }
+
+    &.grid-stack-item-resizing .grid-stack-item-content,
+    &.grid-stack-item-moving .grid-stack-item-content {
+        box-shadow:
+            0 24px 80px rgba(0, 0, 0, 0.6),
+            0 0 0 2px oklch(from var(--color-primary) l c h / 0.5),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        border-color: var(--color-primary);
+        transform: scale(1.01);
+    }
 }
