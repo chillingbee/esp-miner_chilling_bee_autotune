@@ -30,7 +30,7 @@ describe('DropdownComponent', () => {
 
   it('should toggle open/close on trigger click', () => {
     const trigger = fixture.debugElement.query(By.css('.cursor-pointer'));
-
+    
     // Initial state
     expect(component.isOpen).toBeFalse();
 
@@ -47,22 +47,11 @@ describe('DropdownComponent', () => {
 
   it('should select option on click', () => {
     spyOn(component.onChange, 'emit');
-
-    // Optionen explizit setzen, damit klar ist, was an welcher Stelle liegt
-    component.options = [
-      { value: 1, label: 'One' },
-      { value: 2, label: 'Two' }
-    ];
     component.isOpen = true;
     fixture.detectChanges();
 
     const items = fixture.debugElement.queryAll(By.css('li'));
-
-    // Da wir 2 Optionen haben, ist Index 1 das zweite Element (Wert 2)
-    // Falls das erste Element ein Header/Placeholder ist, nimm items[2]
-    const indexToClick = items.length > 2 ? 2 : 1;
-    items[indexToClick].nativeElement.click();
-
+    items[1].nativeElement.click();
     fixture.detectChanges();
 
     expect(component.value).toBe(2);

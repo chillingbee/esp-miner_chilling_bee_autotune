@@ -44,8 +44,9 @@ import { HashSuffixPipe } from './pipes/hash-suffix.pipe';
 import { DiffSuffixPipe } from './pipes/diff-suffix.pipe';
 import { AddressPipe } from './pipes/address.pipe';
 import { SatsPipe } from './pipes/sats.pipe';
-import { HeatmapLightnessPipe } from './pipes/heatmap-lightness.pipe';
 import { DialogService, DialogListComponent } from './services/dialog.service';
+
+import { AutotuneComponent } from './components/autotune/autotune.component';
 
 const components = [
   AppComponent,
@@ -66,7 +67,9 @@ const components = [
 @NgModule({
   declarations: [
     ...components,
-
+    TooltipIconComponent,
+    TooltipTextIconComponent,
+    AutotuneComponent,
     SwarmComponent,
     ScoreboardComponent,
     ThemeConfigComponent,
@@ -98,7 +101,6 @@ const components = [
     DiffSuffixPipe,
     AddressPipe,
     SatsPipe,
-    HeatmapLightnessPipe,
   ],
   providers: [
     { provide: LocationStrategy, useClass: HashLocationStrategy },

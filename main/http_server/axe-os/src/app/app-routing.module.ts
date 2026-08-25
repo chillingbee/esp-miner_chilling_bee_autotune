@@ -11,6 +11,7 @@ import { SwarmComponent } from './components/swarm/swarm.component';
 import { ScoreboardComponent } from './components/scoreboard/scoreboard.component';
 import { DesignComponent } from './components/design/design.component';
 import { PoolComponent } from './components/pool/pool.component';
+import { AutotuneComponent } from './components/autotune/autotune.component';
 import { AppLayoutComponent } from './layout/app.layout.component';
 import { ApModeGuard } from './guards/ap-mode.guard';
 
@@ -18,16 +19,17 @@ const TITLE_PREFIX = 'AxeOS';
 
 const routes: Routes = [
   {
-      path: 'ap',
-      component: AppLayoutComponent,
-      children: [
-        {
-          path: '',
-          component: NetworkComponent,
-          title: `${TITLE_PREFIX} Network`,
-        }
-      ]
+    path: 'ap',
+    component: AppLayoutComponent,
+    children: [
+      {
+        path: '',
+        component: NetworkComponent,
+        title: `${TITLE_PREFIX} Network`,
+      }
+    ]
   },
+
   {
     path: '',
     component: AppLayoutComponent,
@@ -38,6 +40,7 @@ const routes: Routes = [
         component: HomeComponent,
         title: TITLE_PREFIX,
       },
+
       {
         path: 'logs',
         component: LogsComponent,
@@ -82,7 +85,16 @@ const routes: Routes = [
         path: 'pool',
         component: PoolComponent,
         title: `${TITLE_PREFIX} Pool`,
+<<<<<<< HEAD
       }
+=======
+      },
+      {
+        path: 'autotune',
+        component: AutotuneComponent,
+        title: `${TITLE_PREFIX} Autotune`,
+      },
+>>>>>>> 560f298f (feat(autotune): successfully integrate autotune component and UI styles)
     ]
   },
 
