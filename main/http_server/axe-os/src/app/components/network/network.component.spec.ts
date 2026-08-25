@@ -12,7 +12,11 @@ describe('NetworkComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [NetworkComponent, NetworkEditComponent],
+      declarations: [], // Leer lassen oder nicht benötigte Nicht-Standalone-Komponenten rein
+      imports: [
+        NetworkComponent,
+        NetworkEditComponent
+      ],
       providers: [provideHttpClient(), provideToastr(), DialogService]
     });
     fixture = TestBed.createComponent(NetworkComponent);
@@ -24,4 +28,3 @@ describe('NetworkComponent', () => {
     expect(component).toBeTruthy();
   });
 });
-

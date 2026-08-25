@@ -90,7 +90,6 @@ const components = [
     RadioButtonComponent,
     SliderComponent,
     AppChartComponent,
-    EditComponent,
     SettingsComponent,
     ProgressbarComponent,
     ANSIPipe,
