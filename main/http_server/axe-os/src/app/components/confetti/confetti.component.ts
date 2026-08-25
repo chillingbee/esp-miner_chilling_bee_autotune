@@ -1,4 +1,5 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 interface ConfettiDivElement extends HTMLDivElement {
   removeTimeout?: number;

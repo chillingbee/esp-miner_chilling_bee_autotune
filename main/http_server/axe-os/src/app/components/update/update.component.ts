@@ -9,6 +9,10 @@ import { LiveDataService } from 'src/app/services/live-data.service';
 import { LocalStorageService } from 'src/app/local-storage.service';
 import { ModalComponent } from '../modal/modal.component';
 import { SystemInfo } from 'src/app/generated/models';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ProgressbarComponent } from '../progressbar/progressbar.component';
+import { CheckboxComponent } from '../checkbox/checkbox.component';
 
 const IGNORE_RELEASE_CHECK_WARNING = 'IGNORE_RELEASE_CHECK_WARNING';
 
@@ -16,7 +20,8 @@ const IGNORE_RELEASE_CHECK_WARNING = 'IGNORE_RELEASE_CHECK_WARNING';
     selector: 'app-update',
     templateUrl: './update.component.html',
     styleUrls: ['./update.component.scss'],
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, AsyncPipe, FormsModule, ModalComponent, ProgressbarComponent, CheckboxComponent]
 })
 export class UpdateComponent {
 

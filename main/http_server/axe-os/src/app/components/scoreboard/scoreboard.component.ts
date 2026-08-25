@@ -4,6 +4,10 @@ import { SystemApiService } from 'src/app/services/system.service';
 import { LoadingService } from 'src/app/services/loading.service';
 import { LocalStorageService } from 'src/app/local-storage.service';
 import { ISystemScoreboardEntry } from 'src/models/ISystemScoreboard';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { DiffSuffixPipe } from '../../pipes/diff-suffix.pipe';
+import { DateAgoPipe } from '../../pipes/date-ago.pipe';
+import { TooltipDirective } from '../../directives/tooltip.directive';
 
 const SWARM_SORTING = 'SCOREBOARD_SORTING';
 
@@ -11,7 +15,8 @@ const SWARM_SORTING = 'SCOREBOARD_SORTING';
   selector: 'app-scoreboard',
   templateUrl: './scoreboard.component.html',
   styleUrls: ['./scoreboard.component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [CommonModule, AsyncPipe, DiffSuffixPipe, DateAgoPipe, TooltipDirective]
 })
 export class ScoreboardComponent implements OnInit, OnDestroy {
   public scoreboard$: Observable<ISystemScoreboardEntry[]>;

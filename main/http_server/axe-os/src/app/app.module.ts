@@ -7,23 +7,17 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
-import { TooltipDirective } from './directives/tooltip.directive';
-import { CheckboxComponent } from './components/checkbox/checkbox.component';
-import { RadioButtonComponent } from './components/radio-button/radio-button.component';
-import { SliderComponent } from './components/slider/slider.component';
-import { AppChartComponent } from './components/chart/app-chart.component';
-import { DropdownComponent } from './components/dropdown/dropdown.component';
-import { ProgressbarComponent } from './components/progressbar/progressbar.component';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { Api } from './generated/api';
 import { ApiConfiguration } from './generated/api-configuration';
-import { EditComponent } from './components/edit/edit.component';
+// import { EditComponent } from './components/edit/edit.component'; // Standalone - moved to imports
 import { PoolComponent } from './components/pool/pool.component';
 import { NetworkEditComponent } from './components/network-edit/network.edit.component';
 import { HomeComponent } from './components/home/home.component';
 import { ModalComponent } from './components/modal/modal.component';
+import { WifiIconComponent } from './components/wifi-icon/wifi-icon.component';
 import { TooltipIconComponent } from './components/tooltip-icon/tooltip-icon.component';
 import { TooltipTextIconComponent } from './components/tooltip-text-icon/tooltip-text-icon.component';
 import { ConfettiComponent } from './components/confetti/confetti.component';
@@ -45,17 +39,16 @@ import { DiffSuffixPipe } from './pipes/diff-suffix.pipe';
 import { AddressPipe } from './pipes/address.pipe';
 import { SatsPipe } from './pipes/sats.pipe';
 import { DialogService, DialogListComponent } from './services/dialog.service';
-import { AutotuneComponent } from './components/autotune/autotune.component';
+// import { AutotuneComponent } from './components/autotune/autotune.component'; // Standalone - moved to imports
 
 import { AutotuneComponent } from './components/autotune/autotune.component';
 
 const components = [
   AppComponent,
-  EditComponent,
-  AutotuneComponent,
   NetworkEditComponent,
   HomeComponent,
   ModalComponent,
+  WifiIconComponent,
   ConfettiComponent,
   SnowflakesComponent,
   NetworkComponent,
@@ -80,6 +73,8 @@ const components = [
   imports: [
     TooltipIconComponent,
     TooltipTextIconComponent,
+    EditComponent,
+    AutotuneComponent,
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule,

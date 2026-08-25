@@ -1,10 +1,12 @@
 import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'wifi-icon',
     templateUrl: './wifi-icon.component.html',
     styleUrls: ['./wifi-icon.component.scss'],
-    standalone: false
+    standalone: true,
+    imports: [CommonModule]
 })
 export class WifiIconComponent {
   @Input() rssi: number = 0;

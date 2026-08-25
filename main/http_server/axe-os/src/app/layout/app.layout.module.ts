@@ -24,7 +24,6 @@ import { WifiIconComponent } from '../components/wifi-icon/wifi-icon.component';
         AppSidebarComponent,
         AppLayoutComponent,
         LoadingComponent,
-        WifiIconComponent,
     ],
     imports: [
         BrowserModule,
@@ -34,7 +33,8 @@ import { WifiIconComponent } from '../components/wifi-icon/wifi-icon.component';
         TooltipDirective,
         CheckboxComponent,
         RouterModule,
+        WifiIconComponent,
     ],
-    exports: [AppLayoutComponent, WifiIconComponent]
+    exports: [AppLayoutComponent]
 })
 export class AppLayoutModule { }

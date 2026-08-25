@@ -4,10 +4,6 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { getHttpErrorMessage } from 'src/app/utils/error-handler';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { DateAgoPipe } from 'src/app/pipes/date-ago.pipe';
-import { HashSuffixPipe } from 'src/app/pipes/hash-suffix.pipe';
-import { ByteSuffixPipe } from 'src/app/pipes/byte-suffix.pipe';
-import { DiffSuffixPipe } from 'src/app/pipes/diff-suffix.pipe';
 import { QuicklinkService } from 'src/app/services/quicklink.service';
 import { ShareRejectionExplanationService } from 'src/app/services/share-rejection-explanation.service';
 import { LoadingService } from 'src/app/services/loading.service';
@@ -23,6 +19,16 @@ import { eChartLabel, ChartUnitGroups, chartLabelValue, chartLabelKey } from 'sr
 import { LocalStorageService } from 'src/app/local-storage.service';
 import { GridStack, GridItemHTMLElement } from 'gridstack';
 import { DashboardEditService, WidgetDef } from 'src/app/services/dashboard-edit.service';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { DateAgoPipe } from 'src/app/pipes/date-ago.pipe';
+import { HashSuffixPipe } from 'src/app/pipes/hash-suffix.pipe';
+import { DiffSuffixPipe } from 'src/app/pipes/diff-suffix.pipe';
+import { AddressPipe } from 'src/app/pipes/address.pipe';
+import { SatsPipe } from 'src/app/pipes/sats.pipe';
+import { TooltipDirective } from '../../directives/tooltip.directive';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ConfettiComponent } from '../confetti/confetti.component';
+import { ProgressbarComponent } from '../progressbar/progressbar.component';
 
 type PoolLabel = 'Primary' | 'Fallback';
 type ProtocolLabel = 'SV2 Standard Channel' | 'SV2 Extended Channel';
@@ -74,7 +80,22 @@ const WIDGET_DEFAULTS: WidgetDef[] = [
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    AsyncPipe,
+    DateAgoPipe,
+    HashSuffixPipe,
+    DiffSuffixPipe,
+    AddressPipe,
+    SatsPipe,
+    TooltipDirective,
+    FormsModule,
+    ReactiveFormsModule,
+    AppChartComponent,
+    ConfettiComponent,
+    ProgressbarComponent
+  ]
 })
 export class HomeComponent implements OnInit, OnDestroy {
   public messages: ISystemMessage[] = [];

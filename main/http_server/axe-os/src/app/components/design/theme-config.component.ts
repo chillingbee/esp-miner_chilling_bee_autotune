@@ -3,6 +3,10 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { LayoutService } from '../../layout/service/app.layout.service';
 import { ThemeService } from '../../services/theme.service';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RadioButtonComponent } from '../radio-button/radio-button.component';
+import { TooltipDirective } from '../../directives/tooltip.directive';
 
 interface ThemeOption {
   name: string;
@@ -19,7 +23,14 @@ interface ColorSchemeOption {
   selector: 'app-theme-config',
   templateUrl: './theme-config.component.html',
   styleUrls: ['./design-component.scss'],
-  standalone: false
+  standalone: true,
+  imports: [
+    CommonModule,
+    AsyncPipe,
+    FormsModule,
+    RadioButtonComponent,
+    TooltipDirective
+  ]
 })
 export class ThemeConfigComponent implements OnInit, OnDestroy {
   selectedScheme: string;
@@ -143,6 +154,12 @@ export class ThemeConfigComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private applyThemeColors(accentColors: Record<string, string>) {
+    Object.entries(accentColors).forEach(([key, value]) => {
+      document.documentElement.style.setProperty(key, value);
+    });
   }
 
   changeColorScheme(scheme: string) {

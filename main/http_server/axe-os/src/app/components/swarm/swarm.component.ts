@@ -8,6 +8,18 @@ import { LayoutService } from "../../layout/service/app.layout.service";
 import { SystemApiService } from 'src/app/services/system.service';
 import { SystemInfo as ISystemInfo } from 'src/app/generated/models';
 import { ModalComponent } from '../modal/modal.component';
+import { EditComponent } from '../edit/edit.component';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { HashSuffixPipe } from '../../pipes/hash-suffix.pipe';
+import { DiffSuffixPipe } from '../../pipes/diff-suffix.pipe';
+import { DateAgoPipe } from '../../pipes/date-ago.pipe';
+import { ByteSuffixPipe } from '../../pipes/byte-suffix.pipe';
+import { TooltipDirective } from '../../directives/tooltip.directive';
+import { SliderComponent } from '../slider/slider.component';
+import { DropdownComponent } from '../dropdown/dropdown.component';
+import { CheckboxComponent } from '../checkbox/checkbox.component';
+import { RadioButtonComponent } from '../radio-button/radio-button.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 const SWARM_DATA = 'SWARM_DATA';
 const SWARM_VERSION = 'SWARM_VERSION';
@@ -32,22 +44,39 @@ function addressValidator(control: AbstractControl): ValidationErrors | null {
   return { invalidAddress: true };
 }
 
-type SwarmDevice = { 
-  address: string; 
-  ASICModel: string; 
-  deviceModel: string; 
-  swarmColor: string; 
-  asicCount: number; 
-  displayName?: string; 
-  connectionAddress?: string; 
-  [key: string]: any 
+type SwarmDevice = {
+  address: string;
+  ASICModel: string;
+  deviceModel: string;
+  swarmColor: string;
+  asicCount: number;
+  displayName?: string;
+  connectionAddress?: string;
+  [key: string]: any
 };
 
 @Component({
     selector: 'app-swarm',
     templateUrl: './swarm.component.html',
     styleUrls: ['./swarm.component.scss'],
-    standalone: false
+    standalone: true,
+    imports: [
+      CommonModule,
+      AsyncPipe,
+      HashSuffixPipe,
+      DiffSuffixPipe,
+      DateAgoPipe,
+      ByteSuffixPipe,
+      TooltipDirective,
+      SliderComponent,
+      DropdownComponent,
+      CheckboxComponent,
+      RadioButtonComponent,
+      FormsModule,
+      ReactiveFormsModule,
+      ModalComponent,
+      EditComponent
+    ]
 })
 export class SwarmComponent implements OnInit, OnDestroy {
 

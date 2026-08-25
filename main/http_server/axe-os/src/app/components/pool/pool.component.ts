@@ -7,6 +7,17 @@ import { LoadingService } from 'src/app/services/loading.service';
 import { SystemApiService } from 'src/app/services/system.service';
 import { LiveDataService } from 'src/app/services/live-data.service';
 import { first } from 'rxjs';
+<<<<<<< HEAD
+=======
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { CheckboxComponent } from '../checkbox/checkbox.component';
+import { DropdownComponent } from '../dropdown/dropdown.component';
+import { SliderComponent } from '../slider/slider.component';
+import { RadioButtonComponent } from '../radio-button/radio-button.component';
+import { TooltipTextIconComponent } from '../tooltip-text-icon/tooltip-text-icon.component';
+import { TooltipDirective } from '../../directives/tooltip.directive';
+>>>>>>> feea1a55 (chore: apply yesterday's UI changes (theme picker restructure, component updates))
 
 interface ITlsOption {
   value: number;
@@ -31,7 +42,19 @@ interface IPoolDropdownOption {
 @Component({
     selector: 'app-pool',
     templateUrl: './pool.component.html',
-    standalone: false
+    standalone: true,
+    imports: [
+      CommonModule,
+      AsyncPipe,
+      FormsModule,
+      ReactiveFormsModule,
+      CheckboxComponent,
+      DropdownComponent,
+      SliderComponent,
+      RadioButtonComponent,
+      TooltipTextIconComponent,
+      TooltipDirective
+    ]
 })
 export class PoolComponent implements OnInit {
   public form!: FormGroup;
@@ -174,7 +197,7 @@ export class PoolComponent implements OnInit {
           this.updatePoolDropdownOptions();
         });
 
-        this.form.get('primaryPoolIndex')?.valueChanges.subscribe(primVal => {
+        this.form.get('primaryPoolIndex')?.valueChanges.subscribe((primVal: number) => {
           const secVal = this.form.get('secondaryPoolIndex')?.value;
           if (primVal === secVal) {
             this.form.get('secondaryPoolIndex')?.setValue(this.previousPrim, { emitEvent: false });
@@ -183,7 +206,7 @@ export class PoolComponent implements OnInit {
           this.previousPrim = primVal;
         });
 
-        this.form.get('secondaryPoolIndex')?.valueChanges.subscribe(secVal => {
+        this.form.get('secondaryPoolIndex')?.valueChanges.subscribe((secVal: number) => {
           const primVal = this.form.get('primaryPoolIndex')?.value;
           if (secVal === primVal) {
             this.form.get('primaryPoolIndex')?.setValue(this.previousSec, { emitEvent: false });
@@ -205,7 +228,7 @@ export class PoolComponent implements OnInit {
       this.poolDropdownOptions = [];
       return;
     }
-    const newOptions = this.poolsArray.controls.map((control) => {
+    const newOptions = this.poolsArray.controls.map((control: AbstractControl) => {
       const id = control.get('id')?.value;
       const url = control.get('stratumURL')?.value || '';
       const proto = control.get('stratumProtocol')?.value || 'SV1';
@@ -223,7 +246,7 @@ export class PoolComponent implements OnInit {
 
   setupTlsValidationForIndex(index: number) {
     const poolGroup = this.poolsArray.at(index) as FormGroup;
-    poolGroup.get('stratumTLS')?.valueChanges.subscribe(value => {
+    poolGroup.get('stratumTLS')?.valueChanges.subscribe((value: number) => {
       const certControl = poolGroup.get('stratumCert');
       if (value === 2) {
         certControl?.setValidators([
@@ -239,7 +262,7 @@ export class PoolComponent implements OnInit {
   }
 
   private getFirstAvailableId(): number {
-    const existingIds = this.poolsArray.controls.map(c => c.get('id')?.value);
+    const existingIds = this.poolsArray.controls.map((c: AbstractControl) => c.get('id')?.value);
     for (let i = 0; i < 8; i++) {
       if (!existingIds.includes(i)) {
         return i;
@@ -285,7 +308,7 @@ export class PoolComponent implements OnInit {
       this.showAdvancedOptions[nextId] = false;
 
       // Sort visual cards ascending by ID
-      this.poolsArray.controls.sort((a, b) => a.get('id')?.value - b.get('id')?.value);
+      this.poolsArray.controls.sort((a: AbstractControl, b: AbstractControl) => a.get('id')?.value - b.get('id')?.value);
 
       const index = this.poolsArray.controls.findIndex(c => c.get('id')?.value === nextId);
       this.setupTlsValidationForIndex(index);

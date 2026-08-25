@@ -12,12 +12,28 @@ import { SystemApiService } from 'src/app/services/system.service';
 import { WifiNetwork } from 'src/app/generated/models';
 import { first } from 'rxjs/operators';
 import { ISystemUpdateResponse } from 'src/models/ISystemUpdateResponse';
+import { CommonModule, AsyncPipe } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { DropdownComponent } from '../dropdown/dropdown.component';
+import { CheckboxComponent } from '../checkbox/checkbox.component';
+import { TooltipTextIconComponent } from '../tooltip-text-icon/tooltip-text-icon.component';
+import { TooltipDirective } from '../../directives/tooltip.directive';
 
 @Component({
     selector: 'app-network-edit',
     templateUrl: './network.edit.component.html',
     styleUrls: ['./network.edit.component.scss'],
-    standalone: false
+    standalone: true,
+    imports: [
+      CommonModule,
+      AsyncPipe,
+      FormsModule,
+      ReactiveFormsModule,
+      DropdownComponent,
+      CheckboxComponent,
+      TooltipTextIconComponent,
+      TooltipDirective
+    ] restructure, component updates))
 })
 export class NetworkEditComponent implements OnInit {
   private formSubject = new BehaviorSubject<FormGroup | null>(null);
