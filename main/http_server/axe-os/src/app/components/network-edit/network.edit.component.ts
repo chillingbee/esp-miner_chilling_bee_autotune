@@ -33,7 +33,7 @@ import { TooltipDirective } from '../../directives/tooltip.directive';
       CheckboxComponent,
       TooltipTextIconComponent,
       TooltipDirective
-    ] restructure, component updates))
+    ]
 })
 export class NetworkEditComponent implements OnInit {
   private formSubject = new BehaviorSubject<FormGroup | null>(null);

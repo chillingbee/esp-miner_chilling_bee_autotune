@@ -57,14 +57,14 @@ const routes: Routes = [
         title: `${TITLE_PREFIX} Update`,
       },
       {
-        path: 'network',
-        component: NetworkComponent,
-        title: `${TITLE_PREFIX} Network`,
-      },
-      {
         path: 'settings',
         component: SettingsComponent,
         title: `${TITLE_PREFIX} Settings`,
+      },
+      {
+        path: 'network',
+        component: NetworkComponent,
+        title: `${TITLE_PREFIX} Network`,
       },
       {
         path: 'swarm',
@@ -85,16 +85,12 @@ const routes: Routes = [
         path: 'pool',
         component: PoolComponent,
         title: `${TITLE_PREFIX} Pool`,
-<<<<<<< HEAD
-      }
-=======
       },
       {
         path: 'autotune',
         component: AutotuneComponent,
         title: `${TITLE_PREFIX} Autotune`,
-      },
->>>>>>> 560f298f (feat(autotune): successfully integrate autotune component and UI styles)
+      }
     ]
   },
 

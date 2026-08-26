@@ -16,15 +16,6 @@ import { LoadingComponent } from '../components/loading/loading.component';
 import { WifiIconComponent } from '../components/wifi-icon/wifi-icon.component';
 
 @NgModule({
-    declarations: [
-        AppMenuitemComponent,
-        AppTopBarComponent,
-        AppFooterComponent,
-        AppMenuComponent,
-        AppSidebarComponent,
-        AppLayoutComponent,
-        LoadingComponent,
-    ],
     imports: [
         BrowserModule,
         FormsModule,
@@ -34,6 +25,7 @@ import { WifiIconComponent } from '../components/wifi-icon/wifi-icon.component';
         CheckboxComponent,
         RouterModule,
         WifiIconComponent,
+        AppLayoutComponent,
     ],
     exports: [AppLayoutComponent]
 })

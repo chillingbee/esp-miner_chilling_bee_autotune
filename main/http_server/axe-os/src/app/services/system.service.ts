@@ -1,6 +1,6 @@
 import { HttpClient, HttpEvent } from '@angular/common/http';
 import { Injectable, Optional } from '@angular/core';
-import { delay, Observable, of, timeout, from } from 'rxjs';
+import { delay, Observable, of, timeout, from, map } from 'rxjs';
 import { eChartLabel } from 'src/models/enum/eChartLabel';
 import { chartLabelKey } from 'src/models/enum/eChartLabel';
 import { chartLabelValue } from 'src/models/enum/eChartLabel';
@@ -10,7 +10,8 @@ import {
   SystemAsic as ISystemASIC,
   SystemScoreboardEntry as ISystemScoreboardEntry,
   Settings,
-  GenericResponse
+  GenericResponse,
+  AutotuneSettings
 } from '../generated/models';
 import { Api } from '../generated/api';
 import * as functions from '../generated/functions';
@@ -161,6 +162,7 @@ export class SystemApiService {
         responseTime: 10,
         responseShareBatch: 1,
         isUsingFallbackStratum: 0,
+        bestScoreUptime: 30,
         poolConnectionInfo: "IPv4 (TLS)",
         frequency: 485,
         actualFrequency: 485,
@@ -478,6 +480,41 @@ export class SystemApiService {
       defaultVoltage: 1200,
       voltageOptions: [1100, 1150, 1200, 1250, 1300]
     }).pipe(delay(1000));
+  }
+
+  public getAutotuneSettings(uri: string = ''): Observable<AutotuneSettings | null> {
+    if (!environment.mock && this.api && !uri) {
+      return from(this.api.invoke(functions.getAutotuneSettings, {})).pipe(
+        timeout(API_TIMEOUT),
+        map((resp: any) => resp.body as AutotuneSettings)
+      );
+    }
+
+    if (!environment.mock && uri) {
+      return this.httpClient.get<AutotuneSettings>(`${uri}/api/system/autotune`).pipe(timeout(API_TIMEOUT));
+    }
+
+    return of(null).pipe(delay(1000));
+  }
+
+  public updateAutotuneSettings(settings: AutotuneSettings, uri: string = ''): Observable<GenericResponse> {
+    if (!environment.mock && this.api && !uri) {
+      return from(this.api.invoke(functions.updateAutotuneSettings, { body: settings }) as Promise<void>).pipe(
+        map(() => ({ message: 'Autotune settings updated' } as GenericResponse))
+      );
+    }
+
+    if (!environment.mock && uri) {
+      // API returns 204 No Content, so we need to handle empty response
+      return this.httpClient.post(`${uri}/api/system/autotune`, settings, {
+        observe: 'response',
+        responseType: 'text'
+      }).pipe(
+        map(() => ({ message: 'Autotune settings updated' } as GenericResponse))
+      );
+    }
+
+    return of({ message: 'Autotune settings updated (mock)' } as GenericResponse).pipe(delay(1000));
   }
 
 

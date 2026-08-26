@@ -7,11 +7,17 @@ import { LayoutService } from './service/app.layout.service';
 import { SensitiveData } from 'src/app/services/sensitive-data.service';
 import { DashboardEditService } from 'src/app/services/dashboard-edit.service';
 import { SystemInfo as ISystemInfo } from 'src/app/generated/models';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { CheckboxComponent } from '../components/checkbox/checkbox.component';
+import { WifiIconComponent } from '../components/wifi-icon/wifi-icon.component';
+import { TooltipDirective } from '../directives/tooltip.directive';
 
 @Component({
     selector: 'app-topbar',
     templateUrl: './app.topbar.component.html',
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, CheckboxComponent, WifiIconComponent, TooltipDirective]
 })
 export class AppTopBarComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();

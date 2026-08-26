@@ -1,10 +1,13 @@
 import { Component, Input, HostListener } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { TooltipDirective } from '../../directives/tooltip.directive';
 
 @Component({
     selector: 'tooltip-icon',
     templateUrl: './tooltip-icon.component.html',
     styleUrls: ['./tooltip-icon.component.scss'],
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, TooltipDirective]
 })
 export class TooltipIconComponent {
   @Input() tooltip: string = '';

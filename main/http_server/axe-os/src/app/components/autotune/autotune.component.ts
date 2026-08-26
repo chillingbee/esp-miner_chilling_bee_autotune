@@ -148,8 +148,8 @@ export class AutotuneComponent implements OnInit {
     forkJoin([loadSettings$, loadInfo$, loadAsic$])
       .pipe(this.loadingService.lockUIUntilComplete())
       .subscribe({
-        next: ([settings, info, asic]) => {
-          this.updateSliderLimits(info, asic);
+        next: ([settings, info, asicSettings]) => {
+          this.updateSliderLimits(info, asicSettings);
 
           if (settings) {
             this.patchForm(settings);

@@ -4,7 +4,7 @@ import { LayoutService } from "./service/app.layout.service";
 @Component({
     selector: 'app-footer',
     templateUrl: './app.footer.component.html',
-    standalone: false
+    standalone: true
 })
 export class AppFooterComponent {
     constructor(public layoutService: LayoutService) { }

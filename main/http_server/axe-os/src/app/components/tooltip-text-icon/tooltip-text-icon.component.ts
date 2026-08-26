@@ -1,9 +1,11 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { TooltipIconComponent } from '../tooltip-icon/tooltip-icon.component';
 
 @Component({
     selector: 'tooltip-text-icon',
     templateUrl: './tooltip-text-icon.component.html',
-    standalone: false
+    standalone: true,
+    imports: [TooltipIconComponent]
 })
 export class TooltipTextIconComponent implements OnChanges {
   @Input() tooltip: string | null = '';

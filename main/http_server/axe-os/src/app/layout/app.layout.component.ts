@@ -1,15 +1,20 @@
 import { Component, OnDestroy, Renderer2, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, Subscription, Subject, takeUntil } from 'rxjs';
 import { SensitiveData } from 'src/app/services/sensitive-data.service';
 import { LayoutService } from "./service/app.layout.service";
 import { AppSidebarComponent } from "./app.sidebar.component";
 import { AppTopBarComponent } from './app.topbar.component';
+import { LoadingComponent } from '../components/loading/loading.component';
+import { AppFooterComponent } from './app.footer.component';
 
 @Component({
     selector: 'app-layout',
     templateUrl: './app.layout.component.html',
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, RouterModule, AppSidebarComponent, AppTopBarComponent, LoadingComponent, AppFooterComponent]
 })
 export class AppLayoutComponent implements OnDestroy {
     private destroy$ = new Subject<void>();

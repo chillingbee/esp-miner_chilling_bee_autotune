@@ -23,6 +23,9 @@ import { CommonModule, AsyncPipe } from '@angular/common';
 import { DateAgoPipe } from 'src/app/pipes/date-ago.pipe';
 import { HashSuffixPipe } from 'src/app/pipes/hash-suffix.pipe';
 import { DiffSuffixPipe } from 'src/app/pipes/diff-suffix.pipe';
+import { ByteSuffixPipe } from 'src/app/pipes/byte-suffix.pipe';
+import { TooltipTextIconComponent } from '../tooltip-text-icon/tooltip-text-icon.component';
+import { DropdownComponent } from '../dropdown/dropdown.component';
 import { AddressPipe } from 'src/app/pipes/address.pipe';
 import { SatsPipe } from 'src/app/pipes/sats.pipe';
 import { TooltipDirective } from '../../directives/tooltip.directive';
@@ -94,7 +97,9 @@ const WIDGET_DEFAULTS: WidgetDef[] = [
     ReactiveFormsModule,
     AppChartComponent,
     ConfettiComponent,
-    ProgressbarComponent
+    ProgressbarComponent,
+    TooltipTextIconComponent,
+    DropdownComponent
   ]
 })
 export class HomeComponent implements OnInit, OnDestroy {
@@ -1020,7 +1025,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           this.activePoolProtocol = 'SV1';
         }
         this.responseTime = info.responseTime;
-        info.coreVoltageSet = info.coreVoltageSet / 1000;
+        // info.coreVoltageSet is not available in API, using coreVoltage instead
 
         this.activePoolUserAddressPart = this.getAddressPart(this.activePoolUser);
         this.activePoolUserSuffixPart = this.getSuffixPart(this.activePoolUser);
@@ -1474,7 +1479,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       case eChartLabel.asicTemp2: return this.maxTemp;
       case eChartLabel.vrTemp: return this.maxTemp + 25;
       case eChartLabel.asicVoltage: return info.coreVoltage;
-      case eChartLabel.asicVoltageSet: return info.coreVoltageSet;
+      case eChartLabel.asicVoltageSet: return info.coreVoltage;
       case eChartLabel.voltage: return info.nominalVoltage + .5;
       case eChartLabel.power: return this.maxPower;
       case eChartLabel.current: return this.maxPower / info.coreVoltage;
@@ -1498,7 +1503,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       case eChartLabel.asicTemp2: return info.temp2;
       case eChartLabel.vrTemp: return info.vrTemp;
       case eChartLabel.asicVoltage: return info.coreVoltageActual;
-      case eChartLabel.asicVoltageSet: return info.coreVoltageSet;
+      case eChartLabel.asicVoltageSet: return info.coreVoltage;
       case eChartLabel.voltage: return info.voltage;
       case eChartLabel.power: return info.power;
       case eChartLabel.current: return info.current;

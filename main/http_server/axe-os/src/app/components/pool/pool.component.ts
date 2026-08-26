@@ -7,8 +7,6 @@ import { LoadingService } from 'src/app/services/loading.service';
 import { SystemApiService } from 'src/app/services/system.service';
 import { LiveDataService } from 'src/app/services/live-data.service';
 import { first } from 'rxjs';
-<<<<<<< HEAD
-=======
 import { CommonModule, AsyncPipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CheckboxComponent } from '../checkbox/checkbox.component';
@@ -17,7 +15,6 @@ import { SliderComponent } from '../slider/slider.component';
 import { RadioButtonComponent } from '../radio-button/radio-button.component';
 import { TooltipTextIconComponent } from '../tooltip-text-icon/tooltip-text-icon.component';
 import { TooltipDirective } from '../../directives/tooltip.directive';
->>>>>>> feea1a55 (chore: apply yesterday's UI changes (theme picker restructure, component updates))
 
 interface ITlsOption {
   value: number;
