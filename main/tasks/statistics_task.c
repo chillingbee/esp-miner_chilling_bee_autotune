@@ -187,8 +187,6 @@ void statistics_task(void * pvParameters)
                 statsData.wifiRSSI = wifiRSSI;
                 statsData.freeHeap = esp_get_free_heap_size();
                 statsData.responseTime = sys_module->response_time;
-                statsData.frequency = power_management->frequency_value;
-                statsData.core_voltage = power_management->core_voltage;
 
                 addStatisticData(&statsData, configStatsFrequency);
             }

@@ -4,7 +4,6 @@
 #include "mining.h"
 #include "stratum_api.h"
 #include "utils.h"
-#include "esp_log.h"
 
 void free_bm_job(bm_job *job)
 {
