@@ -178,7 +178,7 @@ void SYSTEM_init_system(GlobalState * GLOBAL_STATE)
     module->shares_rejected = 0;
     module->best_nonce_diff = nvs_config_get_u64(NVS_CONFIG_BEST_DIFF);
     module->best_session_nonce_diff = 0;
-    module->start_time = esp_timer_get_time();
+    module->start_time_us = esp_timer_get_time();
     module->lastClockSync = 0;
     module->block_found = 0;
     module->show_new_block = false;
@@ -452,7 +452,7 @@ void SYSTEM_notify_found_nonce(GlobalState * GLOBAL_STATE, double diff, uint32_t
         suffixString((uint64_t) diff, module->best_session_diff_string, DIFF_STRING_SIZE, 0);
         
         // Uptime in Sekunden zum Zeitpunkt des neuen Rekords festhalten:
-        module->best_session_uptime = (uint32_t)((esp_timer_get_time() - module->start_time) / 1000000);
+        module->best_session_uptime = (uint32_t)((esp_timer_get_time() - module->start_time_us) / 1000000);
     }
 
     double network_diff = networkDifficulty(target);

@@ -93,7 +93,7 @@ static void system_api_add_telemetry(cJSON *root, GlobalState *g) {
     }
 
     // Dynamic System Stats & Highscore Uptime Logik
-    uint32_t current_uptime = (uint32_t)((esp_timer_get_time() - g->SYSTEM_MODULE.start_time) / 1000000);
+    uint32_t current_uptime = (uint32_t)((esp_timer_get_time() - g->SYSTEM_MODULE.start_time_us) / 1000000);
     uint64_t current_best_diff = g->SYSTEM_MODULE.best_session_nonce_diff;
 
     // Wenn Miner neu gestartet wurde oder erster Lauf
