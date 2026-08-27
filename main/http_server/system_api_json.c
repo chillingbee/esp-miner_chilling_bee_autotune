@@ -76,6 +76,15 @@ static void system_api_add_telemetry(cJSON *root, GlobalState *g) {
     cJSON_AddNumberToObject(root, "bestDiff", g->SYSTEM_MODULE.best_nonce_diff);
     cJSON_AddNumberToObject(root, "bestSessionDiff", g->SYSTEM_MODULE.best_session_nonce_diff);
     cJSON_AddNumberToObject(root, "bestDiffUptime", g->SYSTEM_MODULE.best_session_uptime);
+
+    // Time elapsed since session best diff was achieved (in seconds)
+    if (g->SYSTEM_MODULE.best_session_uptime > 0) {
+        uint32_t current_uptime = (uint32_t)((esp_timer_get_time() - g->SYSTEM_MODULE.start_time) / 1000000);
+        cJSON_AddNumberToObject(root, "bestSessionUptime", current_uptime - g->SYSTEM_MODULE.best_session_uptime);
+    } else {
+        cJSON_AddNumberToObject(root, "bestSessionUptime", 0);
+    }
+
     cJSON_AddNumberToObject(root, "poolDifficulty", g->pool_difficulty);
     cJSON_AddFloatToObject(root, "responseTime", g->SYSTEM_MODULE.response_time);
     cJSON_AddNumberToObject(root, "responseShareBatch", g->SYSTEM_MODULE.response_share_batch);

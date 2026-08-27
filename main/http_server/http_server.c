@@ -45,6 +45,7 @@
 #include "log_buffer.h"
 #include "cjson_utils.h"
 #include "utils.h"
+#include "auto_tune.h"
 
 static const char * TAG = "http_server";
 static const char * CORS_TAG = "CORS";
@@ -1836,6 +1837,112 @@ esp_err_t http_404_error_handler(httpd_req_t * req, httpd_err_code_t err)
     return ESP_OK;
 }
 
+esp_err_t GET_autotune_info(httpd_req_t * req)
+{
+    if (is_network_allowed(req) != ESP_OK) {
+        return httpd_resp_send_err(req, HTTPD_401_UNAUTHORIZED, "Unauthorized");
+    }
+    httpd_resp_set_type(req, "application/json");
+    if (set_cors_headers(req) != ESP_OK) {
+        httpd_resp_send_500(req);
+        return ESP_OK;
+    }
+
+    cJSON *root = cJSON_CreateObject();
+    cJSON_AddNumberToObject(root, nvs_config_get_settings(NVS_CONFIG_KEY_POWER_LIMIT)->nvs_key_name, AUTO_TUNE.power_limit);
+    cJSON_AddNumberToObject(root, nvs_config_get_settings(NVS_CONFIG_KEY_FAN_LIMIT)->nvs_key_name, AUTO_TUNE.fan_limit);
+    cJSON_AddNumberToObject(root, nvs_config_get_settings(NVS_CONFIG_KEY_MAX_VOLTAGE_ASIC)->nvs_key_name, AUTO_TUNE.max_voltage_asic);
+    cJSON_AddNumberToObject(root, nvs_config_get_settings(NVS_CONFIG_KEY_MAX_FREQUENCY_ASIC)->nvs_key_name, AUTO_TUNE.max_frequency_asic);
+    cJSON_AddNumberToObject(root, nvs_config_get_settings(NVS_CONFIG_KEY_MAX_TEMP_ASIC)->nvs_key_name, AUTO_TUNE.max_temp_asic);
+    cJSON_AddBoolToObject(root, nvs_config_get_settings(NVS_CONFIG_KEY_AUTO_TUNE_ENABLE)->nvs_key_name, AUTO_TUNE.auto_tune_hashrate);
+    cJSON_AddNumberToObject(root, nvs_config_get_settings(NVS_CONFIG_KEY_OVERSHOT_POWER_LIMIT)->nvs_key_name, AUTO_TUNE.overshot_power_limit);
+    cJSON_AddNumberToObject(root, nvs_config_get_settings(NVS_CONFIG_KEY_OVERSHOT_FAN_LIMIT)->nvs_key_name, AUTO_TUNE.overshot_fanspeed);
+    cJSON_AddNumberToObject(root, nvs_config_get_settings(NVS_CONFIG_KEY_MAX_TEMP_VR)->nvs_key_name, AUTO_TUNE.max_temp_vr);
+
+    const char *response = cJSON_Print(root);
+    httpd_resp_sendstr(req, response);
+    free((void *)response);
+    cJSON_Delete(root);
+    return ESP_OK;
+}
+
+esp_err_t POST_autotune_update(httpd_req_t * req)
+{
+    if (is_network_allowed(req) != ESP_OK) {
+        return httpd_resp_send_err(req, HTTPD_401_UNAUTHORIZED, "Unauthorized");
+    }
+    if (set_cors_headers(req) != ESP_OK) {
+        httpd_resp_send_500(req);
+        return ESP_OK;
+    }
+
+    int total_len = req->content_len;
+    char buf[512];
+    int received = 0, cur_len = 0;
+    if (total_len >= sizeof(buf)) {
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "content too long");
+        return ESP_OK;
+    }
+    while (cur_len < total_len) {
+        received = httpd_req_recv(req, buf + cur_len, total_len - cur_len);
+        if (received <= 0) {
+            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to receive data");
+            return ESP_OK;
+        }
+        cur_len += received;
+    }
+    buf[total_len] = '\0';
+
+    cJSON *root = cJSON_Parse(buf);
+    if (!root) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Invalid JSON");
+        return ESP_OK;
+    }
+
+    cJSON *item;
+    if ((item = cJSON_GetObjectItem(root, nvs_config_get_settings(NVS_CONFIG_KEY_POWER_LIMIT)->nvs_key_name)) && cJSON_IsNumber(item)) {
+        AUTO_TUNE.power_limit = item->valuedouble;
+        nvs_config_set_u16(NVS_CONFIG_KEY_POWER_LIMIT, (uint16_t)AUTO_TUNE.power_limit);
+    }
+    if ((item = cJSON_GetObjectItem(root, nvs_config_get_settings(NVS_CONFIG_KEY_FAN_LIMIT)->nvs_key_name)) && cJSON_IsNumber(item)) {
+        AUTO_TUNE.fan_limit = item->valuedouble;
+        nvs_config_set_u16(NVS_CONFIG_KEY_FAN_LIMIT, (uint16_t)AUTO_TUNE.fan_limit);
+    }
+    if ((item = cJSON_GetObjectItem(root, nvs_config_get_settings(NVS_CONFIG_KEY_MAX_VOLTAGE_ASIC)->nvs_key_name)) && cJSON_IsNumber(item)) {
+        AUTO_TUNE.max_voltage_asic = item->valuedouble;
+        nvs_config_set_u16(NVS_CONFIG_KEY_MAX_VOLTAGE_ASIC, (uint16_t)AUTO_TUNE.max_voltage_asic);
+    }
+    if ((item = cJSON_GetObjectItem(root, nvs_config_get_settings(NVS_CONFIG_KEY_MAX_FREQUENCY_ASIC)->nvs_key_name)) && cJSON_IsNumber(item)) {
+        AUTO_TUNE.max_frequency_asic = item->valuedouble;
+        nvs_config_set_u16(NVS_CONFIG_KEY_MAX_FREQUENCY_ASIC, (uint16_t)AUTO_TUNE.max_frequency_asic);
+    }
+    if ((item = cJSON_GetObjectItem(root, nvs_config_get_settings(NVS_CONFIG_KEY_MAX_TEMP_ASIC)->nvs_key_name)) && cJSON_IsNumber(item)) {
+        AUTO_TUNE.max_temp_asic = item->valuedouble;
+        nvs_config_set_u16(NVS_CONFIG_KEY_MAX_TEMP_ASIC, (uint16_t)AUTO_TUNE.max_temp_asic);
+    }
+    if ((item = cJSON_GetObjectItem(root, nvs_config_get_settings(NVS_CONFIG_KEY_AUTO_TUNE_ENABLE)->nvs_key_name)) && cJSON_IsBool(item)) {
+        AUTO_TUNE.auto_tune_hashrate = cJSON_IsTrue(item);
+        nvs_config_set_bool(NVS_CONFIG_KEY_AUTO_TUNE_ENABLE, AUTO_TUNE.auto_tune_hashrate);
+    }
+    if ((item = cJSON_GetObjectItem(root, nvs_config_get_settings(NVS_CONFIG_KEY_OVERSHOT_POWER_LIMIT)->nvs_key_name)) && cJSON_IsNumber(item)) {
+        AUTO_TUNE.overshot_power_limit = item->valuedouble;
+        nvs_config_set_float(NVS_CONFIG_KEY_OVERSHOT_POWER_LIMIT, AUTO_TUNE.overshot_power_limit);
+    }
+    if ((item = cJSON_GetObjectItem(root, nvs_config_get_settings(NVS_CONFIG_KEY_OVERSHOT_FAN_LIMIT)->nvs_key_name)) && cJSON_IsNumber(item)) {
+        AUTO_TUNE.overshot_fanspeed = item->valuedouble;
+        nvs_config_set_u16(NVS_CONFIG_KEY_OVERSHOT_FAN_LIMIT, (uint16_t)AUTO_TUNE.overshot_fanspeed);
+    }
+    if ((item = cJSON_GetObjectItem(root, nvs_config_get_settings(NVS_CONFIG_KEY_MAX_TEMP_VR)->nvs_key_name)) && cJSON_IsNumber(item)) {
+        AUTO_TUNE.max_temp_vr = item->valuedouble;
+        nvs_config_set_u16(NVS_CONFIG_KEY_MAX_TEMP_VR, (uint16_t)AUTO_TUNE.max_temp_vr);
+    }
+
+    cJSON_Delete(root);
+    httpd_resp_set_status(req, "204 No Content");
+    httpd_resp_send(req, NULL, 0);
+    return ESP_OK;
+}
+
 esp_err_t start_rest_server(GlobalState * global_state)
 {
     GLOBAL_STATE = global_state;
@@ -1884,12 +1991,30 @@ esp_err_t start_rest_server(GlobalState * global_state)
 
     /* URI handler for fetching system info */
     httpd_uri_t system_info_get_uri = {
-        .uri = "/api/system/info", 
-        .method = HTTP_GET, 
-        .handler = GET_system_info, 
+        .uri = "/api/system/info",
+        .method = HTTP_GET,
+        .handler = GET_system_info,
         .user_ctx = rest_context
     };
     httpd_register_uri_handler(server, &system_info_get_uri);
+
+    /* URI handler for fetching autotune settings */
+    httpd_uri_t autotune_get_uri = {
+        .uri = "/api/system/autotune",
+        .method = HTTP_GET,
+        .handler = GET_autotune_info,
+        .user_ctx = rest_context
+    };
+    httpd_register_uri_handler(server, &autotune_get_uri);
+
+    /* URI handler for updating autotune settings */
+    httpd_uri_t autotune_post_uri = {
+        .uri = "/api/system/autotune",
+        .method = HTTP_POST,
+        .handler = POST_autotune_update,
+        .user_ctx = rest_context
+    };
+    httpd_register_uri_handler(server, &autotune_post_uri);
 
     /* URI handler for setting boot partition */
     httpd_uri_t system_boot_post_uri = {

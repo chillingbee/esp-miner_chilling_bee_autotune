@@ -273,6 +273,7 @@ components:
         - bestDiff
         - bestSessionDiff
         - bestScoreUptime
+        - bestSessionUptime
         - boardVersion
         - coreVoltage
         - coreVoltageActual
@@ -384,6 +385,9 @@ components:
         bestScoreUptime:
           type: number
           description: Uptime in seconds when best session difficulty was achieved
+        bestSessionUptime:
+          type: number
+          description: Seconds elapsed since session best difficulty was achieved
         boardVersion:
           type: string
           description: Hardware board version

@@ -72,6 +72,7 @@ static lv_obj_t *stats_hashrate_label;
 static lv_obj_t *stats_efficiency_label;
 static lv_obj_t *stats_difficulty_label;
 static lv_obj_t *stats_temp_label;
+static lv_obj_t *stats_session_best_uptime_label;
 
 static lv_obj_t *wifi_rssi_value_label;
 static lv_obj_t *wifi_signal_strength_label;
@@ -303,7 +304,7 @@ static lv_obj_t * create_scr_urls() {
 }
 
 static lv_obj_t * create_scr_stats() {
-    lv_obj_t * scr = create_flex_screen(4);
+    lv_obj_t * scr = create_flex_screen(5);
 
     stats_hashrate_label = lv_label_create(scr);
     lv_label_set_text(stats_hashrate_label, "Gh/s: --");
@@ -313,6 +314,9 @@ static lv_obj_t * create_scr_stats() {
 
     stats_difficulty_label = lv_label_create(scr);
     lv_label_set_text(stats_difficulty_label, "Best: --");
+
+    stats_session_best_uptime_label = lv_label_create(scr);
+    lv_label_set_text(stats_session_best_uptime_label, "Session Best: --");
 
     stats_temp_label = lv_label_create(scr);
     lv_label_set_text(stats_temp_label, "Temp: --");
@@ -550,6 +554,32 @@ static void screen_update_cb(lv_timer_t * timer)
             lv_label_set_text_fmt(stats_difficulty_label, "Best: %s/%s", module->best_session_diff_string, module->best_diff_string);
         }
         current_difficulty = module->best_session_nonce_diff;
+    }
+
+    // Display uptime when session best diff was achieved
+    if (module->best_session_uptime > 0 && stats_session_best_uptime_label) {
+        uint32_t current_uptime = (uint32_t)((esp_timer_get_time() - module->start_time) / 1000000);
+        uint32_t diff_uptime_seconds = current_uptime - module->best_session_uptime;
+
+        char uptime_since_best[50];
+        uint32_t days = diff_uptime_seconds / (24 * 3600);
+        diff_uptime_seconds %= (24 * 3600);
+        uint32_t hours = diff_uptime_seconds / 3600;
+        diff_uptime_seconds %= 3600;
+        uint32_t minutes = diff_uptime_seconds / 60;
+        diff_uptime_seconds %= 60;
+
+        if (days > 0) {
+            snprintf(uptime_since_best, sizeof(uptime_since_best), "Session Best @ %" PRIu32 "d %" PRIu32 "h %" PRIu32 "m ago", days, hours, minutes);
+        } else if (hours > 0) {
+            snprintf(uptime_since_best, sizeof(uptime_since_best), "Session Best @ %" PRIu32 "h %" PRIu32 "m ago", hours, minutes);
+        } else if (minutes > 0) {
+            snprintf(uptime_since_best, sizeof(uptime_since_best), "Session Best @ %" PRIu32 "m %" PRIu32 "s ago", minutes, diff_uptime_seconds);
+        } else {
+            snprintf(uptime_since_best, sizeof(uptime_since_best), "Session Best @ %" PRIu32 "s ago", diff_uptime_seconds);
+        }
+
+        lv_label_set_text(stats_session_best_uptime_label, uptime_since_best);
     }
 
     if (current_chip_temp != power_management->chip_temp_avg) {
