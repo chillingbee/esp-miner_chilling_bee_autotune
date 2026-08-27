@@ -44,6 +44,8 @@ const mockSystemInfo: ISystemInfo = {
   sharesRejected: 0,
   bestDiff: 1200000000,
   bestSessionDiff: 500000000,
+  bestScoreUptime: 3000,
+  bestSessionUptime: 600,
   uptimeSeconds: 3600,
   hashRate: 500,
   hashRate_1m: 500,

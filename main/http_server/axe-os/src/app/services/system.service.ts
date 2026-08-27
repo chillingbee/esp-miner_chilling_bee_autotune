@@ -163,6 +163,7 @@ export class SystemApiService {
         responseShareBatch: 1,
         isUsingFallbackStratum: 0,
         bestScoreUptime: 30,
+        bestSessionUptime: 120,
         poolConnectionInfo: "IPv4 (TLS)",
         frequency: 485,
         actualFrequency: 485,
