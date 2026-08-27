@@ -1921,25 +1921,24 @@ esp_err_t POST_autotune_update(httpd_req_t * req)
         nvs_config_set_u16(NVS_CONFIG_KEY_MAX_TEMP_ASIC, (uint16_t)AUTO_TUNE.max_temp_asic);
     }
     if ((item = cJSON_GetObjectItem(root, nvs_config_get_settings(NVS_CONFIG_KEY_AUTO_TUNE_ENABLE)->nvs_key_name)) && cJSON_IsBool(item)) {
-        AUTO_TUNE.auto_tune_hashrate = cJSON_IsTrue(item);
-        nvs_config_set_bool(NVS_CONFIG_KEY_AUTO_TUNE_ENABLE, AUTO_TUNE.auto_tune_hashrate);
+        AUTO_TUNE.auto_tune_hashrate = item->valueint;
+        nvs_config_set_bool(NVS_CONFIG_KEY_AUTO_TUNE_ENABLE, (bool)AUTO_TUNE.auto_tune_hashrate);
     }
     if ((item = cJSON_GetObjectItem(root, nvs_config_get_settings(NVS_CONFIG_KEY_OVERSHOT_POWER_LIMIT)->nvs_key_name)) && cJSON_IsNumber(item)) {
         AUTO_TUNE.overshot_power_limit = item->valuedouble;
         nvs_config_set_float(NVS_CONFIG_KEY_OVERSHOT_POWER_LIMIT, AUTO_TUNE.overshot_power_limit);
     }
     if ((item = cJSON_GetObjectItem(root, nvs_config_get_settings(NVS_CONFIG_KEY_OVERSHOT_FAN_LIMIT)->nvs_key_name)) && cJSON_IsNumber(item)) {
-        AUTO_TUNE.overshot_fanspeed = item->valuedouble;
+        AUTO_TUNE.overshot_fanspeed = (uint16_t)item->valuedouble;
         nvs_config_set_u16(NVS_CONFIG_KEY_OVERSHOT_FAN_LIMIT, (uint16_t)AUTO_TUNE.overshot_fanspeed);
     }
     if ((item = cJSON_GetObjectItem(root, nvs_config_get_settings(NVS_CONFIG_KEY_MAX_TEMP_VR)->nvs_key_name)) && cJSON_IsNumber(item)) {
-        AUTO_TUNE.max_temp_vr = item->valuedouble;
+        AUTO_TUNE.max_temp_vr = (uint16_t)item->valueint;
         nvs_config_set_u16(NVS_CONFIG_KEY_MAX_TEMP_VR, (uint16_t)AUTO_TUNE.max_temp_vr);
     }
 
     cJSON_Delete(root);
-    httpd_resp_set_status(req, "204 No Content");
-    httpd_resp_send(req, NULL, 0);
+    httpd_resp_send_chunk(req, NULL, 0);
     return ESP_OK;
 }
 

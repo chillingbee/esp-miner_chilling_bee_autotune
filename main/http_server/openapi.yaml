@@ -27,11 +27,6 @@ components:
     AutotuneSettings:
       type: object
       properties:
-        auto_tune:
-          type: integer
-          description: Whether autotuning is enabled (0 or 1)
-          minimum: 0
-          maximum: 1
         power_limit:
           type: number
           description: Power limit (in watts)
@@ -42,36 +37,49 @@ components:
           description: Fan speed limit (%)
           minimum: 0
           maximum: 100
-        osh_pow_limit:
+        max_voltage_asic:
           type: number
-          description: Power limit during overshoot conditions (watts)
-          minimum: 0
-          maximum: 2.2
-        osh_fan_limit:
-          type: number
-          description: Fan speed limit during overshoot conditions (%)
-          minimum: 0
-          maximum: 25
-        max_volt_asic:
-          type: number
-          description: Maximum voltage for ASIC chips (mV)
-          minimum: 500
-          maximum: 1500
-        max_freq_asic:
+          description: Maximum voltage for ASIC chips (volts)
+          minimum: 0.5
+          maximum: 20
+        max_frequency_asic:
           type: number
           description: Maximum frequency for ASIC chips (MHz)
-          minimum: 400
+          minimum: 1100
           maximum: 1400
         max_temp_asic:
           type: number
           description: Maximum temperature for ASIC chips (°C)
-          minimum: 20
+          minimum: 30
           maximum: 90
+        auto_tune:
+          type: boolean
+          description: Whether autotuning is enabled to optimize hashrate
+        overshoot_power_limit:
+          type: number
+          description: Power limit during overshoot conditions (watts)
+          minimum: 0
+          maximum: 2
+        overshoot_fanspeed:
+          type: number
+          description: Fan speed limit during overshoot conditions (%)
+          minimum: 0
+          maximum: 20
         max_temp_vr:
           type: number
           description: Maximum temperature for VR (°C)
-          minimum: 20
+          minimum: 40
           maximum: 95
+      required:
+        - power_limit
+        - fan_limit
+        - max_voltage_asic
+        - max_frequency_asic
+        - max_temp_asic
+        - auto_tune
+        - overshoot_power_limit
+        - overshoot_fanspeed
+        - max_temp_vr
     UpdateSettingsResponse:
       type: object
       properties:
@@ -1105,6 +1113,22 @@ paths:
           description: Internal server error
 
   /api/system/autotune:
+    post:
+      summary: Update autotuning configuration
+      description: Updates the current autotuning settings via a JSON body. Requires valid authentication.
+      tags:
+        - Autotune
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AutotuneSettings'
+      responses:
+        '204':
+          description: Settings updated successfully (no content returned)
+      operationId: updateAutotuneSettings
+
     get:
       summary: Get current autotuning configuration
       description: Returns the current power, fan, temperature, and frequency limits used in autotuning.
@@ -1122,22 +1146,6 @@ paths:
         '500':
           description: Internal server error
       operationId: getAutotuneSettings
-
-    post:
-      summary: Update autotuning configuration
-      description: Updates the current autotuning settings via a JSON body. Requires valid authentication.
-      tags:
-        - Autotune
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AutotuneSettings'
-      responses:
-        '204':
-          description: Settings updated successfully (no content returned)
-      operationId: updateAutotuneSettings
 
   /api/system/info:
     get:
