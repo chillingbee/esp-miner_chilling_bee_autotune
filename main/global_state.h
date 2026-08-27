@@ -69,7 +69,7 @@ typedef struct SystemModule
     float hashrate_10m;
     float hashrate_1h;
     float error_percentage;
-    int64_t start_time_us;
+    int64_t start_time;
     uint64_t shares_accepted;
     uint64_t shares_rejected;
     uint16_t shares_pending;
@@ -115,7 +115,6 @@ typedef struct SystemModule
     char hardware_fault_msg[64];
     const char * asic_status;
     char * version;
-    uint64_t uptime_seconds;
     char * axeOSVersion;
     Scoreboard scoreboard;
     cached_partition_t cached_partitions[3];
@@ -178,11 +177,10 @@ typedef struct GlobalState
     bool new_set_mining_difficulty_msg;
     uint32_t version_mask;
     bool new_stratum_version_rolling_msg;
-    bool reset_extranonce2;
 
     esp_transport_handle_t transport;
     portMUX_TYPE stratum_mux;
-    
+
     // A message ID that must be unique per request that expects a response.
     // For requests not expecting a response (called notifications), this is null.
     int send_uid;

@@ -1,1 +1,1 @@
-- [Autotune Backend Restoration](memory/autotune-backend-restoration.md) — Restored deleted autotune C backend, fixed build errors, GitHub Actions build running
+- [Autotune Backend Restoration](memory/autotune-backend-restoration.md) — Restored deleted autotune C backend, fixed build errors, GitHub Actions build FAILED (missing NVS keys TOTAL_UPTIME, CUMULATIVE_HASHES). Branch: master_bitaxeorg_feat_autotune at e4ad097b

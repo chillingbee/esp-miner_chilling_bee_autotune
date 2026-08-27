@@ -46,7 +46,7 @@ typedef struct
     uint64_t cumulative_hashes_high;  // High 64 bits of 128-bit cumulative hash count
     uint64_t cumulative_hashes_low;   // Low 64 bits of 128-bit cumulative hash count
     uint32_t sentinel;                // Magic value to detect valid noinit data
-} NoinitState;    
+} NoinitState;
 
 __NOINIT_ATTR static NoinitState noinit_state; // Noinit state survives soft reboots but is lost on power cycle
 static uint64_t last_update_time_ms;
@@ -173,7 +173,7 @@ void SYSTEM_check_firmware_migration(void)
     char *last_fw_fp = nvs_config_get_string(NVS_CONFIG_LAST_FW_FINGERPRINT);
     if (!last_fw_fp || strcmp(last_fw_fp, current_fp) != 0) {
         if (nvs_config_get_bool(NVS_CONFIG_USE_CUSTOM_WWW)) {
-            ESP_LOGI(TAG, "Firmware build changed (%s -> %s). Resetting custom WWW to default (false).⁠​‌‌​​​‌​​‌‌​‌​​‌​‌‌‌​‌​​​‌‌​​​​‌​‌‌‌‌​​​​‌‌​​‌​‌⁠",
+            ESP_LOGI(TAG, "Firmware build changed (%s -> %s). Resetting custom WWW to default (false).",
                      (last_fw_fp && strlen(last_fw_fp) > 0) ? last_fw_fp : "none", current_fp);
             nvs_config_set_bool(NVS_CONFIG_USE_CUSTOM_WWW, false);
         }
@@ -197,7 +197,7 @@ void SYSTEM_init_system(GlobalState * GLOBAL_STATE)
     module->shares_rejected = 0;
     module->best_nonce_diff = nvs_config_get_u64(NVS_CONFIG_BEST_DIFF);
     module->best_session_nonce_diff = 0;
-    module->start_time_us = esp_timer_get_time();
+    module->start_time = esp_timer_get_time();
     module->lastClockSync = 0;
     module->block_found = 0;
     module->show_new_block = false;
@@ -230,7 +230,7 @@ void SYSTEM_init_system(GlobalState * GLOBAL_STATE)
     strcpy(module->ip_addr_str, "");
     strcpy(module->ipv6_addr_str, "");
     strcpy(module->wifi_status, "Initializing...");
-    
+
     // set the pool configurations
     for (int i = 0; i < MAX_POOLS; i++) {
         module->pools[i].url = NULL;
@@ -288,14 +288,14 @@ void SYSTEM_init_system(GlobalState * GLOBAL_STATE)
 void SYSTEM_init_versions(GlobalState * GLOBAL_STATE)
 {
     const esp_app_desc_t *app_desc = esp_app_get_description();
-    
+
     // Store the firmware version
     GLOBAL_STATE->SYSTEM_MODULE.version = strdup(app_desc->version);
     if (GLOBAL_STATE->SYSTEM_MODULE.version == NULL) {
         ESP_LOGE(TAG, "Failed to allocate memory for version");
         GLOBAL_STATE->SYSTEM_MODULE.version = strdup("Unknown");
     }
-    
+
     bool use_custom = nvs_config_get_bool(NVS_CONFIG_USE_CUSTOM_WWW) && GLOBAL_STATE->filesystem_is_available;
     char version[64] = "Unified";
 
@@ -321,7 +321,7 @@ void SYSTEM_init_versions(GlobalState * GLOBAL_STATE)
     if (GLOBAL_STATE->SYSTEM_MODULE.axeOSVersion == NULL) {
         GLOBAL_STATE->SYSTEM_MODULE.axeOSVersion = strdup("Unknown");
     }
-    
+
     ESP_LOGI(TAG, "Firmware Version: %s", GLOBAL_STATE->SYSTEM_MODULE.version);
     ESP_LOGI(TAG, "AxeOS Version: %s", GLOBAL_STATE->SYSTEM_MODULE.axeOSVersion);
 }
@@ -452,8 +452,8 @@ void SYSTEM_notify_rejected_share(GlobalState * GLOBAL_STATE, char * error_msg)
     }
 
     if (module->rejected_reason_stats_count < (int)(sizeof(module->rejected_reason_stats) / sizeof(module->rejected_reason_stats[0]))) {
-        strncpy(module->rejected_reason_stats[module->rejected_reason_stats_count].message, 
-                error_msg, 
+        strncpy(module->rejected_reason_stats[module->rejected_reason_stats_count].message,
+                error_msg,
                 sizeof(module->rejected_reason_stats[module->rejected_reason_stats_count].message) - 1);
         module->rejected_reason_stats[module->rejected_reason_stats_count].message[sizeof(module->rejected_reason_stats[module->rejected_reason_stats_count].message) - 1] = '\0'; // Ensure null termination
         module->rejected_reason_stats[module->rejected_reason_stats_count].count = 1;
@@ -461,9 +461,9 @@ void SYSTEM_notify_rejected_share(GlobalState * GLOBAL_STATE, char * error_msg)
     }
 
     if (module->rejected_reason_stats_count > 1) {
-        qsort(module->rejected_reason_stats, module->rejected_reason_stats_count, 
+        qsort(module->rejected_reason_stats, module->rejected_reason_stats_count,
             sizeof(module->rejected_reason_stats[0]), compare_rejected_reason_stats);
-    }    
+    }
 }
 
 void SYSTEM_notify_new_ntime(GlobalState * GLOBAL_STATE, uint32_t ntime)
@@ -489,6 +489,9 @@ void SYSTEM_notify_found_nonce(GlobalState * GLOBAL_STATE, double diff, uint32_t
     if ((uint64_t) diff > module->best_session_nonce_diff) {
         module->best_session_nonce_diff = (uint64_t) diff;
         suffixString((uint64_t) diff, module->best_session_diff_string, DIFF_STRING_SIZE, 0);
+
+        // Uptime in Sekunden zum Zeitpunkt des neuen Rekords festhalten:
+        module->best_session_uptime = (uint32_t)((esp_timer_get_time() - module->start_time) / 1000000);
     }
 
     double network_diff = networkDifficulty(target);
@@ -522,7 +525,7 @@ static esp_err_t ensure_overheat_mode_config() {
 void SYSTEM_noinit_update(SystemModule * SYSTEM_MODULE)
 {
     uint64_t current_time_ms = esp_timer_get_time() / 1000;
-    
+
     // Initialize last_update_time on first call
     if (last_update_time_ms == 0) {
         last_update_time_ms = current_time_ms;
@@ -532,15 +535,15 @@ void SYSTEM_noinit_update(SystemModule * SYSTEM_MODULE)
 
     uint64_t elapsed_ms = current_time_ms - last_update_time_ms;
     last_update_time_ms = current_time_ms;
-    
+
     // Only update if at least 1 second has passed
     if (elapsed_ms < 1000) {
         return;
     }
-    
-    SYSTEM_MODULE->uptime_seconds = (esp_timer_get_time() - SYSTEM_MODULE->start_time_us) / 1000000;
+
+    SYSTEM_MODULE->uptime_seconds = (esp_timer_get_time() - SYSTEM_MODULE->start_time) / 1000000;
     noinit_state.total_uptime = total_uptime_at_system_start + SYSTEM_MODULE->uptime_seconds;
-    
+
     // Update cumulative hashes: hashrate (GH/s) × milliseconds × 1e6 = raw hashes
     uint64_t hashes_done = elapsed_ms * 1e6 * SYSTEM_MODULE->current_hashrate;
     uint64_t new_low = noinit_state.cumulative_hashes_low + hashes_done;
@@ -578,12 +581,12 @@ double SYSTEM_noinit_get_total_log2_work()
         }
         return log2((double)noinit_state.cumulative_hashes_low);
     }
-    
+
     // For 128-bit value: log2(high * 2^64 + low) = 64 + log2(high + low/2^64)
     // Since low/2^64 is very small compared to high, we approximate:
     // log2(high * 2^64 + low) ≈ 64 + log2(high) for large values
     // More precise: 64 + log2(high + low/2^64)
-    double high_plus_fraction = (double)noinit_state.cumulative_hashes_high + 
+    double high_plus_fraction = (double)noinit_state.cumulative_hashes_high +
                                 (double)noinit_state.cumulative_hashes_low / 18446744073709551616.0;
     return 64.0 + log2(high_plus_fraction);
 }
@@ -628,7 +631,7 @@ void SYSTEM_init_partitions(GlobalState * GLOBAL_STATE) {
                 snprintf(cp->version, sizeof(cp->version), "%s", app_desc.version);
                 snprintf(cp->compileDate, sizeof(cp->compileDate), "%s", app_desc.date);
                 snprintf(cp->compileTime, sizeof(cp->compileTime), "%s", app_desc.time);
-                
+
                 esp_partition_pos_t part_pos = {
                     .offset = p->address,
                     .size = p->size,
@@ -649,14 +652,14 @@ void SYSTEM_init_partitions(GlobalState * GLOBAL_STATE) {
 
 void SYSTEM_load_pool_from_nvs(GlobalState * GLOBAL_STATE, int i) {
     if (i < 0 || i >= MAX_POOLS) return;
-    
+
     PoolConfig *cfg = &GLOBAL_STATE->SYSTEM_MODULE.pools[i];
     free(cfg->url);
     free(cfg->user);
     free(cfg->pass);
     free(cfg->cert);
     free(cfg->sv2_authority_pubkey);
-    
+
     cfg->url = NULL;
     cfg->user = NULL;
     cfg->pass = NULL;
