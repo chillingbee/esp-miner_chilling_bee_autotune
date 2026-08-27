@@ -29,6 +29,8 @@ struct StatisticsData
     int8_t wifiRSSI;
     uint32_t freeHeap;
     float responseTime;
+    float frequency;
+    float core_voltage;
 };
 
 bool getStatisticData(uint16_t index, StatisticsDataPtr dataOut);
