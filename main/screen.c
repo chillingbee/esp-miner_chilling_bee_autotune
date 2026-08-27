@@ -663,7 +663,7 @@ void screen_button_press()
 static void uptime_update_cb(lv_timer_t * timer)
 {
     if (wifi_uptime_label) {
-        uint32_t uptime_seconds = (esp_timer_get_time() - GLOBAL_STATE->SYSTEM_MODULE.start_time_us) / 1000000;
+        uint32_t uptime_seconds = (esp_timer_get_time() - GLOBAL_STATE->SYSTEM_MODULE.start_time) / 1000000;
 
         if (current_uptime_seconds != uptime_seconds) {
             current_uptime_seconds = uptime_seconds;

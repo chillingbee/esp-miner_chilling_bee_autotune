@@ -541,8 +541,8 @@ void SYSTEM_noinit_update(SystemModule * SYSTEM_MODULE)
         return;
     }
 
-    SYSTEM_MODULE->uptime_seconds = (esp_timer_get_time() - SYSTEM_MODULE->start_time) / 1000000;
-    noinit_state.total_uptime = total_uptime_at_system_start + SYSTEM_MODULE->uptime_seconds;
+    uint64_t current_uptime_seconds = (esp_timer_get_time() - SYSTEM_MODULE->start_time) / 1000000;
+    noinit_state.total_uptime = total_uptime_at_system_start + current_uptime_seconds;
 
     // Update cumulative hashes: hashrate (GH/s) × milliseconds × 1e6 = raw hashes
     uint64_t hashes_done = elapsed_ms * 1e6 * SYSTEM_MODULE->current_hashrate;
