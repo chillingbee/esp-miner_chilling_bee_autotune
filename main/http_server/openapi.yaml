@@ -280,11 +280,10 @@ components:
         - autofanspeed
         - bestDiff
         - bestSessionDiff
-        - bestScoreUptime
-        - bestSessionUptime
         - boardVersion
         - coreVoltage
         - coreVoltageActual
+        - coreVoltageSet
         - current
         - display
         - fallbackStratumExtranonceSubscribe
@@ -368,12 +367,12 @@ components:
         - networkDifficulty
         - blockSignals
         - blockFound
+        - coinbaseOutputs
         - coinbaseValueTotalSatoshis
         - coinbaseValueUserSatoshis
+        - hashrateMonitor
         - miningPaused
         - statsLimit
-        - partitions
-        - useCustomWWW
       properties:
         ASICModel:
           type: string
@@ -390,12 +389,6 @@ components:
         bestSessionDiff:
           type: number
           description: Best difficulty achieved in current session
-        bestScoreUptime:
-          type: number
-          description: Uptime in seconds when best session difficulty was achieved
-        bestSessionUptime:
-          type: number
-          description: Seconds elapsed since session best difficulty was achieved
         boardVersion:
           type: string
           description: Hardware board version
@@ -405,6 +398,9 @@ components:
         coreVoltageActual:
           type: number
           description: Actual measured ASIC core voltage
+        coreVoltageSet:
+          type: number
+          description: Actual set ASIC core voltage
         current:
           type: number
           description: Current draw in milliamps
@@ -593,15 +589,6 @@ components:
         sharesRejected:
           type: number
           description: Number of rejected shares
-        totalUptimeSeconds:
-          type: number
-          description: Total uptime in seconds
-        totalHashes:
-          type: number
-          description: Total hashes done by the device
-        totalLog2Work:
-          type: number
-          description: Log2 of total hashes
         sharesPending:
           type: number
           description: Shares submitted but not yet resolved by the pool (SV2; 0 for SV1). Rises while the pool batches/buffers acks, drops to 0 once it catches up.
@@ -772,12 +759,6 @@ components:
         ASICModel:
           type: string
           description: ASIC model identifier
-          enum:
-            - BM1366
-            - BM1368
-            - BM1370
-            - BM1373
-            - BM1397
           examples:
             - "BM1366"
         deviceModel:
@@ -1006,9 +987,21 @@ components:
           minimum: 1
           examples:
             - 850
+        coreVoltageSet:
+          type: integer
+          description: ASIC core voltage set in millivolts
+          minimum: 1
+          examples:
+            - 850
         frequency:
           type: integer
           description: ASIC frequency in MHz
+          minimum: 1
+          examples:
+            - 450
+        frequencySet:
+          type: integer
+          description: ASIC frequency set in MHz
           minimum: 1
           examples:
             - 450

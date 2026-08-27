@@ -1,17 +1,17 @@
 import { HttpClient, HttpEvent } from '@angular/common/http';
 import { Injectable, Optional } from '@angular/core';
-import { delay, Observable, of, timeout, from, map } from 'rxjs';
+import { delay, Observable, of, timeout, from } from 'rxjs';
 import { eChartLabel } from 'src/models/enum/eChartLabel';
 import { chartLabelKey } from 'src/models/enum/eChartLabel';
 import { chartLabelValue } from 'src/models/enum/eChartLabel';
+import { IAutotuneSettings } from 'src/models/IAutotuneSettings';
 import {
   SystemInfo as ISystemInfo,
   SystemStatistics as ISystemStatistics,
   SystemAsic as ISystemASIC,
   SystemScoreboardEntry as ISystemScoreboardEntry,
   Settings,
-  GenericResponse,
-  AutotuneSettings
+  GenericResponse
 } from '../generated/models';
 import { Api } from '../generated/api';
 import * as functions from '../generated/functions';
@@ -78,6 +78,7 @@ export class SystemApiService {
         maxAllocHeap: 90000,
         coreVoltage: 1200,
         coreVoltageActual: 1200,
+        coreVoltageSet: 1200,
         hostname: "Bitaxe",
         macAddr: "2C:54:91:88:C9:E3",
         ssid: "default",
@@ -95,9 +96,6 @@ export class SystemApiService {
           { message: "Duplicate share", count: 2 }
         ],
         uptimeSeconds: 38,
-        totalUptimeSeconds: 123456,
-        totalHashes: 456789012345,
-        totalLog2Work: 38.729,
         smallCoreCount: 672,
         ASICModel: "BM1370" as any,
         primaryPoolIndex: 0,
@@ -162,10 +160,9 @@ export class SystemApiService {
         responseTime: 10,
         responseShareBatch: 1,
         isUsingFallbackStratum: 0,
-        bestScoreUptime: 30,
-        bestSessionUptime: 120,
         poolConnectionInfo: "IPv4 (TLS)",
         frequency: 485,
+        frequencySet: 485,
         actualFrequency: 485,
         version: "v2.12.0",
         axeOSVersion: "v2.12.0",
@@ -483,39 +480,27 @@ export class SystemApiService {
     }).pipe(delay(1000));
   }
 
-  public getAutotuneSettings(uri: string = ''): Observable<AutotuneSettings | null> {
-    if (!environment.mock && this.api && !uri) {
-      return from(this.api.invoke(functions.getAutotuneSettings, {})).pipe(
-        timeout(API_TIMEOUT),
-        map((resp: any) => resp.body as AutotuneSettings)
-      );
+  public getAutotune() {
+    if (!environment.mock) {
+      return this.httpClient.get<IAutotuneSettings>('/api/system/autotune').pipe(timeout(5000));
     }
 
-    if (!environment.mock && uri) {
-      return this.httpClient.get<AutotuneSettings>(`${uri}/api/system/autotune`).pipe(timeout(API_TIMEOUT));
-    }
-
-    return of(null).pipe(delay(1000));
+    // Mock data for development
+    return of({
+      power_limit: 20,
+      fan_limit: 75,
+      max_volt_asic: 1400,
+      max_freq_asic: 1000,
+      max_temp_asic: 65,
+      max_temp_vr: 85,
+      auto_tune: false,
+      osh_pow_limit: 0.2,
+      osh_fan_limit: 5,
+    }).pipe(delay(1000));
   }
 
-  public updateAutotuneSettings(settings: AutotuneSettings, uri: string = ''): Observable<GenericResponse> {
-    if (!environment.mock && this.api && !uri) {
-      return from(this.api.invoke(functions.updateAutotuneSettings, { body: settings }) as Promise<void>).pipe(
-        map(() => ({ message: 'Autotune settings updated' } as GenericResponse))
-      );
-    }
-
-    if (!environment.mock && uri) {
-      // API returns 204 No Content, so we need to handle empty response
-      return this.httpClient.post(`${uri}/api/system/autotune`, settings, {
-        observe: 'response',
-        responseType: 'text'
-      }).pipe(
-        map(() => ({ message: 'Autotune settings updated' } as GenericResponse))
-      );
-    }
-
-    return of({ message: 'Autotune settings updated (mock)' } as GenericResponse).pipe(delay(1000));
+  public updateAutotune(data: any) {
+    return this.httpClient.post('/api/system/autotune', data);
   }
 
 
