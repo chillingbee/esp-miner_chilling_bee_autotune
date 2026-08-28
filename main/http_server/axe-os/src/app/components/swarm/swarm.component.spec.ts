@@ -25,11 +25,11 @@ describe('SwarmComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
-        SwarmComponent,
         ModalComponent,
-        TooltipTextIconComponent
+        SwarmComponent,
       ],
       imports: [
+        TooltipTextIconComponent,
         ReactiveFormsModule,
         FormsModule,
         TooltipDirective,

@@ -491,6 +491,14 @@ void SYSTEM_notify_found_nonce(GlobalState * GLOBAL_STATE, double diff, uint32_t
         suffixString((uint64_t) diff, module->best_session_diff_string, DIFF_STRING_SIZE, 0);
     }
 
+    if ((uint64_t) diff > module->best_session_nonce_diff) {
+        module->best_session_nonce_diff = (uint64_t) diff;
+        suffixString((uint64_t) diff, module->best_session_diff_string, DIFF_STRING_SIZE, 0);
+        
+        // Uptime in Sekunden zum Zeitpunkt des neuen Rekords festhalten:
+        module->best_session_uptime = (uint32_t)((esp_timer_get_time() - module->start_time) / 1000000);
+    }
+
     double network_diff = networkDifficulty(target);
     if (diff >= network_diff) {
         module->block_found++;

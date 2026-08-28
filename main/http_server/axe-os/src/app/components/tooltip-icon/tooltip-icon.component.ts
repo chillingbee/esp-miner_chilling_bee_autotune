@@ -1,10 +1,14 @@
-import { Component, Input, HostListener } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+import { TooltipDirective } from '../../directives/tooltip.directive'; // Pfad anpassen
 
 @Component({
     selector: 'tooltip-icon',
     templateUrl: './tooltip-icon.component.html',
     styleUrls: ['./tooltip-icon.component.scss'],
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, TooltipDirective]
 })
 export class TooltipIconComponent {
   @Input() tooltip: string = '';

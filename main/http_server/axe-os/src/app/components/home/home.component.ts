@@ -24,6 +24,25 @@ import { LocalStorageService } from 'src/app/local-storage.service';
 import { GridStack, GridItemHTMLElement } from 'gridstack';
 import { DashboardEditService, WidgetDef } from 'src/app/services/dashboard-edit.service';
 
+import { CommonModule } from '@angular/common';
+import { TooltipTextIconComponent } from '../tooltip-text-icon/tooltip-text-icon.component';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+
+// Eigene Pipes & Direktiven importieren (Pfad anpassen)
+
+
+import { SatsPipe } from '../../pipes/sats.pipe';
+import { AddressPipe } from '../../pipes/address.pipe';
+
+import { TooltipDirective } from '../../directives/tooltip.directive'; // falls als Direktive eingebunden
+
+// Eigene Komponenten importieren
+import { DropdownComponent } from '../../components/dropdown/dropdown.component';
+import { ConfettiComponent } from '../../components/confetti/confetti.component';
+import { ProgressbarComponent } from '../../components/progressbar/progressbar.component'; // Pfad anpassen
+
+
+
 type PoolLabel = 'Primary' | 'Fallback';
 type ProtocolLabel = 'SV2 Standard Channel' | 'SV2 Extended Channel';
 type MessageType =
@@ -73,11 +92,42 @@ const WIDGET_DEFAULTS: WidgetDef[] = [
     selector: 'app-home',
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.scss'],
+<<<<<<< HEAD
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: false
+=======
+changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        FormsModule,
+        ConfettiComponent,
+        HashSuffixPipe,
+        DiffSuffixPipe,
+        SatsPipe,
+        AddressPipe,
+        DateAgoPipe,
+        TooltipDirective,
+        DropdownComponent,
+        AppChartComponent,
+        TooltipTextIconComponent,
+        ProgressbarComponent
+    ],
+>>>>>>> test-pr-1857
 })
 export class HomeComponent implements OnInit, OnDestroy {
   public messages: ISystemMessage[] = [];
+
+// --- KLASSEN-PROPERTIES & DI ---
+  private _lastBestDiff: number = -1;
+  private _bestDiffTimestamp: number = 0;
+  private _lastUptime: number = -1;
+
+  displayInfo: any = null;
+  public lastBestUpdate: Date = new Date();
+
+
 
   public info$!: Observable<ISystemInfo>;
   public stats$!: Observable<ISystemStatistics>;
@@ -97,6 +147,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   public maxTemp: number = 75;
   public maxRpm: number = 7000;
   public maxFrequency: number = 800;
+
 
   public quickLink$!: Observable<string | undefined>;
 
@@ -188,6 +239,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   public networkDifficultyPercentage: string = '0';
   public payoutPercentage: number = -1;
   public chartDataSources: { name: string; value: string }[] = [];
+
+public smoothedEfficiencyAverage: number = 0;
+private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
+
   private lastHasVrTemp = false;
   private lastHasAsicTemp2 = false;
   private lastHasFanRpm = false;
@@ -199,6 +254,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   private latestInfo?: ISystemInfo;
   private liveDataStarted = false;
   private resizeTimer: any;
+  private displayTickInterval: any;
   public form!: FormGroup;
 
   private staleCheckInterval: any;
@@ -211,6 +267,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   @Input() uri = '';
 
   constructor(
+    private cdr: ChangeDetectorRef,
     private fb: FormBuilder,
     private systemService: SystemApiService,
     private themeService: ThemeService,
@@ -240,6 +297,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+
     this.dashboardEditService.widgetDefs = this.widgetDefs;
     this.dashboardEditService.isActive$.next(true);
 
@@ -303,6 +361,16 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
 
     this.loadPreviousData();
+
+// Live-Ticker für den Timer (aktualisiert die Anzeige sekündlich)
+this.ngZone.runOutsideAngular(() => {
+  this.displayTickInterval = setInterval(() => {
+    if (this.displayInfo) {
+      this.displayInfo = { ...this.displayInfo };
+      this.cd.markForCheck();
+    }
+  }, 1000);
+});
   }
 
   @HostListener('document:visibilitychange')
@@ -352,6 +420,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     clearTimeout(this.resizeTimer);
     clearInterval(this.staleCheckInterval);
+    clearInterval(this.displayTickInterval);
     this.dashboardEditService.isActive$.next(false);
     this.dashboardEditService.editMode$.next(false);
     this.destroy$.next();
@@ -801,6 +870,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           const idxPower = stats.labels.indexOf(chartLabelKey(eChartLabel.power));
           const idxTimestamp = stats.labels.indexOf('timestamp');
 
+<<<<<<< HEAD
           stats.labels.forEach((labelKey, labelIdx) => {
             const valEnum = chartLabelValue(labelKey);
             if (valEnum === eChartLabel.asicVoltage || valEnum === eChartLabel.voltage || valEnum === eChartLabel.current) {
@@ -809,6 +879,37 @@ export class HomeComponent implements OnInit, OnDestroy {
                   element[labelIdx] = element[labelIdx] / 1000;
                 }
               });
+=======
+          // map label to index
+          for (let i = 0; i < stats.labels.length; i++) {
+            if (stats.labels[i] === chartLabelKey(eChartLabel.hashrate)) { idxHashrate = i; }
+            if (stats.labels[i] === chartLabelKey(eChartLabel.power))    { idxPower = i; }
+            if (stats.labels[i] === chartY1DataLabel)                    { idxChartY1Data = i; }
+            if (stats.labels[i] === chartY2DataLabel)                    { idxChartY2Data = i; }
+            if (stats.labels[i] === 'timestamp')                         { idxTimestamp = i; }
+          }
+
+          stats.statistics.forEach((element: number[]) => {
+            switch (chartLabelValue(chartY1DataLabel)) {
+              case eChartLabel.asicVoltage:
+            case eChartLabel.asicVoltageSet:
+              case eChartLabel.voltage:
+              case eChartLabel.current:
+                element[idxChartY1Data] = element[idxChartY1Data] / 1000;
+                break;
+              default:
+                break;
+            }
+            switch (chartLabelValue(chartY2DataLabel)) {
+              case eChartLabel.asicVoltage:
+            case eChartLabel.asicVoltageSet:
+              case eChartLabel.voltage:
+              case eChartLabel.current:
+                element[idxChartY2Data] = element[idxChartY2Data] / 1000;
+                break;
+              default:
+                break;
+>>>>>>> test-pr-1857
             }
           });
 
@@ -916,8 +1017,30 @@ export class HomeComponent implements OnInit, OnDestroy {
         return processed;
       }),
       tap(info => {
-        this.latestInfo = info;
-        this.lastMessageTime = new Date().getTime();
+
+// --- FINALER, FELSENFESTER TIMER (FIRMWARE-GESTÜTZT) ---
+    const currentUptime = Number(info.uptimeSeconds) || 0;
+    const bestScoreUptime = Number((info as any).bestScoreUptime) || 0;
+
+    // Die vergangene Zeit ist mathematisch korrekt die Differenz
+    const uptimeSinceBest = Math.max(0, currentUptime - bestScoreUptime);
+    const elapsedMs = uptimeSinceBest * 1000;
+
+    // Datum setzen, ab dem der Timer zählt
+    this.lastBestUpdate = new Date(Date.now() - elapsedMs);
+
+    // Display-Info für das UI aktualisieren
+    this.displayInfo = { 
+        ...info, 
+        lastBestUpdate: this.lastBestUpdate
+    };
+    
+    this.latestInfo = info;
+    this.lastMessageTime = new Date().getTime();
+    this.cdr.detectChanges();
+    // --- ENDE ---
+
+    
         // Clear error indicators if data is flowing
         const systemInfoError = this.systemInfoError$.value;
         if (!!systemInfoError.duration) {
@@ -946,6 +1069,26 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.networkDifficultyPercentage = this.getNetworkDifficultyPercentage(info);
         this.payoutPercentage = this.getPayoutPercentage(info);
 
+        // MANUELLE BERECHNUNG FÜR DEN GEGLÄTTETEN DURCHSCHNITT:
+        if (info && info.power > 0 && info.hashRate_1h > 0) {
+            const currentRawAvg = (info.power * 1000) / info.hashRate_1h;
+            
+            // Wenn der Wert zum ersten Mal berechnet wird, nimm den aktuellen Wert
+            if (this.smoothedEfficiencyAverage === 0) {
+                this.smoothedEfficiencyAverage = currentRawAvg;
+            } else {
+                // FILTER: 99% alter Wert + 1% neuer Wert (schluckt sekündliche Schwankungen)
+                this.smoothedEfficiencyAverage = (this.smoothedEfficiencyAverage * 0.99) + (currentRawAvg * 0.01);
+            }
+            
+            this.efficiencyAverage = this.smoothedEfficiencyAverage;
+        } else {
+            this.efficiencyAverage = 0;
+            this.smoothedEfficiencyAverage = 0;
+        }
+
+        this.expectedEfficiency = this.calculateEfficiency(info, 'expectedHashrate');
+
         const isFallbackPool = !!info.isUsingFallbackStratum;
         this.activePoolLabel = isFallbackPool ? 'Fallback' : 'Primary';
         this.activePoolURL = isFallbackPool ? info.fallbackStratumURL : info.stratumURL;
@@ -959,6 +1102,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           this.activePoolProtocol = 'SV1';
         }
         this.responseTime = info.responseTime;
+        info.coreVoltageSet = info.coreVoltageSet / 1000;
 
         this.activePoolUserAddressPart = this.getAddressPart(this.activePoolUser);
         this.activePoolUserSuffixPart = this.getSuffixPart(this.activePoolUser);
@@ -1051,6 +1195,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         formatted.temp = parseFloat(formatted.temp.toFixed(1));
         formatted.temp2 = parseFloat(formatted.temp2.toFixed(1));
         formatted.responseTime = parseFloat(formatted.responseTime.toFixed(1));
+        formatted.frequency = parseFloat(info.frequency.toFixed(2));
 
         return formatted;
       }),
@@ -1089,7 +1234,9 @@ export class HomeComponent implements OnInit, OnDestroy {
         }
         return result;
       }));
+
   }
+  
 
   onPoolChange(event: { originalEvent?: Event; value: PoolLabel }) {
     const useFallbackStratum = Number(event.value === 'Fallback');
@@ -1351,9 +1498,14 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.dataLabel.splice(0, excess);
         this.hashrateData.splice(0, excess);
         this.powerData.splice(0, excess);
+<<<<<<< HEAD
         Object.keys(this.chartDatasets).forEach(k => {
           this.chartDatasets[k].splice(0, excess);
         });
+=======
+        this.chartY1Data.splice(0, excess);
+        this.chartY2Data.splice(0, excess);
+>>>>>>> test-pr-1857
       }
     }
 
@@ -1392,9 +1544,14 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.dataLabel.splice(low, 1);
       this.hashrateData.splice(low, 1);
       this.powerData.splice(low, 1);
+<<<<<<< HEAD
       Object.keys(this.chartDatasets).forEach(k => {
         this.chartDatasets[k].splice(low, 1);
       });
+=======
+      this.chartY1Data.splice(low, 1);
+      this.chartY2Data.splice(low, 1);
+>>>>>>> test-pr-1857
     }
 
     if (this.chartData) {
@@ -1429,6 +1586,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       case eChartLabel.asicTemp2:        return this.maxTemp;
       case eChartLabel.vrTemp:           return this.maxTemp + 25;
       case eChartLabel.asicVoltage:      return info.coreVoltage;
+      case eChartLabel.asicVoltageSet:   return info.coreVoltageSet;
       case eChartLabel.voltage:          return info.nominalVoltage + .5;
       case eChartLabel.power:            return this.maxPower;
       case eChartLabel.current:          return this.maxPower / info.coreVoltage;
@@ -1436,6 +1594,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       case eChartLabel.fanRpm:           return 7000;
       case eChartLabel.fan2Rpm:          return 7000;
       case eChartLabel.responseTime:     return 50;
+      case eChartLabel.frequency:        return 0;
       default:                           return 0;
     }
   }
@@ -1451,6 +1610,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       case eChartLabel.asicTemp2:          return info.temp2;
       case eChartLabel.vrTemp:             return info.vrTemp;
       case eChartLabel.asicVoltage:        return info.coreVoltageActual;
+      case eChartLabel.asicVoltageSet:     return info.coreVoltageSet;
       case eChartLabel.voltage:            return info.voltage;
       case eChartLabel.power:              return info.power;
       case eChartLabel.current:            return info.current;
@@ -1460,6 +1620,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       case eChartLabel.wifiRssi:           return info.wifiRSSI;
       case eChartLabel.freeHeap:           return info.freeHeap;
       case eChartLabel.responseTime:       return info.responseTime;
+      case eChartLabel.frequency:          return info.frequency;
       default:                             return 0.0;
     }
   }
@@ -1475,7 +1636,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       case eChartLabel.asicTemp2:
       case eChartLabel.vrTemp:           return {suffix: ' °C', precision: 1};
       case eChartLabel.asicVoltage:
-      case eChartLabel.voltage:          return {suffix: ' V', precision: 1};
+      case eChartLabel.voltage:
+      case eChartLabel.asicVoltageSet:   return {suffix: ' V', precision: 3};
       case eChartLabel.power:            return {suffix: ' W', precision: 1};
       case eChartLabel.current:          return {suffix: ' A', precision: 1};
       case eChartLabel.fanSpeed:         return {suffix: ' %', precision: 1};
@@ -1484,6 +1646,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       case eChartLabel.wifiRssi:         return {suffix: ' dBm', precision: 0};
       case eChartLabel.freeHeap:         return {suffix: ' B', precision: 0};
       case eChartLabel.responseTime:     return {suffix: ' ms', precision: 1};
+      case eChartLabel.frequency:        return {suffix: ' MHz', precision: 1};
       default:                           return {suffix: '', precision: 0};
     }
   }
@@ -1513,4 +1676,15 @@ export class HomeComponent implements OnInit, OnDestroy {
     const dotIndex = user.lastIndexOf('.');
     return dotIndex !== -1 ? '.' + user.substring(dotIndex + 1) : '';
   }
+<<<<<<< HEAD
+=======
+public getElapsedTime(date: Date | undefined): string {
+    if (!date) return 'noch keine Daten';
+    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+    if (seconds < 60) return `${seconds}s ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    return `${Math.floor(minutes / 60)}h ago`;
+  }
+>>>>>>> test-pr-1857
 }

@@ -33,6 +33,7 @@ import { SystemComponent } from './components/system/system.component';
 import { UpdateComponent } from './components/update/update.component';
 import { NetworkComponent } from './components/network/network.component';
 import { SettingsComponent } from './components/settings/settings.component';
+import { AutotuneComponent } from './components/autotune/autotune.component';
 import { SwarmComponent } from './components/swarm/swarm.component';
 import { ScoreboardComponent } from './components/scoreboard/scoreboard.component';
 import { ThemeConfigComponent } from './components/design/theme-config.component';
@@ -49,18 +50,11 @@ import { DialogService, DialogListComponent } from './services/dialog.service';
 
 const components = [
   AppComponent,
-  NetworkEditComponent,
-  HomeComponent,
   ModalComponent,
-  TooltipIconComponent,
-  TooltipTextIconComponent,
-  ConfettiComponent,
   SnowflakesComponent,
-  NetworkComponent,
   LogsComponent,
   SystemComponent,
   UpdateComponent,
-  PoolComponent
 ];
 
 @NgModule({
@@ -91,6 +85,7 @@ const components = [
     SliderComponent,
     AppChartComponent,
     EditComponent,
+    AutotuneComponent, // <--- HIER ERGÄNZT
     SettingsComponent,
     ProgressbarComponent,
     ANSIPipe,

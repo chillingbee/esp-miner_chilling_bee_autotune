@@ -13,11 +13,23 @@ import { WifiNetwork } from 'src/app/generated/models';
 import { first } from 'rxjs/operators';
 import { ISystemUpdateResponse } from 'src/models/ISystemUpdateResponse';
 
+import { CommonModule } from '@angular/common';
+import { TooltipTextIconComponent } from '../tooltip-text-icon/tooltip-text-icon.component';
+
+
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+
+
 @Component({
     selector: 'app-network-edit',
     templateUrl: './network.edit.component.html',
     styleUrls: ['./network.edit.component.scss'],
-    standalone: false
+     standalone: true,
+ imports: [
+  CommonModule,
+  TooltipTextIconComponent,
+  ReactiveFormsModule,
+  FormsModule /* weitere benötigte Module */],
 })
 export class NetworkEditComponent implements OnInit {
   private formSubject = new BehaviorSubject<FormGroup | null>(null);

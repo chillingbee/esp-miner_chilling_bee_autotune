@@ -11,7 +11,8 @@ describe('NetworkEditComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [NetworkEditComponent],
+      declarations: [],
+      imports: [NetworkEditComponent],
       providers: [provideHttpClient(), provideToastr(), DialogService]
     });
     fixture = TestBed.createComponent(NetworkEditComponent);

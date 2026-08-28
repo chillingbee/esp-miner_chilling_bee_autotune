@@ -4,6 +4,7 @@ import { delay, Observable, of, timeout, from } from 'rxjs';
 import { eChartLabel } from 'src/models/enum/eChartLabel';
 import { chartLabelKey } from 'src/models/enum/eChartLabel';
 import { chartLabelValue } from 'src/models/enum/eChartLabel';
+import { IAutotuneSettings } from 'src/models/IAutotuneSettings';
 import {
   SystemInfo as ISystemInfo,
   SystemStatistics as ISystemStatistics,
@@ -77,6 +78,7 @@ export class SystemApiService {
         maxAllocHeap: 90000,
         coreVoltage: 1200,
         coreVoltageActual: 1200,
+        coreVoltageSet: 1200,
         hostname: "Bitaxe",
         macAddr: "2C:54:91:88:C9:E3",
         ssid: "default",
@@ -211,7 +213,7 @@ export class SystemApiService {
         },
         blockFound: 1,
         showNewBlock: true,
-        coinbaseOutputs: [{value: 50, address: "payoutaddress"}],
+        coinbaseOutputs: [{ value: 50, address: "payoutaddress" }],
         coinbaseValueTotalSatoshis: 50,
         coinbaseValueUserSatoshis: 50,
         miningPaused: false,
@@ -238,6 +240,7 @@ export class SystemApiService {
       return from(this.api.invoke(functions.getSystemStatistics, { columns: columnList })).pipe(timeout(API_TIMEOUT));
     }
 
+<<<<<<< HEAD
     const hashrateData = [0,413.4903744405481,410.7764830376959,440.100549473198,430.5816012914026,452.5464981767163,414.9564271189586,498.7294609150379,411.1671601439723,491.327834852684];
     const powerData = [14.45068359375,14.86083984375,15.03173828125,15.1171875,15.1171875,15.1513671875,15.185546875,15.27099609375,15.30517578125,15.33935546875];
     const asicTempData = [-1,58.5,59.625,60.125,60.75,61.5,61.875,62.125,62.5,63];
@@ -253,14 +256,31 @@ export class SystemApiService {
     const freeHeapData = [214504,212504,213504,210504,207504,209504,203504,202504,201504,200504];
     const responseTimeData = [15.1,14.5,14.3,15.1,13.1,16.1,28.6,18.4,17.7,17.6,18.0,15.5];
     const timestampData = [13131,18126,23125,28125,33125,38125,43125,48125,53125,58125];
+=======
+    const hashrateData = [0, 413.4903744405481, 410.7764830376959, 440.100549473198, 430.5816012914026, 452.5464981767163, 414.9564271189586, 498.7294609150379, 411.1671601439723, 491.327834852684];
+    const powerData = [14.45068359375, 14.86083984375, 15.03173828125, 15.1171875, 15.1171875, 15.1513671875, 15.185546875, 15.27099609375, 15.30517578125, 15.33935546875];
+    const asicTempData = [-1, 58.5, 59.625, 60.125, 60.75, 61.5, 61.875, 62.125, 62.5, 63];
+    const vrTempData = [45, 45, 45, 44, 45, 44, 44, 45, 45, 45];
+    const asicVoltageData = [1221, 1223, 1219, 1223, 1217, 1222, 1221, 1219, 1221, 1221];
+    const voltageData = [5196.875, 5204.6875, 5196.875, 5196.875, 5196.875, 5196.875, 5196.875, 5196.875, 5196.875, 5204.6875];
+    const currentData = [2284.375, 2284.375, 2253.125, 2284.375, 2253.125, 2231.25, 2284.375, 2253.125, 2253.125, 2284.375];
+    const fanSpeedData = [48, 52, 50, 52, 53, 54, 50, 50, 48, 48];
+    const fanRpmData = [4032, 3545, 3904, 3691, 3564, 3554, 3691, 3573, 3701, 4044];
+    const fan2RpmData = [3545, 3904, 3691, 3564, 3554, 3691, 3573, 3701, 4044, 4032];
+    const wifiRssiData = [-35, -34, -33, -34, -34, -34, -33, -35, -33, -34];
+    const freeHeapData = [214504, 212504, 213504, 210504, 207504, 209504, 203504, 202504, 201504, 200504];
+    const responseTimeData = [15.1, 14.5, 14.3, 15.1, 13.1, 16.1, 28.6, 18.4, 17.7, 17.6, 18.0, 15.5];
+    const timestampData = [13131, 18126, 23125, 28125, 33125, 38125, 43125, 48125, 53125, 58125];
+>>>>>>> test-pr-1857
 
     columnList.push("timestamp");
     let statisticsList: number[][] = [];
 
-    for(let i: number = 0; i < 10; i++) {
+    for (let i: number = 0; i < 10; i++) {
       statisticsList[i] = [];
-      for(let j: number = 0; j < columnList.length; j++) {
+      for (let j: number = 0; j < columnList.length; j++) {
         switch (chartLabelValue(columnList[j])) {
+<<<<<<< HEAD
           case eChartLabel.hashrate:     statisticsList[i][j] = hashrateData[i];     break;
           case eChartLabel.hashrate_1m:  statisticsList[i][j] = hashrateData[i];     break;
           case eChartLabel.hashrate_10m: statisticsList[i][j] = hashrateData[i];     break;
@@ -277,6 +297,23 @@ export class SystemApiService {
           case eChartLabel.fan2Rpm:      statisticsList[i][j] = fan2RpmData[i];      break;
           case eChartLabel.wifiRssi:     statisticsList[i][j] = wifiRssiData[i];     break;
           case eChartLabel.freeHeap:     statisticsList[i][j] = freeHeapData[i];     break;
+=======
+          case eChartLabel.hashrate: statisticsList[i][j] = hashrateData[i]; break;
+          case eChartLabel.hashrate_1m: statisticsList[i][j] = hashrateData[i]; break;
+          case eChartLabel.hashrate_10m: statisticsList[i][j] = hashrateData[i]; break;
+          case eChartLabel.hashrate_1h: statisticsList[i][j] = hashrateData[i]; break;
+          case eChartLabel.power: statisticsList[i][j] = powerData[i]; break;
+          case eChartLabel.asicTemp: statisticsList[i][j] = asicTempData[i]; break;
+          case eChartLabel.vrTemp: statisticsList[i][j] = vrTempData[i]; break;
+          case eChartLabel.asicVoltage: statisticsList[i][j] = asicVoltageData[i]; break;
+          case eChartLabel.voltage: statisticsList[i][j] = voltageData[i]; break;
+          case eChartLabel.current: statisticsList[i][j] = currentData[i]; break;
+          case eChartLabel.fanSpeed: statisticsList[i][j] = fanSpeedData[i]; break;
+          case eChartLabel.fanRpm: statisticsList[i][j] = fanRpmData[i]; break;
+          case eChartLabel.fan2Rpm: statisticsList[i][j] = fan2RpmData[i]; break;
+          case eChartLabel.wifiRssi: statisticsList[i][j] = wifiRssiData[i]; break;
+          case eChartLabel.freeHeap: statisticsList[i][j] = freeHeapData[i]; break;
+>>>>>>> test-pr-1857
           case eChartLabel.responseTime: statisticsList[i][j] = responseTimeData[i]; break;
           default:
             if (columnList[j] === "timestamp") {
@@ -487,4 +524,28 @@ export class SystemApiService {
   }
 
 
+
+
+  public getAutotune() {
+    if (!environment.mock) {
+      return this.httpClient.get<IAutotuneSettings>('/api/system/autotune').pipe(timeout(5000));
+    }
+
+    // Mock data for development
+    return of({
+      power_limit: 20,
+      fan_limit: 75,
+      max_volt_asic: 1400,
+      max_freq_asic: 1000,
+      max_temp_asic: 65,
+      max_temp_vr: 85,
+      auto_tune: false,
+      osh_pow_limit: 0.2,
+      osh_fan_limit: 5,
+    }).pipe(delay(1000));
+  }
+
+  public updateAutotune(data: any) {
+    return this.httpClient.post('/api/system/autotune', data);
+  }
 }

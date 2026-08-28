@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { TooltipIconComponent } from 'src/app/components/tooltip-icon/tooltip-icon.component';
 import { WifiIconComponent } from './wifi-icon.component';
 
 describe('WifiIconComponent', () => {
@@ -8,7 +8,7 @@ describe('WifiIconComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [WifiIconComponent]
+      imports: [TooltipIconComponent], // WifiIconComponent hier entfernt
     });
     fixture = TestBed.createComponent(WifiIconComponent);
     component = fixture.componentInstance;
