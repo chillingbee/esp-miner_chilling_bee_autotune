@@ -94,7 +94,7 @@ static void system_api_add_telemetry(cJSON *root, GlobalState *g) {
     }
 
     // Dynamic System Stats & Highscore Uptime Logik
-    uint32_t current_uptime = (uint32_t)((esp_timer_get_time() - g->SYSTEM_MODULE.start_time) / 1000000);
+    uint32_t current_uptime = (uint32_t)((esp_timer_get_time() - g->SYSTEM_MODULE.start_time_us) / 1000000);
     uint64_t current_best_diff = g->SYSTEM_MODULE.best_session_nonce_diff;
 
     // Wenn Miner neu gestartet wurde oder erster Lauf
@@ -114,16 +114,6 @@ static void system_api_add_telemetry(cJSON *root, GlobalState *g) {
     cJSON_AddNumberToObject(root, "freeHeapSpiram", heap_caps_get_free_size(MALLOC_CAP_SPIRAM));
     cJSON_AddNumberToObject(root, "minFreeHeap", esp_get_minimum_free_heap_size());
     cJSON_AddNumberToObject(root, "maxAllocHeap", heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL));
-<<<<<<< HEAD
-    cJSON_AddNumberToObject(root, "uptimeSeconds", g->SYSTEM_MODULE.uptime_seconds);
-    cJSON_AddNumberToObject(root, "totalUptimeSeconds", SYSTEM_noinit_get_total_uptime_seconds());
-    cJSON_AddNumberToObject(root, "totalHashes", SYSTEM_noinit_get_total_hashes());
-    cJSON_AddNumberToObject(root, "totalLog2Work", SYSTEM_noinit_get_total_log2_work());
-=======
-    cJSON_AddNumberToObject(root, "uptimeSeconds", current_uptime);
-    cJSON_AddNumberToObject(root, "bestScoreUptime", best_score_uptime); // <--- Übergabe an den Webserver/Browser
-    
->>>>>>> test-pr-1857
     cJSON_AddFloatToObject(root, "cpuUsage", g->SYSTEM_MODULE.cpu_usage);
     cJSON_AddBoolToObject(root, "miningPaused", g->SYSTEM_MODULE.mining_paused);
     cJSON_AddNumberToObject(root, "overheat_mode", g->SYSTEM_MODULE.overheat_mode ? 1 : 0);
