@@ -92,11 +92,7 @@ const WIDGET_DEFAULTS: WidgetDef[] = [
     selector: 'app-home',
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.scss'],
-<<<<<<< HEAD
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
-=======
-changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
     imports: [
         CommonModule,
@@ -114,7 +110,6 @@ changeDetection: ChangeDetectionStrategy.OnPush,
         TooltipTextIconComponent,
         ProgressbarComponent
     ],
->>>>>>> test-pr-1857
 })
 export class HomeComponent implements OnInit, OnDestroy {
   public messages: ISystemMessage[] = [];
@@ -870,7 +865,6 @@ this.ngZone.runOutsideAngular(() => {
           const idxPower = stats.labels.indexOf(chartLabelKey(eChartLabel.power));
           const idxTimestamp = stats.labels.indexOf('timestamp');
 
-<<<<<<< HEAD
           stats.labels.forEach((labelKey, labelIdx) => {
             const valEnum = chartLabelValue(labelKey);
             if (valEnum === eChartLabel.asicVoltage || valEnum === eChartLabel.voltage || valEnum === eChartLabel.current) {
@@ -879,37 +873,6 @@ this.ngZone.runOutsideAngular(() => {
                   element[labelIdx] = element[labelIdx] / 1000;
                 }
               });
-=======
-          // map label to index
-          for (let i = 0; i < stats.labels.length; i++) {
-            if (stats.labels[i] === chartLabelKey(eChartLabel.hashrate)) { idxHashrate = i; }
-            if (stats.labels[i] === chartLabelKey(eChartLabel.power))    { idxPower = i; }
-            if (stats.labels[i] === chartY1DataLabel)                    { idxChartY1Data = i; }
-            if (stats.labels[i] === chartY2DataLabel)                    { idxChartY2Data = i; }
-            if (stats.labels[i] === 'timestamp')                         { idxTimestamp = i; }
-          }
-
-          stats.statistics.forEach((element: number[]) => {
-            switch (chartLabelValue(chartY1DataLabel)) {
-              case eChartLabel.asicVoltage:
-            case eChartLabel.asicVoltageSet:
-              case eChartLabel.voltage:
-              case eChartLabel.current:
-                element[idxChartY1Data] = element[idxChartY1Data] / 1000;
-                break;
-              default:
-                break;
-            }
-            switch (chartLabelValue(chartY2DataLabel)) {
-              case eChartLabel.asicVoltage:
-            case eChartLabel.asicVoltageSet:
-              case eChartLabel.voltage:
-              case eChartLabel.current:
-                element[idxChartY2Data] = element[idxChartY2Data] / 1000;
-                break;
-              default:
-                break;
->>>>>>> test-pr-1857
             }
           });
 
@@ -1498,14 +1461,9 @@ this.ngZone.runOutsideAngular(() => {
         this.dataLabel.splice(0, excess);
         this.hashrateData.splice(0, excess);
         this.powerData.splice(0, excess);
-<<<<<<< HEAD
         Object.keys(this.chartDatasets).forEach(k => {
           this.chartDatasets[k].splice(0, excess);
         });
-=======
-        this.chartY1Data.splice(0, excess);
-        this.chartY2Data.splice(0, excess);
->>>>>>> test-pr-1857
       }
     }
 
@@ -1544,14 +1502,9 @@ this.ngZone.runOutsideAngular(() => {
       this.dataLabel.splice(low, 1);
       this.hashrateData.splice(low, 1);
       this.powerData.splice(low, 1);
-<<<<<<< HEAD
       Object.keys(this.chartDatasets).forEach(k => {
         this.chartDatasets[k].splice(low, 1);
       });
-=======
-      this.chartY1Data.splice(low, 1);
-      this.chartY2Data.splice(low, 1);
->>>>>>> test-pr-1857
     }
 
     if (this.chartData) {
@@ -1676,9 +1629,8 @@ this.ngZone.runOutsideAngular(() => {
     const dotIndex = user.lastIndexOf('.');
     return dotIndex !== -1 ? '.' + user.substring(dotIndex + 1) : '';
   }
-<<<<<<< HEAD
-=======
-public getElapsedTime(date: Date | undefined): string {
+
+  public getElapsedTime(date: Date | undefined): string {
     if (!date) return 'noch keine Daten';
     const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
     if (seconds < 60) return `${seconds}s ago`;
@@ -1686,5 +1638,4 @@ public getElapsedTime(date: Date | undefined): string {
     if (minutes < 60) return `${minutes}m ago`;
     return `${Math.floor(minutes / 60)}h ago`;
   }
->>>>>>> test-pr-1857
 }

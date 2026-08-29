@@ -40,11 +40,7 @@ export class LiveDataService {
       switchMap(state => {
         const interval = state === 'visible' ? 3000 : 60000; // 3s when visible, 60s when hidden
         return timer(0, interval).pipe(
-<<<<<<< HEAD
-          exhaustMap(() => {
-=======
-          switchMap(() => {
->>>>>>> test-pr-1857
+        switchMap(() => {
             // Only poll if not connected OR if backgrounded (to keep data fresh)
             if (this.connectedSubject.value && state === 'visible') return EMPTY;
             return this.systemService.getInfo().pipe(
@@ -120,11 +116,7 @@ export class LiveDataService {
     });
 
     return this.socket$.pipe(
-<<<<<<< HEAD
-      timeout(10000),
-=======
       timeout(20000),
->>>>>>> test-pr-1857
       tap(msg => {
         this.lastMessageAt = Date.now();
         if (msg.event === 'update' && msg.data) {
