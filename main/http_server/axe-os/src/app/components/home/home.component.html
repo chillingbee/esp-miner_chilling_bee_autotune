@@ -177,12 +177,9 @@
                 <tooltip-text-icon
                   [text]="'(' + (sharesRejectedReason.percentage | number:'1.2-2') + ' %)'"
                   [tooltip]="getRejectionExplanation(sharesRejectedReason.message)"
-<<<<<<< HEAD
                   [split]=false />
-=======
                   [split]="false">
                 </tooltip-text-icon>
->>>>>>> test-pr-1857
               </div>
             }
           }
@@ -202,9 +199,7 @@
                   {{info.bestDiff | diffSuffix}}
                 </span>
                 <span class="text-secondary text-lg">all-time best</span>
-<<<<<<< HEAD
 
-=======
                 @if (info.networkDifficulty) {
                   <span class="text-sm font-medium mb-4">
                     <tooltip-text-icon
@@ -214,17 +209,14 @@
                     />
                   </span>
                 }
->>>>>>> test-pr-1857
               </div>
             </div>
           </div>
           <div>
-<<<<<<< HEAD
             <span class="font-medium cursor-pointer" appTooltip="{{info.bestSessionDiff | number:'1.0-0'}}" tooltipPosition="bottom">
               {{info.bestSessionDiff | diffSuffix}}
             </span>
             <span class="text-secondary text-lg">session best</span>
-=======
             <span class="font-medium cursor-pointer" appTooltip="{{(displayInfo?.bestSessionDiff || info.bestSessionDiff) | number:'1.0-0'}}" tooltipPosition="bottom">
               {{(displayInfo?.bestSessionDiff || info.bestSessionDiff) | diffSuffix}}
             </span>
@@ -233,7 +225,6 @@
               [ngStyle]="{'color': ((displayInfo?.bestSessionDiff || info.bestSessionDiff) >= info.bestDiff) ? '#22c55e' : 'gray'}">
               ({{ getElapsedTime(displayInfo?.lastBestUpdate) }})
             </span>
->>>>>>> test-pr-1857
           </div>
         </div>
       </div>
@@ -247,7 +238,6 @@
             <form [formGroup]="form">
               <div class="flex flex-nowrap justify-between mb-3">
                 <app-dropdown
-<<<<<<< HEAD
                   formControlName="chartY1Unit"
                   [options]="chartUnitGroups"
                   class="w-40 text-sm">
@@ -255,7 +245,6 @@
                 <app-dropdown
                   formControlName="chartY2Unit"
                   [options]="chartUnitGroups"
-=======
                   formControlName="chartY1Data"
                   [options]="chartDataSources"
                   class="w-40 text-sm">
@@ -263,7 +252,6 @@
                 <app-dropdown
                   formControlName="chartY2Data"
                   [options]="chartDataSources"
->>>>>>> test-pr-1857
                   class="w-40 text-sm">
                 </app-dropdown>
               </div>
@@ -293,18 +281,10 @@
               Input Voltage<span>{{info.voltage}} V</span>
             </h6>
             <app-progressbar
-<<<<<<< HEAD
-              [value]="((info.voltage / (info.nominalVoltage + .5)) * 100)"
-              [markers]="[{ value: (info.nominalVoltage / (info.nominalVoltage + .5)) * 100, label: info.nominalVoltage + ' V' }]">
-            </app-progressbar>
-            <!-- Adding 0.949 because we want to give it the 5mV headroom for weak psu's  -->
-            @if (info.voltage < (info.nominalVoltage) * 0.949) {
-=======
               [value]="(info.voltage / (info.nominalVoltage + .5)) * 100"
               [markers]="[{ value: (info.nominalVoltage / (info.nominalVoltage + .5)) * 100, label: info.nominalVoltage + ' V' }]">
             </app-progressbar>
             @if (info.voltage < (info.nominalVoltage + .5) * 0.87) {
->>>>>>> test-pr-1857
               <strong class="text-red-500">
                 Danger: Low Voltage
               </strong>
@@ -342,24 +322,18 @@
                 ASIC Temperature
               }
               <span>
-<<<<<<< HEAD
                 @if (info.temp > 0) {
                   {{info.temp}} °C
                 } @else {
                   --
                 }
-=======
                 {{ info.temp > 0 ? info.temp + ' °C' : '-' }}
->>>>>>> test-pr-1857
               </span>
             </h6>
             <app-progressbar
               [value]="(info.temp / maxTemp) * 100"
-<<<<<<< HEAD
               [markers]="[{ value: (info.temptarget / maxTemp) * 100, label: info.temptarget + ' °C', visible: info.autofanspeed === 1 && 0 >= info.temp2 }]">
-=======
               [markers]="[{ value: (info.temptarget / maxTemp) * 100, label: info.temptarget + ' &deg;C', visible: info.autofanspeed === 1 && 0 >= info.temp2 }]">
->>>>>>> test-pr-1857
             </app-progressbar>
 
             @if (info.temp >= 70) {
@@ -374,20 +348,14 @@
               <h6 class="flex justify-between mb-1">
                 ASIC Temperature 2
                 <span>
-<<<<<<< HEAD
                   {{info.temp2}} °C
-=======
                   {{info.temp2}} &deg;C
->>>>>>> test-pr-1857
                 </span>
               </h6>
               <app-progressbar
                 [value]="(info.temp2 / maxTemp) * 100"
-<<<<<<< HEAD
                 [markers]="[{ value: (info.temptarget / maxTemp) * 100, label: info.temptarget + ' °C', visible: info.autofanspeed === 1 }]">
-=======
                 [markers]="[{ value: (info.temptarget / maxTemp) * 100, label: info.temptarget + ' &deg;C', visible: info.autofanspeed === 1 }]">
->>>>>>> test-pr-1857
               </app-progressbar>
 
               @if (info.temp2 >= 70) {
@@ -401,11 +369,8 @@
           @if (info.vrTemp > 0) {
             <div class="mb-4">
               <h6 class="flex justify-between mb-1">
-<<<<<<< HEAD
                 Voltage Regulator Temperature<span>{{info.vrTemp}} °C</span>
-=======
                 Voltage Regulator Temperature<span>{{info.vrTemp}} &deg;C</span>
->>>>>>> test-pr-1857
               </h6>
               <app-progressbar [value]="(info.vrTemp / 120) * 100"></app-progressbar>
 
@@ -452,11 +417,8 @@
             <div class="flex flex-nowrap justify-between relative">
               <h4 class="font-medium">
                 Pool
-<<<<<<< HEAD
                 @if ((quickLink$ | async); as quickLink) {
-=======
                 @if (quickLink$ | async; as quickLink) {
->>>>>>> test-pr-1857
                   <a
                     [href]="quickLink"
                     target="_blank"
@@ -495,10 +457,7 @@
               <div class="w-24 shrink-0 text-secondary">
                 User
               </div>
-<<<<<<< HEAD
 
-=======
->>>>>>> test-pr-1857
               <div appTooltip="{{ activePoolUser }}" tooltipPosition="top" sensitive-data>
                 <span class="font-mono font-bold text-base">{{ activePoolUserAddressPart | address }}</span>{{ activePoolUserSuffixPart }}
               </div>
@@ -512,7 +471,6 @@
                 />
               </div>
               @if (info.responseTime > 0) {
-<<<<<<< HEAD
                 {{ info.responseTime | number:'1.1-1' }} ms
                 @if ((info.responseShareBatch ?? 0) > 1) {
                   <span class="text-neutral-500" appTooltip="The pool acknowledged {{ info.responseShareBatch }} shares in one batch; the time reflects the most recent share, so it may include the pool's batching window" tooltipPosition="top">&nbsp;(batched ×{{ info.responseShareBatch }})</span>
@@ -524,7 +482,6 @@
             @if ((info.coinbaseOutputs?.length ?? 0) > 0) {
               <div class="flex flex-nowrap">
                 @let percentage = payoutPercentage;
-=======
                 {{ info.responseTime | number:'1.1-1' }} ms@if ((info.responseShareBatch ?? 0) > 1) {<span class="text-neutral-500" appTooltip="The pool acknowledged {{ info.responseShareBatch }} shares in one batch; the time reflects the most recent share, so it may include the pool's batching window" tooltipPosition="top">&nbsp;(batched ×{{ info.responseShareBatch }})</span>}
               } @else {
                 -
@@ -534,7 +491,6 @@
             @if ((info.coinbaseOutputs?.length ?? 0) > 0) {
               @let percentage = payoutPercentage;
               <div class="flex flex-nowrap">
->>>>>>> test-pr-1857
                 @if (percentage >= 95) {
                   <div class="w-24 shrink-0 text-secondary">
                     <tooltip-text-icon text="Fee" tooltip="Percentage of the bitcoin block reward that will be paid out to the pool if you find a block." />
@@ -551,19 +507,13 @@
                       {{ percentage | number:'1.0-1' }}%
                     </div>
                   } @else {
-<<<<<<< HEAD
                     --
-=======
                     -
->>>>>>> test-pr-1857
                   }
                 }
               </div>
             }
-<<<<<<< HEAD
-=======
 
->>>>>>> test-pr-1857
             <div class="flex flex-nowrap">
               <div class="w-24 shrink-0 text-secondary">
                 <span>Difficulty</span>
@@ -571,16 +521,13 @@
               @if (info.poolDifficulty > 0) {
                 {{ info.poolDifficulty }}
               } @else {
-<<<<<<< HEAD
                 --
               }
             </div>
-=======
                 -
               }
             </div>
 
->>>>>>> test-pr-1857
             <div class="flex flex-nowrap">
               <div class="w-24 shrink-0 text-neutral-500">
                 <span>Mode</span>
@@ -601,11 +548,8 @@
             <i class="pi pi-arrow-down transition-opacity duration-500 ml-2 text-sm align-middle text-blue-500" [ngClass]="{'opacity-100': flashWorkReceived, 'opacity-0': !flashWorkReceived}" appTooltip="Work Received" tooltipPosition="top"></i>
             @if (info.blockSignals && info.blockSignals.length > 0) {
               <span class="align-bottom ml-2">
-<<<<<<< HEAD
                 @for (signal of info.blockSignals; track signal) {
-=======
                 @for (signal of info.blockSignals; track $index) {
->>>>>>> test-pr-1857
                   <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-green-500 text-white ml-1">{{ signal }}</span>
                 }
               </span>
@@ -640,36 +584,27 @@
               {{ info.scriptsig }}
             </div>
           </div>
-<<<<<<< HEAD
-=======
 
->>>>>>> test-pr-1857
           @if ((info.coinbaseOutputs?.length ?? 0) > 0) {
             <div class="flex flex-nowrap justify-between">
               <div class="w-24 shrink-0 text-secondary">
                 <tooltip-text-icon text="Value" tooltip="Total value of transaction outputs in BTC. For non-bitcoin chains, disable 'Decode Coinbase Tx' in Advanced Pool Options." />
               </div>
               @if (info.coinbaseValueTotalSatoshis && info.coinbaseValueTotalSatoshis > 0) {
-<<<<<<< HEAD
                 {{ info.coinbaseValueTotalSatoshis | sats }}
               }
             </div>
-=======
                 <div>{{ info.coinbaseValueTotalSatoshis | sats }}</div>
               }
             </div>
 
->>>>>>> test-pr-1857
             <div class="flex flex-nowrap items-baseline">
               <div class="w-24 shrink-0 text-secondary">
                 <span>Outputs</span>
               </div>
               <div class="w-full">
-<<<<<<< HEAD
                 @for (output of info.coinbaseOutputs; track output; let i = $index) {
-=======
                 @for (output of info.coinbaseOutputs; track $index) {
->>>>>>> test-pr-1857
                   <div class="flex justify-between">
                     @if (output.value > 0) {
                       @if (output.address === activePoolUserAddressPart) {
@@ -691,11 +626,8 @@
                 Amount
               </div>
               @if (info.coinbaseValueTotalSatoshis && info.coinbaseValueTotalSatoshis > 0) {
-<<<<<<< HEAD
                 {{ info.coinbaseValueTotalSatoshis / 100_000_000 }}
-=======
                 <div>{{ info.coinbaseValueTotalSatoshis / 100_000_000 }}</div>
->>>>>>> test-pr-1857
               }
             </div>
           }
@@ -726,35 +658,29 @@
                 </tr>
               </thead>
               <tbody>
-<<<<<<< HEAD
                 @for (asic of info.hashrateMonitor?.asics; track trackByIndex($index, asic); let i = $index) {
                   <tr class="cursor-pointer"
                     [appTooltip]="(asicAmount > 1 ? 'ASIC ' + (i + 1) + ' - ' : '') + 'Error count: ' + asic.errorCount"
                     tooltipPosition="bottom">
-=======
                 @for (asic of info.hashrateMonitor.asics; track trackByIndex($index, asic); let i = $index) {
                   <tr class="cursor-pointer"
                         [appTooltip]="(asicAmount > 1 ? 'ASIC ' + (i + 1) + ' - ' : '') + 'Error count: ' + asic.errorCount"
                         tooltipPosition="bottom">
->>>>>>> test-pr-1857
                     @if (asicAmount > 1) {
                       <td class="text-secondary text-left">
                         {{ i + 1 }}
                       </td>
                     }
                     @for (domain of asic?.domains; track trackByIndex($index, domain)) {
-<<<<<<< HEAD
                       <td
                         [style.--lightness]="getHeatmapLightness(domain, info.expectedHashrate)"
                         [style.height]="(asicAmount <= 2 ? '2rem' : null)"
                         class="heatmap-cell">
                         <span class="text-xs">{{ domain | hashSuffix }}</span>
-=======
                       <td [style.--lightness]="getHeatmapLightness(domain, info.expectedHashrate)"
                           [style.height]="(asicAmount <= 2 ? '2rem' : null)"
                           class="heatmap-cell">
                           <span class="text-xs">{{ domain | hashSuffix }}</span>
->>>>>>> test-pr-1857
                       </td>
                     }
                   </tr>
@@ -766,7 +692,6 @@
       </div>
     </div>
 
-<<<<<<< HEAD
     <!-- misc -->
     <div class="grid-stack-item" gs-id="misc">
       <div class="grid-stack-item-content">
@@ -775,7 +700,6 @@
 
           <div class="flex flex-nowrap mb-1">
             <div class="w-24 shrink-0 text-secondary">
-=======
     <!-- Misc -->
     <div class="grid-stack-item" gs-id="misc">
       <div class="grid-stack-item-content">
@@ -784,14 +708,12 @@
 
           <div class="flex flex-nowrap">
             <div class="col-fixed-width text-500">
->>>>>>> test-pr-1857
               <span>Uptime</span>
             </div>
             <div>
               <span>{{ info.uptimeSeconds | dateAgo: { intervals: 2, strict:true, short:false } }}</span>
             </div>
           </div>
-<<<<<<< HEAD
 
           @if (info.totalUptimeSeconds) {
             <div class="flex flex-nowrap mb-1">
@@ -819,8 +741,6 @@
               </div>
             </div>
           }
-=======
->>>>>>> test-pr-1857
         </div>
       </div>
     </div>
@@ -829,8 +749,5 @@
   @if (info.showNewBlock) {
     <app-confetti></app-confetti>
   }
-<<<<<<< HEAD
 }
-=======
 }
->>>>>>> test-pr-1857

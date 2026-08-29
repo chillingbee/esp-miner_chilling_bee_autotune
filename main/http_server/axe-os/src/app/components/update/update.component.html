@@ -30,7 +30,6 @@
               <a style="text-decoration: underline;" target="_blank"
               [href]="latestRelease.html_url">{{latestRelease.name}}</a>
             </h3>
-<<<<<<< HEAD
             @if (latestEspMinerAsset$ | async; as asset) {
                 <div>
                   <a style="text-decoration: underline;" target="_blank"
@@ -41,7 +40,6 @@
                   Firmware binaries are not yet available for this release. Please check back shortly.
                 </span>
               }
-=======
             <div class="text-orange-500 mb-3">Download both files for update!</div>
             @for (asset of latestRelease.assets; track asset) {
               <div>
@@ -59,7 +57,6 @@
                 }
               </div>
             }
->>>>>>> test-pr-1857
             <a class="text-secondary underline block mt-3 cursor-pointer" (click)="releaseNotesModal.isVisible = true">
               Release Notes
             </a>
@@ -96,12 +93,9 @@
           </app-checkbox>
           <label for="customWWWToggle" class="font-medium cursor-pointer">Enable custom web UI</label>
         </div>
-<<<<<<< HEAD
         <small class="text-orange-500 block mb-2">* A device restart is required to apply this change.</small>
         <small class="text-secondary block mb-4">If an incompatible custom UI is loaded, visit <a href="/recovery" target="_blank" class="underline">/recovery</a> to disable Custom Frondend.</small>
-=======
         <small class="text-orange-500 block mb-4">* A device restart is required to apply this change.</small>
->>>>>>> test-pr-1857
 
         @if ((info$ | async)?.useCustomWWW === 1) {
           <div class="rounded p-3 bg-white/5 border border-white/10">
@@ -120,7 +114,6 @@
 </div>
 
 <app-modal #progressModal [headline]="'Updating ' + updateTarget" [closable]="updateStatus !== 'progress'">
-<<<<<<< HEAD
   <div class="flex flex-col items-center justify-center p-4">
     @if (updateStatus === 'progress') {
       @if (updateTarget === 'AxeOS' && websiteUpdateProgress !== null) {
@@ -144,29 +137,7 @@
         Please do not disconnect the power.
       </div>
     }
-=======
-    <div class="flex flex-col items-center justify-center p-4">
-        <ng-container *ngIf="updateStatus === 'progress'">
-            <div class="text-xl mb-3" *ngIf="updateTarget === 'AxeOS' && websiteUpdateProgress !== null">
-                Uploading... {{ websiteUpdateProgress }}%
-            </div>
-            <div class="text-xl mb-3" *ngIf="updateTarget === 'Firmware' && firmwareUpdateProgress !== null">
-                Uploading... {{ firmwareUpdateProgress }}%
-            </div>
-            <div class="text-xl mb-3" *ngIf="(updateTarget === 'AxeOS' && websiteUpdateProgress === null) || (updateTarget === 'Firmware' && firmwareUpdateProgress === null)">
-                Applying update...
-            </div>
-            
-            @let progressVal = (updateTarget === 'AxeOS' ? websiteUpdateProgress : firmwareUpdateProgress);
-            <app-progressbar [value]="progressVal ?? 0" heightClass="h-6"></app-progressbar>
-            
-            <div class="text-center mt-3 text-secondary">
-                Please do not disconnect the power.
-            </div>
-        </ng-container>
->>>>>>> test-pr-1857
-
-    @if (updateStatus === 'success') {
+        @if (updateStatus === 'success') {
       <i class="pi pi-check-circle text-green-500" style="font-size: 3.5rem; margin-bottom: 1rem;"></i>
       <div class="text-lg text-center">{{ updateMessage }}</div>
       @if (updateTarget !== 'AxeOS') {
@@ -258,4 +229,4 @@
       <span>Restart Device</span>
     </button>
   </div>
-</div>
+</app-modal>
