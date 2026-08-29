@@ -10,7 +10,7 @@ import { AutotuneSettings, SystemInfo } from 'src/app/generated/models';
 import { SystemApiService } from 'src/app/services/system.service';
 
 
-import { TooltipTextIconComponent } from 'src/app/components/tooltip-text-icon/tooltip-text-icon.component'; // Passe ggf. den relativen Pfad an
+import { TooltipTextIconComponent } from 'src/app/components/tooltip-text-icon/tooltip-text-icon.component';
 
 
 interface SliderConfig {
