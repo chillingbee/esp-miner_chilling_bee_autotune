@@ -4,6 +4,25 @@
 
 @custom-variant dark (&:where(.dark-mode, .dark-mode *));
 
+@layer components {
+  .card {
+    @apply bg-bg-card border border-surface shadow rounded p-4;
+  }
+
+  .glass-mode .card {
+    @apply backdrop-blur-xl border-white/10 shadow-lg;
+    background: var(--color-bg-card);
+    box-shadow: var(--glass-glow), var(--card-shadow);
+  }
+
+  .glass-mode {
+    background-attachment: fixed;
+    background-image:
+      radial-gradient(at 0% 0%, oklch(from var(--color-primary) l c h / 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, oklch(from var(--color-primary) l c h / 0.1) 0px, transparent 50%);
+  }
+}
+
 @theme {
   --color-primary: var(--color-primary);
   --color-primary-hover: var(--color-primary-hover);

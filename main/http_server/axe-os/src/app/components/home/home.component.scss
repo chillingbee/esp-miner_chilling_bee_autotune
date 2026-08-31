@@ -32,7 +32,8 @@
     .grid-stack-item-content {
         container-type: size;
         container-name: widget;
-        overflow: hidden;
+        overflow: visible;
+        border-radius: 12px;
 
         > .card {
             height: 100%;

@@ -29,7 +29,7 @@
             </div>
             <input type="range" [id]="slider.formControlName" [formControlName]="slider.formControlName"
               [min]="slider.min" [max]="slider.max" [step]="slider.step"
-              class="w-full h-2 bg-surface rounded-lg appearance-none cursor-pointer accent-primary">
+              class="w-full h-2 bg-surface rounded-lg appearance-none cursor-pointer accent-primary cyber-slider" [style.background]="'linear-gradient(to right, var(--color-primary) ' + (((autotuneForm.value[slider.formControlName] || 0) - (slider.min || 0)) / ((slider.max || 100) - (slider.min || 0)) * 100) + '%, var(--slider-bg, #dee2e6) ' + (((autotuneForm.value[slider.formControlName] || 0) - (slider.min || 0)) / ((slider.max || 100) - (slider.min || 0)) * 100) + '%)'">
           </div>
         </div>
       }

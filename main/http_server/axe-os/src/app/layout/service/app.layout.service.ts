@@ -144,15 +144,39 @@ export class LayoutService {
         const config = this.config();
         const root = document.documentElement;
 
+        // Resolve 'auto' to actual scheme
+        let effectiveScheme = config.colorScheme;
+        const isGlass = effectiveScheme.startsWith('glass-') || effectiveScheme === 'glass';
+        const isAuto = effectiveScheme.endsWith('auto') || effectiveScheme === 'auto';
+
+        if (isAuto) {
+            const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (isGlass) {
+                effectiveScheme = systemDark ? 'glass-dark' : 'glass-light';
+            } else {
+                effectiveScheme = systemDark ? 'dark' : 'light';
+            }
+        } else if (effectiveScheme === 'glass') {
+            // Default glass to dark if not specified
+            effectiveScheme = 'glass-dark';
+        }
+
         // Toggle theme CSS classes
-        root.classList.remove('theme-dark', 'theme-light', 'theme-white');
+        root.classList.remove('theme-dark', 'theme-light', 'theme-white', 'theme-glass-dark', 'theme-glass-light', 'theme-cyberpunk');
         root.classList.add(`theme-${config.colorScheme}`);
 
         // Toggle dark-mode class for theme switching
-        if (config.colorScheme === 'white') {
+        if (effectiveScheme === 'white' || effectiveScheme === 'light' || effectiveScheme === 'glass-light') {
             root.classList.remove('dark-mode');
         } else {
             root.classList.add('dark-mode');
+        }
+
+        // Apply glass effect if needed
+        if (effectiveScheme.includes('glass')) {
+             root.classList.add('glass-mode');
+        } else {
+             root.classList.remove('glass-mode');
         }
 
         // Load theme settings from NVS
