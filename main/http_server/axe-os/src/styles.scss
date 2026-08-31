@@ -1,8 +1,16 @@
 @layer theme, base, components, layout, axe-os, utilities;
 
 @font-face {
-    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    font-family: 'Inter';
     src: url(/assets/fonts/Nippo-Regular.woff2) format('woff2');
+    font-weight: 400;
+    font-display: swap;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Orbitron';
+    src: url(/assets/fonts/orbitron-v35-latin-regular.woff2) format('woff2');
     font-weight: 400;
     font-display: swap;
     font-style: normal;

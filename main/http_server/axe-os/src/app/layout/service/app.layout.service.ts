@@ -145,8 +145,8 @@ export class LayoutService {
         const root = document.documentElement;
 
         // Resolve 'auto' to actual scheme
-        let effectiveScheme = config.colorScheme;
-        const isGlass = effectiveScheme.startsWith('glass-') || effectiveScheme === 'glass';
+        let effectiveScheme = config?.colorScheme || 'dark';
+        const isGlass = (effectiveScheme || '').startsWith('glass-') || effectiveScheme === 'glass';
         const isAuto = effectiveScheme.endsWith('auto') || effectiveScheme === 'auto';
 
         if (isAuto) {
