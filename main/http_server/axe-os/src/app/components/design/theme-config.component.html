@@ -14,11 +14,6 @@
           <label for="light" class="ml-2 cursor-pointer">Light</label>
         </div>
         <div class="flex items-center">
-          <app-radio-button name="colorScheme" [value]="'auto'" [(ngModel)]="selectedScheme"
-            (onClick)="changeColorScheme('auto')" inputId="auto"></app-radio-button>
-          <label for="auto" class="ml-2 cursor-pointer">Auto</label>
-        </div>
-        <div class="flex items-center">
           <app-radio-button name="colorScheme" [value]="'white'" [(ngModel)]="selectedScheme"
             (onClick)="changeColorScheme('white')" inputId="white"></app-radio-button>
           <label for="white" class="ml-2 cursor-pointer">White</label>

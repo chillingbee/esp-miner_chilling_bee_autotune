@@ -108,10 +108,10 @@
     100% { text-shadow: -2px 0 4px var(--color-neon-cyan, #00FFFF), 0 0 8px var(--color-neon-pink, #FF0080); }
 }
 
-.grid-stack-item[gs-id="hashrate"] .card span.block.text-lg,
-.grid-stack-item[gs-id="efficiency"] .card span.block.text-lg,
-.grid-stack-item[gs-id="shares"] .card span.block.text-lg,
-.grid-stack-item[gs-id="bestdiff"] .card span.block.text-lg {
+.theme-cyberpunk .grid-stack-item[gs-id="hashrate"] .card span.block.text-lg,
+.theme-cyberpunk .grid-stack-item[gs-id="efficiency"] .card span.block.text-lg,
+.theme-cyberpunk .grid-stack-item[gs-id="shares"] .card span.block.text-lg,
+.theme-cyberpunk .grid-stack-item[gs-id="bestdiff"] .card span.block.text-lg {
     background: linear-gradient(90deg, var(--color-neon-cyan, #00FFFF), var(--color-neon-pink, #FF0080));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -120,13 +120,13 @@
     text-shadow: none;
 }
 
-.grid-stack-item[gs-id="power"] .card h4,
-.grid-stack-item[gs-id="heat"] .card h4,
-.grid-stack-item[gs-id="fan"] .card h4,
-.grid-stack-item[gs-id="pool"] .card h4,
-.grid-stack-item[gs-id="blockheader"] .card h4,
-.grid-stack-item[gs-id="registers"] .card h4,
-.grid-stack-item[gs-id="misc"] .card h4 {
+.theme-cyberpunk .grid-stack-item[gs-id="power"] .card h4,
+.theme-cyberpunk .grid-stack-item[gs-id="heat"] .card h4,
+.theme-cyberpunk .grid-stack-item[gs-id="fan"] .card h4,
+.theme-cyberpunk .grid-stack-item[gs-id="pool"] .card h4,
+.theme-cyberpunk .grid-stack-item[gs-id="blockheader"] .card h4,
+.theme-cyberpunk .grid-stack-item[gs-id="registers"] .card h4,
+.theme-cyberpunk .grid-stack-item[gs-id="misc"] .card h4 {
     color: var(--color-neon-cyan, #00FFFF);
     text-shadow: 0 0 10px var(--color-neon-cyan, #00FFFF);
 }
