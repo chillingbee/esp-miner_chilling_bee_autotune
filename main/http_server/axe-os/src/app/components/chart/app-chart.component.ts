@@ -3,6 +3,25 @@ import { Chart, registerables } from 'chart.js';
 
 Chart.register(...registerables);
 
+// Cyberpunk Neon-Glow Plugin
+const cyberGlowPlugin = {
+  id: 'cyberGlow',
+  beforeDatasetDraw(chart: any, args: any, options: any) {
+    const ctx = chart.ctx;
+    ctx.save();
+    ctx.shadowColor = 'rgba(0, 240, 255, 1)';
+    ctx.shadowBlur = 25;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+  },
+  afterDatasetDraw(chart: any, args: any, options: any) {
+    const ctx = chart.ctx;
+    ctx.restore();
+  }
+};
+
+Chart.register(cyberGlowPlugin);
+
 @Component({
   selector: 'app-chart',
   template: `<div class="relative w-full h-full"><canvas #canvas></canvas></div>`,
@@ -68,10 +87,17 @@ export class AppChartComponent implements OnChanges, OnDestroy {
     if (!ctx) return;
 
     this.ngZone.runOutsideAngular(() => {
+      const options = this.options || {};
+      // Ensure glow plugin is active
+      if (!options.plugins) {
+        options.plugins = {};
+      }
+      options.plugins.cyberGlow = { enabled: true };
+
       this.chart = new Chart(ctx, {
         type: this.type as any,
         data: this.data,
-        options: this.options
+        options: options
       });
     });
   }

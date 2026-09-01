@@ -590,10 +590,22 @@ this.ngZone.runOutsideAngular(() => {
 
     return labels.filter(label => this.isSensorSupported(label, this.latestInfo)).map((labelKey, index) => {
       const label = chartLabelValue(labelKey) || labelKey;
-      const borderColor = index === 0 
-        ? baseColor 
+      const borderColor = index === 0
+        ? baseColor
         : `color-mix(in srgb, ${baseColor} ${100 - index * 15}%, ${mixColor} ${index * 15}%)`;
-      const backgroundColor = `color-mix(in srgb, ${borderColor}, transparent 81%)`;
+      // Gradient Fill: Cyan → Magenta (Cyberpunk)
+      const gradientColors = ['rgba(0, 240, 255, 0.6)', 'rgba(255, 0, 255, 0.4)'];
+      const backgroundColor = (context: any) => {
+        const chart = context.chart;
+        if (!chart) return gradientColors[0];
+        const { ctx, chartArea } = chart;
+        if (!chartArea) return gradientColors[0];
+        const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+        gradient.addColorStop(0, gradientColors[0]);
+        gradient.addColorStop(0.5, 'rgba(0, 240, 255, 0.15)');
+        gradient.addColorStop(1, gradientColors[1]);
+        return gradient;
+      };
 
       return {
         type: 'line',
@@ -602,10 +614,10 @@ this.ngZone.runOutsideAngular(() => {
         fill,
         backgroundColor,
         borderColor,
-        tension: 0,
-        pointRadius: 2,
-        pointHoverRadius: 5,
-        borderWidth: 1,
+        tension: 0.4,
+        pointRadius: 0,
+        pointHoverRadius: 8,
+        borderWidth: 3,
         yAxisID,
         hidden: this.chartHiddenSensors[label] ?? DEFAULT_HIDDEN_SENSORS.has(labelKey)
       };

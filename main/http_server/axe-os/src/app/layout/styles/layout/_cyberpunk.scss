@@ -57,6 +57,7 @@
     background: rgba(10, 20, 40, 0.45);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
+    clip-path: polygon(0 12px, 12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px));
 }
 
 .theme-cyberpunk .card::before {
@@ -67,12 +68,38 @@
     border-radius: 12px 12px 0 0;
 }
 
+.theme-cyberpunk .card::after {
+    content: '';
+    position: absolute;
+    top: 6px; left: 6px;
+    width: 12px; height: 12px;
+    border-top: 1px solid rgba(0, 240, 255, 0.6);
+    border-left: 1px solid rgba(0, 240, 255, 0.6);
+    border-top-left-radius: 4px;
+}
+
+.theme-cyberpunk .card > .corner-cyber::before {
+    content: '';
+    position: absolute;
+    bottom: 6px; right: 6px;
+    width: 12px; height: 12px;
+    border-bottom: 1px solid rgba(255, 0, 255, 0.6);
+    border-right: 1px solid rgba(255, 0, 255, 0.6);
+    border-bottom-right-radius: 4px;
+}
+
 .theme-cyberpunk .layout-wrapper {
     background-color: #02060a;
     background-image:
       linear-gradient(0deg, rgba(0, 240, 255, 0.08) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255, 0, 255, 0.08) 1px, transparent 1px);
     background-size: 30px 30px;
+    animation: gridMove 20s linear infinite;
+}
+
+@keyframes gridMove {
+    0% { background-position: 0 0; }
+    100% { background-position: 30px 30px; }
 }
 
 .theme-cyberpunk .layout-topbar,
@@ -93,6 +120,18 @@
 .theme-cyberpunk .btn {
     box-shadow: var(--glow-cyan);
     border: 1px solid rgba(0, 240, 255, 0.4);
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.theme-cyberpunk button:hover,
+.theme-cyberpunk .btn:hover,
+.theme-cyberpunk .layout-sidebar button:hover,
+.theme-cyberpunk .layout-sidebar .btn:hover,
+.theme-cyberpunk .layout-sidebar a:hover {
+    box-shadow: 0 0 30px rgba(0, 240, 255, 1), 0 0 60px rgba(255, 0, 255, 0.8), inset 0 0 20px rgba(0, 240, 255, 0.3);
+    border-color: rgba(255, 0, 255, 0.9);
+    color: #fff;
+    text-shadow: 0 0 8px rgba(0, 240, 255, 0.8);
 }
 
 .theme-cyberpunk input,
