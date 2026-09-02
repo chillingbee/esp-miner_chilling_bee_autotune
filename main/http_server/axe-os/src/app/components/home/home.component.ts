@@ -593,19 +593,7 @@ this.ngZone.runOutsideAngular(() => {
       const borderColor = index === 0
         ? baseColor
         : `color-mix(in srgb, ${baseColor} ${100 - index * 15}%, ${mixColor} ${index * 15}%)`;
-      // Gradient Fill: Cyan → Magenta (Cyberpunk)
-      const gradientColors = ['rgba(0, 240, 255, 0.6)', 'rgba(255, 0, 255, 0.4)'];
-      const backgroundColor = (context: any) => {
-        const chart = context.chart;
-        if (!chart) return gradientColors[0];
-        const { ctx, chartArea } = chart;
-        if (!chartArea) return gradientColors[0];
-        const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-        gradient.addColorStop(0, gradientColors[0]);
-        gradient.addColorStop(0.5, 'rgba(0, 240, 255, 0.15)');
-        gradient.addColorStop(1, gradientColors[1]);
-        return gradient;
-      };
+      const backgroundColor = `color-mix(in srgb, ${borderColor}, transparent 81%)`;
 
       return {
         type: 'line',
@@ -614,10 +602,10 @@ this.ngZone.runOutsideAngular(() => {
         fill,
         backgroundColor,
         borderColor,
-        tension: 0.4,
-        pointRadius: 0,
-        pointHoverRadius: 8,
-        borderWidth: 3,
+        tension: 0,
+        pointRadius: 2,
+        pointHoverRadius: 5,
+        borderWidth: 1,
         yAxisID,
         hidden: this.chartHiddenSensors[label] ?? DEFAULT_HIDDEN_SENSORS.has(labelKey)
       };
@@ -629,11 +617,33 @@ this.ngZone.runOutsideAngular(() => {
     const primaryColor = documentStyle.getPropertyValue('--color-primary').trim() || '#F80421';
     const textColor = documentStyle.getPropertyValue('--color-text-main').trim() || '#ffffff';
     const textColorSecondary = documentStyle.getPropertyValue('--color-text-secondary').trim() || '#808080';
+    const isCyberpunk = document.documentElement.classList.contains('theme-cyberpunk');
 
     const datasets = [
       ...this.createChartDatasets('chartY1Unit', primaryColor, textColor, true, 'y'),
       ...this.createChartDatasets('chartY2Unit', textColorSecondary, 'black', false, 'y2')
     ];
+
+    // Cyberpunk-specific chart styling overrides (Cyan → Magenta gradient)
+    if (isCyberpunk) {
+      for (const ds of datasets) {
+        ds.backgroundColor = (context: any) => {
+          const chart = context.chart;
+          if (!chart) return 'rgba(0, 240, 255, 0.6)';
+          const { ctx, chartArea } = chart;
+          if (!chartArea) return 'rgba(0, 240, 255, 0.6)';
+          const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+          gradient.addColorStop(0, 'rgba(0, 240, 255, 0.6)');
+          gradient.addColorStop(0.5, 'rgba(0, 240, 255, 0.15)');
+          gradient.addColorStop(1, 'rgba(255, 0, 255, 0.4)');
+          return gradient;
+        };
+        ds.tension = 0.4;
+        ds.pointRadius = 0;
+        ds.pointHoverRadius = 8;
+        ds.borderWidth = 3;
+      }
+    }
 
     if (this.chartData) {
       this.chartData = {
