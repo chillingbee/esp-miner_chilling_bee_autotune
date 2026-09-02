@@ -1,0 +1,127 @@
+.theme-tron {
+    --color-bg-content: #050510;
+    --color-bg-card: rgba(5, 8, 20, 0.9);
+    --color-border-content: #ffd700;
+    --card-border: rgba(255, 215, 0, 0.35);
+    --surface-border: rgba(255, 215, 0, 0.25);
+    --color-text-main: #fff5c2;
+    --color-text-secondary: #f0e68c;
+    --color-mask-bg: rgba(0, 0, 0, 0.8);
+    --backdrop-filter: blur(12px);
+    --font-family: 'Orbitron', 'Segoe UI', system-ui, sans-serif;
+    --glass-glow: 0 0 25px rgba(255, 215, 0, 0.35), 0 0 50px rgba(255, 215, 0, 0.15);
+    --card-shadow: 0 0 20px rgba(255, 215, 0, 0.2), inset 0 0 10px rgba(255, 215, 0, 0.1);
+    --border-radius: 8px;
+    --glow-gold: 0 0 15px rgba(255, 215, 0, 0.7);
+    --glow-amber: 0 0 30px rgba(255, 160, 0, 0.5);
+}
+
+.theme-tron,
+.theme-tron .card,
+.theme-tron .layout-topbar,
+.theme-tron .layout-sidebar,
+.theme-tron .surface,
+.theme-tron h1,
+.theme-tron h2,
+.theme-tron h3,
+.theme-tron h4,
+.theme-tron h5,
+.theme-tron h6,
+.theme-tron span,
+.theme-tron p,
+.theme-tron .text-lg,
+.theme-tron .font-medium {
+    font-family: 'Orbitron', 'Segoe UI', system-ui, sans-serif;
+}
+
+.theme-tron .card {
+    position: relative;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 215, 0, 0.35);
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.15), inset 0 0 15px rgba(255, 215, 0, 0.08);
+    background: rgba(5, 8, 20, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    overflow: hidden;
+}
+
+.theme-tron .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.9), rgba(255, 160, 0, 0.6), transparent);
+}
+
+.theme-tron .layout-wrapper {
+    background-color: #020510;
+    background-image:
+      linear-gradient(0deg, rgba(255, 215, 0, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 215, 0, 0.06) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+.theme-tron .layout-topbar,
+.theme-tron .layout-sidebar,
+.theme-tron .surface {
+    background: rgba(5, 8, 20, 0.75);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.15), inset 0 0 10px rgba(255, 215, 0, 0.1);
+}
+
+.theme-tron .layout-main-container {
+    box-shadow: inset 0 0 60px rgba(255, 215, 0, 0.05);
+    border-left: 1px solid rgba(255, 215, 0, 0.15);
+    border-right: 1px solid rgba(255, 215, 0, 0.15);
+}
+
+.theme-tron button,
+.theme-tron .btn {
+    box-shadow: var(--glow-gold);
+    border: 1px solid rgba(255, 215, 0, 0.4);
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+    background: rgba(255, 215, 0, 0.05);
+}
+
+.theme-tron button:hover,
+.theme-tron .btn:hover,
+.theme-tron .layout-sidebar button:hover,
+.theme-tron .layout-sidebar .btn:hover,
+.theme-tron .layout-sidebar a:hover {
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 0 60px rgba(255, 160, 0, 0.4), inset 0 0 20px rgba(255, 215, 0, 0.2);
+    border-color: rgba(255, 215, 0, 0.9);
+    color: #fff;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+}
+
+.theme-tron input,
+.theme-tron select,
+.theme-tron textarea {
+    box-shadow: var(--glow-gold);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    background: rgba(5, 8, 20, 0.7);
+    color: #fff5c2;
+}
+
+.theme-tron .grid-stack-item[gs-id="hashrate"] .card span.block.text-lg,
+.theme-tron .grid-stack-item[gs-id="efficiency"] .card span.block.text-lg,
+.theme-tron .grid-stack-item[gs-id="shares"] .card span.block.text-lg,
+.theme-tron .grid-stack-item[gs-id="bestdiff"] .card span.block.text-lg {
+    background: linear-gradient(90deg, #ffd700, #ff8c00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+}
+
+.theme-tron .grid-stack-item[gs-id="power"] .card h4,
+.theme-tron .grid-stack-item[gs-id="heat"] .card h4,
+.theme-tron .grid-stack-item[gs-id="fan"] .card h4,
+.theme-tron .grid-stack-item[gs-id="pool"] .card h4,
+.theme-tron .grid-stack-item[gs-id="blockheader"] .card h4,
+.theme-tron .grid-stack-item[gs-id="registers"] .card h4,
+.theme-tron .grid-stack-item[gs-id="misc"] .card h4 {
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+}
