@@ -162,7 +162,7 @@ export class LayoutService {
         }
 
         // Toggle theme CSS classes
-        root.classList.remove('theme-dark', 'theme-light', 'theme-white', 'theme-glass-dark', 'theme-glass-light', 'theme-cyberpunk');
+        root.classList.remove('theme-dark', 'theme-light', 'theme-white', 'theme-glass-dark', 'theme-glass-light', 'theme-cyberpunk', 'theme-tron');
         root.classList.add(`theme-${config.colorScheme}`);
 
         // Toggle dark-mode class for theme switching
