@@ -618,11 +618,34 @@ this.ngZone.runOutsideAngular(() => {
     const textColor = documentStyle.getPropertyValue('--color-text-main').trim() || '#ffffff';
     const textColorSecondary = documentStyle.getPropertyValue('--color-text-secondary').trim() || '#808080';
     const isCyberpunk = document.documentElement.classList.contains('theme-cyberpunk');
+    const isTron = document.documentElement.classList.contains('theme-tron');
 
     const datasets = [
       ...this.createChartDatasets('chartY1Unit', primaryColor, textColor, true, 'y'),
       ...this.createChartDatasets('chartY2Unit', textColorSecondary, 'black', false, 'y2')
     ];
+
+    // Tron-specific chart styling (Cyan → Amber/Orange gradient, subtle glow)
+    if (isTron) {
+      for (const ds of datasets) {
+        ds.backgroundColor = (context: any) => {
+          const chart = context.chart;
+          if (!chart) return 'rgba(0, 240, 255, 0.5)';
+          const { ctx, chartArea } = chart;
+          if (!chartArea) return 'rgba(0, 240, 255, 0.5)';
+          const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+          gradient.addColorStop(0, 'rgba(0, 240, 255, 0.55)');
+          gradient.addColorStop(0.5, 'rgba(255, 160, 0, 0.15)');
+          gradient.addColorStop(1, 'rgba(255, 160, 0, 0.35)');
+          return gradient;
+        };
+        ds.tension = 0.35;
+        ds.pointRadius = 2;
+        ds.pointHoverRadius = 6;
+        ds.borderWidth = 2.5;
+        ds.borderColor = '#00f0ff';
+      }
+    }
 
     // Cyberpunk-specific chart styling overrides (Cyan → Magenta gradient)
     if (isCyberpunk) {
