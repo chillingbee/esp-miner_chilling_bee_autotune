@@ -346,7 +346,9 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
 
     this.form = this.fb.group(parsedConfig);
 
-    this.form.valueChanges.subscribe(() => {
+    this.form.valueChanges.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
       this.storageService.setItem(HOME_CHART_DATA_SOURCES, JSON.stringify(this.form.getRawValue()));
       this.loadPreviousData();
     });
@@ -379,9 +381,6 @@ this.ngZone.runOutsideAngular(() => {
     }
 
     if (document.visibilityState === 'visible') {
-      // Immediately refresh the chart to display the accumulated data points and avoid a stale visual state
-      this.updateChart(undefined, true);
-
       // Reset lastMessageTime to prevent stale data warning immediately after wake up
       if (this.lastMessageTime > 0) {
         this.lastMessageTime = Date.now();
@@ -398,6 +397,8 @@ this.ngZone.runOutsideAngular(() => {
 
       if (awayTime > threshold || !lastPoint || (Date.now() - lastPoint > threshold)) {
         this.loadPreviousData(false);
+      } else {
+        this.updateChart(undefined, true);
       }
       this.lastHiddenTime = 0;
     }
@@ -414,6 +415,9 @@ this.ngZone.runOutsideAngular(() => {
 
   ngOnDestroy() {
     clearTimeout(this.resizeTimer);
+    clearTimeout(this.shareAcceptedTimeout);
+    clearTimeout(this.shareRejectedTimeout);
+    clearTimeout(this.workReceivedTimeout);
     clearInterval(this.staleCheckInterval);
     clearInterval(this.displayTickInterval);
     this.dashboardEditService.isActive$.next(false);
@@ -1552,7 +1556,7 @@ this.ngZone.runOutsideAngular(() => {
       });
     }
 
-    if (this.chartData) {
+    if (this.chartData && document.visibilityState !== 'hidden') {
       this.chartData = { ...this.chartData };
     }
   }
