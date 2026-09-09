@@ -62,9 +62,6 @@
 }
 
 /* Permanent Glow behind ALL cards — uses parent, avoids clip-path cut */
-.theme-cyberpunk .grid-stack-item {
-    position: relative;
-}
 .theme-cyberpunk .card::after {
     content: '';
     position: absolute;
