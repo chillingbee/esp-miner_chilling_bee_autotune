@@ -19,7 +19,7 @@
 .theme-cyberpunk {
     font-family: 'Orbitron', 'Segoe UI', system-ui, sans-serif;
     --color-bg-content: #050a14;
-    --color-bg-card: rgba(10, 20, 40, 0.85);
+    --color-bg-card: rgba(10, 20, 40, 0.4);
     --color-border-content: #00f0ff;
     --card-border: rgba(0, 240, 255, 0.3);
     --surface-border: rgba(255, 0, 255, 0.2);
@@ -33,6 +33,11 @@
     --border-radius: 12px;
     --glow-cyan: 0 0 15px rgba(0, 240, 255, 0.4);
     --glow-magenta: 0 0 15px rgba(255, 0, 255, 0.3);
+
+    /* Theme-Slider Variablen (nur Cyberpunk) */
+    --card-alpha: 0.4;
+    --glow-intensity: 0.35;
+    --card-blur: 8px;
 }
 
 .theme-cyberpunk input[type="range"],
@@ -52,13 +57,15 @@
 .theme-cyberpunk .card {
     position: relative;
     z-index: 1;
-    overflow: hidden;
+    overflow: visible;
     border-radius: 12px;
-    border: 1px solid rgba(0, 240, 255, 0.3);
-    background: rgba(10, 20, 40, 0.25);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(0, 240, 255, 0.4);
+    background: rgba(10, 20, 40, var(--card-alpha));
+    backdrop-filter: blur(var(--card-blur));
+    -webkit-backdrop-filter: blur(var(--card-blur));
     clip-path: polygon(0 12px, 12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px));
+    filter: drop-shadow(0 0 8px rgba(0, 240, 255, var(--glow-intensity)));
+    box-shadow: inset 0 0 8px rgba(255, 0, 255, 0.1);
 }
 
 /* Permanent Glow behind ALL cards — uses parent, avoids clip-path cut */
@@ -165,6 +172,49 @@
 
 .theme-cyberpunk .grid-stack-item {
     position: relative;
-    overflow: hidden;
+    overflow: visible;
+}
+
+/* Cyberpunk Theme Slider Panel — nur bei aktivem Theme */
+.theme-cyberpunk .cyber-slider-panel {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 9998;
+    background: rgba(10, 20, 40, 0.85);
+    border: 1px solid rgba(0, 240, 255, 0.4);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.25), inset 0 0 10px rgba(255, 0, 255, 0.1);
+    color: var(--color-text-main);
+    font-family: var(--font-family);
+    min-width: 220px;
+    pointer-events: auto;
+    animation: fadein 0.3s ease;
+}
+
+.theme-cyberpunk .cyber-slider-panel label {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(0, 240, 255, 0.9);
+    margin-bottom: 0.25rem;
+    text-shadow: 0 0 4px rgba(0, 240, 255, 0.4);
+}
+
+.theme-cyberpunk .cyber-slider-panel input[type="range"] {
+    width: 100%;
+    margin-bottom: 0.75rem;
+    accent-color: var(--color-primary, #00f0ff);
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: 9999px;
+    background: linear-gradient(to right, rgba(0, 240, 255, 0.6), rgba(255, 0, 255, 0.4));
+    outline: none;
+    cursor: pointer;
 }
 

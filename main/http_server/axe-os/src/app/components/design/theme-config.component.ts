@@ -16,6 +16,19 @@ interface ThemeOption {
   standalone: false
 })
 export class ThemeConfigComponent implements OnInit {
+  updateSlider(event: Event, varName: string, suffix?: string) {
+    const input = event.target as HTMLInputElement;
+    const val = input.value;
+    const pct = ((parseFloat(val) - parseFloat(input.min)) / (parseFloat(input.max) - parseFloat(input.min))) * 100;
+    input.style.background = `linear-gradient(to right, rgba(0,240,255,0.8) 0%, rgba(0,240,255,0.8) ${pct}%, rgba(255,0,255,0.15) ${pct}%, rgba(255,0,255,0.15) 100%)`;
+    this.setVar(varName, suffix ? val + suffix : val);
+  }
+
+  setVar(varName: string, value: string) {
+    document.documentElement.style.setProperty(varName, value);
+    localStorage.setItem('cyberpunk_' + varName, value);
+  }
+
   selectedScheme: string;
   currentColor: string = '';
   themes: ThemeOption[] = [
@@ -112,6 +125,33 @@ export class ThemeConfigComponent implements OnInit {
         },
         error: (error) => console.error('Error loading theme settings:', error)
       });
+
+    // Slider-Werte aus localStorage laden
+    const vars = [
+      { key: '--card-alpha', min: 0.1, max: 0.9, defaultVal: '0.4', suffix: '' },
+      { key: '--glow-intensity', min: 0, max: 1, defaultVal: '0.35', suffix: '' },
+      { key: '--card-blur', min: 0, max: 20, defaultVal: '8', suffix: 'px' }
+    ];
+    vars.forEach(v => {
+      const saved = localStorage.getItem('cyberpunk_' + v.key);
+      const val = saved ? saved.replace('px', '') : v.defaultVal;
+      document.documentElement.style.setProperty(v.key, saved || v.defaultVal + v.suffix);
+    });
+
+    // Slider-Init nach Theme-Laden
+    setTimeout(() => {
+      document.querySelectorAll<HTMLInputElement>('.slider-fill').forEach((input) => {
+        // Wert aus localStorage / CSS-Var ermitteln
+        const key = input.getAttribute('data-var') || '--card-alpha';
+        const saved = localStorage.getItem('cyberpunk_' + key);
+        if (saved) {
+          const clean = saved.replace('px', '');
+          input.value = clean;
+        }
+        const pct = ((parseFloat(input.value) - parseFloat(input.min)) / (parseFloat(input.max) - parseFloat(input.min))) * 100;
+        input.style.background = `linear-gradient(to right, rgba(0,240,255,0.8) 0%, rgba(0,240,255,0.8) ${pct}%, rgba(255,0,255,0.15) ${pct}%, rgba(255,0,255,0.15) 100%)`;
+      });
+    }, 100);
   }
 
   ngOnDestroy() {
@@ -130,6 +170,29 @@ export class ThemeConfigComponent implements OnInit {
       .subscribe({
         error: (error) => console.error('Error saving theme settings:', error)
       });
+
+    // Slider-Werte wiederherstellen wenn zurück zu cyberpunk
+    if (scheme === 'cyberpunk') {
+      setTimeout(() => this.restoreSliderVals(), 0);
+    }
+  }
+
+  restoreSliderVals() {
+    ['--card-alpha', '--glow-intensity', '--card-blur'].forEach(key => {
+      const saved = localStorage.getItem('cyberpunk_' + key);
+      if (saved) document.documentElement.style.setProperty(key, saved);
+    });
+    document.querySelectorAll<HTMLInputElement>('.slider-fill').forEach(input => {
+      const key = input.getAttribute('data-var');
+      if (!key) return;
+      const saved = localStorage.getItem('cyberpunk_' + key);
+      if (saved) {
+        const val = saved.replace('px', '');
+        input.value = val;
+        const pct = ((parseFloat(val) - parseFloat(input.min)) / (parseFloat(input.max) - parseFloat(input.min))) * 100;
+        input.style.background = `linear-gradient(to right, rgba(0,240,255,0.8) 0%, rgba(0,240,255,0.8) ${pct}%, rgba(255,0,255,0.15) ${pct}%, rgba(255,0,255,0.15) 100%)`;
+      }
+    });
   }
 
   changeTheme(theme: ThemeOption) {
