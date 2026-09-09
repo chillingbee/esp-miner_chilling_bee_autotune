@@ -52,12 +52,13 @@
 .theme-cyberpunk .card {
     position: relative;
     z-index: 1;
-    overflow: visible;
+    overflow: hidden;
     border-radius: 12px;
     border: 1px solid rgba(0, 240, 255, 0.3);
     background: rgba(10, 20, 40, 0.25);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
+    clip-path: polygon(0 12px, 12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px));
 }
 
 /* Permanent Glow behind ALL cards — uses parent, avoids clip-path cut */
