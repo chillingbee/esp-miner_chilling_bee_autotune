@@ -15,6 +15,7 @@ import { ISystemUpdateResponse } from 'src/models/ISystemUpdateResponse';
 
 import { CommonModule } from '@angular/common';
 import { TooltipTextIconComponent } from '../tooltip-text-icon/tooltip-text-icon.component';
+import { CheckboxComponent } from '../checkbox/checkbox.component';
 
 
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
@@ -25,11 +26,13 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
     templateUrl: './network.edit.component.html',
     styleUrls: ['./network.edit.component.scss'],
      standalone: true,
- imports: [
+  imports: [
   CommonModule,
   TooltipTextIconComponent,
+  CheckboxComponent,
   ReactiveFormsModule,
-  FormsModule /* weitere benötigte Module */],
+  FormsModule
+],
 })
 export class NetworkEditComponent implements OnInit {
   private formSubject = new BehaviorSubject<FormGroup | null>(null);

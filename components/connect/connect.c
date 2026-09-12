@@ -60,7 +60,6 @@ static const char * TAG = "connect";
 
 static TimerHandle_t ip_acquire_timer = NULL;
 static TimerHandle_t reconnect_timer = NULL;
-static GlobalState *s_reconnect_global_state = NULL;
 
 static bool is_scanning = false;
 static uint16_t ap_number = 0;
