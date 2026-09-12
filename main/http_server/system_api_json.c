@@ -81,7 +81,7 @@ cJSON_AddNumberToObject(root, "uptimeSeconds", g->SYSTEM_MODULE.uptime_seconds);
     cJSON_AddNumberToObject(root, "totalLog2Work", SYSTEM_noinit_get_total_log2_work());
     cJSON_AddNumberToObject(root, "bestScoreUptime", best_score_uptime); //
     cJSON_AddNumberToObject(root, "bestDiffUptime", g->SYSTEM_MODULE.best_session_uptime);
-    cJSON_AddNumberToObject(root, "poolDifficulty", g->pool_difficulty);
+    cJSON_AddNumberToObject(root, "poolDifficulty", g->SYSTEM_MODULE.pool_difficulty);
     cJSON_AddFloatToObject(root, "responseTime", g->SYSTEM_MODULE.response_time);
     cJSON_AddNumberToObject(root, "responseShareBatch", g->SYSTEM_MODULE.response_share_batch);
     cJSON_AddFloatToObject(root, "processTime", g->SYSTEM_MODULE.process_time);
