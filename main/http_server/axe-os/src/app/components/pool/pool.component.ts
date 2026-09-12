@@ -51,7 +51,6 @@ interface IPoolDropdownOption {
 })
 export class PoolComponent implements OnInit {
   public form!: FormGroup;
-  public savedChanges: boolean = false;
 
   private previousPrim: number = 0;
   private previousSec: number = 1;
@@ -194,6 +193,7 @@ export class PoolComponent implements OnInit {
           const secVal = this.form.get('secondaryPoolIndex')?.value;
           if (primVal === secVal) {
             this.form.get('secondaryPoolIndex')?.setValue(this.previousPrim, { emitEvent: false });
+            this.form.get('secondaryPoolIndex')?.markAsDirty();
             this.previousSec = this.previousPrim;
           }
           this.previousPrim = primVal;
@@ -203,7 +203,8 @@ export class PoolComponent implements OnInit {
           const primVal = this.form.get('primaryPoolIndex')?.value;
           if (secVal === primVal) {
             this.form.get('primaryPoolIndex')?.setValue(this.previousSec, { emitEvent: false });
-            this.previousSec = secVal;
+            this.form.get('primaryPoolIndex')?.markAsDirty();
+            this.previousPrim = this.previousSec;
           }
           this.previousSec = secVal;
         });
@@ -341,8 +342,6 @@ export class PoolComponent implements OnInit {
   public updateSystem() {
     const form = this.form.getRawValue();
 
-    const restartAlreadyPending = this.savedChanges;
-
     this.systemService.updateSystem(this.uri, form)
       .pipe(this.loadingService.lockUIUntilComplete())
       .subscribe({
@@ -368,33 +367,17 @@ export class PoolComponent implements OnInit {
         },
         error: (err: HttpErrorResponse) => {
           this.toastr.error(`Could not save pool settings. ${getHttpErrorMessage(err, this.uri)}`);
-          this.savedChanges = restartAlreadyPending;
         }
       });
   }
 
   private onSaveSuccess() {
     const successMessage = this.uri ? `Saved pool settings for ${this.uri}` : 'Saved pool settings';
-    this.toastr.warning('You must restart this device after saving for changes to take effect.');
     this.toastr.success(successMessage);
-    this.savedChanges = true;
     this.pendingDeletePoolIds = [];
     this.form.markAsPristine();
-  }
-
-  public restart() {
-    this.systemService.restart(this.uri)
-      .pipe(this.loadingService.lockUIUntilComplete())
-      .subscribe({
-        next: () => {
-          const successMessage = this.uri ? `Device at ${this.uri} restarted` : 'Device restarted';
-          this.toastr.success(successMessage);
-          this.savedChanges = false;
-        },
-        error: (err: HttpErrorResponse) => {
-          this.toastr.error(`Failed to restart device. ${getHttpErrorMessage(err, this.uri)}`);
-        }
-      });
+    this.previousPrim = this.form.get('primaryPoolIndex')?.value ?? 0;
+    this.previousSec = this.form.get('secondaryPoolIndex')?.value ?? 1;
   }
 
   private extractPort(url: string): { cleanUrl: string, port?: number } {
@@ -424,11 +407,10 @@ export class PoolComponent implements OnInit {
       { prefix: 'stratum+ssl://', tlsMode: true }
     ] as const;
 
-    let isTlsMode = 0;
     const matched = prefixes.find(({ prefix }) => urlValue.startsWith(prefix));
     if (matched) {
       urlValue = urlValue.slice(matched.prefix.length);
-      isTlsMode = +matched.tlsMode;
+      tlsControl.setValue(+matched.tlsMode);
     }
 
     const { cleanUrl, port } = this.extractPort(urlValue);
@@ -437,7 +419,6 @@ export class PoolComponent implements OnInit {
       portControl.setValue(port);
     }
     urlControl.setValue(cleanUrl);
-    tlsControl.setValue(isTlsMode);
     urlControl.markAsDirty();
   }
 
@@ -525,10 +506,6 @@ export class PoolComponent implements OnInit {
     if (!this.isPoolV2Enabled(index)) return false;
     const poolGroup = this.poolsArray.at(index);
     return poolGroup?.get('stratumV2ChannelType')?.value === 'extended';
-  }
-
-  isStandardChannelDisabled(): boolean {
-    return this.asicModel === 'BM1397';
   }
 
   getProtocolLabel(value: string): string {

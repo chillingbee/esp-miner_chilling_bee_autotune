@@ -17,7 +17,6 @@
 #include "hashrate_monitor_task.h"
 #include "cjson_utils.h"
 #include "statistics_task.h"
-#include "stratum_v2_task.h"
 #include "asic.h"
 
 
@@ -76,7 +75,7 @@ static void system_api_add_telemetry(cJSON *root, GlobalState *g) {
     cJSON_AddNumberToObject(root, "sharesPending", g->SYSTEM_MODULE.shares_pending);
     cJSON_AddNumberToObject(root, "bestDiff", g->SYSTEM_MODULE.best_nonce_diff);
     cJSON_AddNumberToObject(root, "bestSessionDiff", g->SYSTEM_MODULE.best_session_nonce_diff);
-    cJSON_AddNumberToObject(root, "uptimeSeconds", g->SYSTEM_MODULE.uptime_seconds);
+cJSON_AddNumberToObject(root, "uptimeSeconds", g->SYSTEM_MODULE.uptime_seconds);
     cJSON_AddNumberToObject(root, "totalUptimeSeconds", SYSTEM_noinit_get_total_uptime_seconds());
     cJSON_AddNumberToObject(root, "totalHashes", SYSTEM_noinit_get_total_hashes());
     cJSON_AddNumberToObject(root, "totalLog2Work", SYSTEM_noinit_get_total_log2_work());
@@ -91,13 +90,11 @@ static void system_api_add_telemetry(cJSON *root, GlobalState *g) {
     // Dynamic Block Info
     cJSON_AddNumberToObject(root, "blockFound", g->SYSTEM_MODULE.block_found);
     cJSON_AddBoolToObject(root, "showNewBlock", g->SYSTEM_MODULE.show_new_block);
-    if (g->block_height > 0) {
-        cJSON_AddNumberToObject(root, "blockHeight", g->block_height);
-        cJSON_AddStringToObject(root, "scriptsig", g->scriptsig);
-        cJSON_AddNumberToObject(root, "networkDifficulty", g->network_nonce_diff);
-        cJSON_AddNumberToObject(root, "coinbaseValueTotalSatoshis", g->coinbase_value_total_satoshis);
-        cJSON_AddNumberToObject(root, "coinbaseValueUserSatoshis", g->coinbase_value_user_satoshis);
-    }
+    cJSON_AddNumberToObject(root, "blockHeight", g->block_height);
+    cJSON_AddStringToObject(root, "scriptsig", g->scriptsig);
+    cJSON_AddNumberToObject(root, "networkDifficulty", g->network_nonce_diff);
+    cJSON_AddNumberToObject(root, "coinbaseValueTotalSatoshis", g->coinbase_value_total_satoshis);
+    cJSON_AddNumberToObject(root, "coinbaseValueUserSatoshis", g->coinbase_value_user_satoshis);
 
     // Dynamic System Stats & Highscore Uptime Logik
     uint32_t current_uptime = (uint32_t)((esp_timer_get_time() - g->SYSTEM_MODULE.start_time_us) / 1000000);
@@ -176,6 +173,7 @@ static void system_api_add_config(cJSON *root, GlobalState *g) {
     cJSON_AddStringToObject(root, "ipv4", g->SYSTEM_MODULE.ip_addr_str);
     cJSON_AddStringToObject(root, "ipv6", g->SYSTEM_MODULE.ipv6_addr_str);
     cJSON_AddNumberToObject(root, "apEnabled", g->SYSTEM_MODULE.ap_enabled ? 1 : 0);
+    cJSON_AddNumberToObject(root, "useNTP", nvs_config_get_bool(NVS_CONFIG_USE_NTP) ? 1 : 0);
 
     // Pool Configuration
     cJSON_AddStringToObject(root, "poolConnectionInfo", g->SYSTEM_MODULE.pool_connection_info);
@@ -205,7 +203,7 @@ static void system_api_add_config(cJSON *root, GlobalState *g) {
             cJSON_AddNumberToObject(p_obj, "stratumTLS", p->tls);
             cJSON_AddStringToObject(p_obj, "stratumCert", p->cert ? p->cert : "");
             cJSON_AddBoolToObject(p_obj, "stratumDecodeCoinbase", p->decode_coinbase_tx);
-            cJSON_AddStringToObject(p_obj, "stratumV2ChannelType", p->sv2_channel_type == SV2_CHANNEL_STANDARD ? SV2_CHANNEL_TYPE_STANDARD : SV2_CHANNEL_TYPE_EXTENDED);
+            cJSON_AddStringToObject(p_obj, "stratumV2ChannelType", sv2_channel_type_to_string(p->sv2_channel_type));
             cJSON_AddStringToObject(p_obj, "stratumV2AuthorityPubkey", p->sv2_authority_pubkey ? p->sv2_authority_pubkey : "");
             cJSON_AddBoolToObject(p_obj, "stratumV2RequireAuth", p->sv2_require_auth);
 
@@ -227,7 +225,7 @@ static void system_api_add_config(cJSON *root, GlobalState *g) {
     cJSON_AddBoolToObject(root, "stratumDecodeCoinbase", prim_pool->decode_coinbase_tx);
     cJSON_AddStringToObject(root, "stratumProtocol", prim_pool->protocol == STRATUM_PROTOCOL_V2 ? STRATUM_V2 : STRATUM_V1);
     cJSON_AddStringToObject(root, "stratumV2AuthorityPubkey", prim_pool->sv2_authority_pubkey ? prim_pool->sv2_authority_pubkey : "");
-    cJSON_AddStringToObject(root, "stratumV2ChannelType", prim_pool->sv2_channel_type == SV2_CHANNEL_STANDARD ? SV2_CHANNEL_TYPE_STANDARD : SV2_CHANNEL_TYPE_EXTENDED);
+    cJSON_AddStringToObject(root, "stratumV2ChannelType", sv2_channel_type_to_string(prim_pool->sv2_channel_type));
 
     cJSON_AddStringToObject(root, "fallbackStratumURL", sec_pool->url ? sec_pool->url : "");
     cJSON_AddNumberToObject(root, "fallbackStratumPort", sec_pool->port);
@@ -239,7 +237,7 @@ static void system_api_add_config(cJSON *root, GlobalState *g) {
     cJSON_AddBoolToObject(root, "fallbackStratumDecodeCoinbase", sec_pool->decode_coinbase_tx);
     cJSON_AddStringToObject(root, "fallbackStratumProtocol", sec_pool->protocol == STRATUM_PROTOCOL_V2 ? STRATUM_V2 : STRATUM_V1);
     cJSON_AddStringToObject(root, "fallbackStratumV2AuthorityPubkey", sec_pool->sv2_authority_pubkey ? sec_pool->sv2_authority_pubkey : "");
-    cJSON_AddStringToObject(root, "fallbackStratumV2ChannelType", sec_pool->sv2_channel_type == SV2_CHANNEL_STANDARD ? SV2_CHANNEL_TYPE_STANDARD : SV2_CHANNEL_TYPE_EXTENDED);
+    cJSON_AddStringToObject(root, "fallbackStratumV2ChannelType", sv2_channel_type_to_string(sec_pool->sv2_channel_type));
 
     // User Preferences
     cJSON_AddNumberToObject(root, "useCustomWWW", nvs_config_get_bool(NVS_CONFIG_USE_CUSTOM_WWW) ? 1 : 0);
@@ -306,7 +304,7 @@ static void system_api_add_rejected_reasons(cJSON *root, GlobalState *g) {
 }
 
 static void system_api_add_block_info(cJSON *root, GlobalState *g) {
-    if (!root || !g || g->block_height <= 0) return;
+    if (!root || !g) return;
 
     cJSON *signals = cJSON_CreateArray();
     if (signals) {

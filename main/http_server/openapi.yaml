@@ -327,6 +327,7 @@ components:
         - overclockEnabled
         - primaryPoolIndex
         - secondaryPoolIndex
+        - useFallbackStratum
         - pools
         - poolConnectionInfo
         - poolDifficulty
@@ -354,6 +355,7 @@ components:
         - temp
         - temp2
         - uptimeSeconds
+        - useNTP
         - version
         - axeOSVersion
         - voltage
@@ -662,6 +664,9 @@ components:
         uptimeSeconds:
           type: number
           description: System uptime in seconds
+        useFallbackStratum:
+          type: integer
+          description: Whether fallback stratum is selected as primary preference (0=no, 1=yes)
         version:
           type: string
           description: Firmware version
@@ -752,7 +757,9 @@ components:
           description: List of available app partitions and their firmware versions
           items:
             $ref: '#/components/schemas/SystemPartition'
-
+        useNTP:
+          type: boolean
+          description: Whether NTP time sync is enabled
     SystemASIC:
       type: object
       required:

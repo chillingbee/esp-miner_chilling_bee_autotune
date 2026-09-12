@@ -18,6 +18,7 @@ import * as functions from '../generated/functions';
 import { ISystemUpdateResponse } from 'src/models/ISystemUpdateResponse';
 
 import { environment } from '../../environments/environment';
+import { useAnimation } from '@angular/animations';
 
 const API_TIMEOUT = 15000;
 
@@ -88,6 +89,7 @@ export class SystemApiService {
         wifiStatus: "Connected!",
         wifiRSSI: -32,
         apEnabled: 0,
+        useNTP: true,
         sharesAccepted: 1,
         sharesRejected: 10,
         sharesPending: 0,
@@ -163,6 +165,7 @@ export class SystemApiService {
         responseTime: 10,
         responseShareBatch: 1,
         isUsingFallbackStratum: 0,
+        useFallbackStratum: 0,
         poolConnectionInfo: "IPv4 (TLS)",
         frequency: 485,
         actualFrequency: 485,

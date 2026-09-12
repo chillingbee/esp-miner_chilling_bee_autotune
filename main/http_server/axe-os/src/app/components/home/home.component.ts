@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, Input, OnDestroy, ElementRef, HostListener, effect, NgZone, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { map, Observable, shareReplay, Subscription, switchMap, tap, first, Subject, takeUntil, BehaviorSubject, filter, combineLatest } from 'rxjs';
+import { map, Observable, shareReplay, Subscription, switchMap, tap, first, Subject, takeUntil, BehaviorSubject, filter, combineLatest, finalize } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { getHttpErrorMessage } from 'src/app/utils/error-handler';
 import { FormBuilder, FormGroup } from '@angular/forms';
@@ -152,6 +152,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   public activePoolLabel!: PoolLabel;
   public activePoolProtocol!: string;
   public responseTime!: number;
+  private isChangingPool: boolean = false;
+  private targetPoolLabel: PoolLabel | null = null;
 
   public flashShareAccepted: boolean = false;
   public flashShareRejected: boolean = false;
@@ -1061,7 +1063,7 @@ this.ngZone.runOutsideAngular(() => {
         // MANUELLE BERECHNUNG FÜR DEN GEGLÄTTETEN DURCHSCHNITT:
         if (info && info.power > 0 && info.hashRate_1h > 0) {
             const currentRawAvg = (info.power * 1000) / info.hashRate_1h;
-            
+
             // Wenn der Wert zum ersten Mal berechnet wird, nimm den aktuellen Wert
             if (this.smoothedEfficiencyAverage === 0) {
                 this.smoothedEfficiencyAverage = currentRawAvg;
@@ -1069,7 +1071,7 @@ this.ngZone.runOutsideAngular(() => {
                 // FILTER: 99% alter Wert + 1% neuer Wert (schluckt sekündliche Schwankungen)
                 this.smoothedEfficiencyAverage = (this.smoothedEfficiencyAverage * 0.99) + (currentRawAvg * 0.01);
             }
-            
+
             this.efficiencyAverage = this.smoothedEfficiencyAverage;
         } else {
             this.efficiencyAverage = 0;
@@ -1078,14 +1080,23 @@ this.ngZone.runOutsideAngular(() => {
 
         this.expectedEfficiency = this.calculateEfficiency(info, 'expectedHashrate');
 
-        const isFallbackPool = !!info.isUsingFallbackStratum;
-        this.activePoolLabel = isFallbackPool ? 'Fallback' : 'Primary';
-        this.activePoolURL = isFallbackPool ? info.fallbackStratumURL : info.stratumURL;
-        this.activePoolUser = isFallbackPool ? info.fallbackStratumUser : info.stratumUser;
-        this.activePoolPort = isFallbackPool ? info.fallbackStratumPort : info.stratumPort;
-        const activeProtocol = isFallbackPool ? info.fallbackStratumProtocol : info.stratumProtocol;
+        const preferredPool: PoolLabel = info.useFallbackStratum === 1 ? 'Fallback' : 'Primary';
+        const activePool: PoolLabel = info.isUsingFallbackStratum === 1 ? 'Fallback' : 'Primary';
+
+        // Keep a manual selection until its preference is acknowledged by the device.
+        if (this.targetPoolLabel === preferredPool) {
+          this.targetPoolLabel = null;
+        }
+
+        // Automatic failover changes the active pool without changing the preference.
+        this.activePoolLabel = this.targetPoolLabel ?? activePool;
+        const isCurrentlyFallback = activePool === 'Fallback';
+        this.activePoolURL = isCurrentlyFallback ? info.fallbackStratumURL : info.stratumURL;
+        this.activePoolUser = isCurrentlyFallback ? info.fallbackStratumUser : info.stratumUser;
+        this.activePoolPort = isCurrentlyFallback ? info.fallbackStratumPort : info.stratumPort;
+        const activeProtocol = isCurrentlyFallback ? info.fallbackStratumProtocol : info.stratumProtocol;
         if (activeProtocol === 'SV2') {
-          const channelType = isFallbackPool ? info.fallbackStratumV2ChannelType : info.stratumV2ChannelType;
+          const channelType = isCurrentlyFallback ? info.fallbackStratumV2ChannelType : info.stratumV2ChannelType;
           this.activePoolProtocol = channelType === 'standard' ? 'SV2 Standard Channel' : 'SV2 Extended Channel';
         } else {
           this.activePoolProtocol = 'SV1';
@@ -1228,23 +1239,28 @@ this.ngZone.runOutsideAngular(() => {
   
 
   onPoolChange(event: { originalEvent?: Event; value: PoolLabel }) {
-    const useFallbackStratum = Number(event.value === 'Fallback');
+    if (this.isChangingPool) return;
+    const targetIsFallback = event.value === 'Fallback';
+    const useFallbackStratum = Number(targetIsFallback);
+    this.isChangingPool = true;
+    this.targetPoolLabel = event.value;
+    this.activePoolLabel = event.value;
 
     this.systemService.updateSystem('', { useFallbackStratum })
       .pipe(
         this.loadingService.lockUIUntilComplete(),
-        switchMap(() =>
-          this.systemService.restart().pipe(
-            this.loadingService.lockUIUntilComplete()
-          )
-        )
+        finalize(() => {
+          this.isChangingPool = false;
+        })
       )
       .subscribe({
         next: () => {
-          this.toastr.success('Pool changed and device restarted');
+          this.toastr.success(`Switched to ${event.value} pool`);
         },
         error: (err: HttpErrorResponse) => {
-          this.toastr.error(`Error during pool change or device restart: ${getHttpErrorMessage(err, this.uri)}`);
+          this.isChangingPool = false;
+          this.targetPoolLabel = null;
+          this.toastr.error(`Error during pool change: ${getHttpErrorMessage(err, this.uri)}`);
         }
       });
   }
@@ -1352,7 +1368,7 @@ this.ngZone.runOutsideAngular(() => {
     updateMessage(!!info.power_fault, 'POWER_FAULT', 'error', `${info.power_fault} Check your Power Supply.`);
     updateMessage(!!info.hardware_fault, 'HARDWARE_FAULT', 'error', `${info.hardware_fault}`);
     updateMessage(!info.frequency || info.frequency < 400, 'FREQUENCY_LOW', 'warn', 'Device frequency is set low - See settings');
-    updateMessage(!!info.isUsingFallbackStratum, 'FALLBACK_STRATUM', 'warn', 'Using fallback pool - Share stats reset. Check Pool Settings and / or reboot Device.');
+    updateMessage(info.isUsingFallbackStratum === 1 && info.useFallbackStratum === 0, 'FALLBACK_STRATUM', 'warn', 'Primary pool unreachable - operating on fallback pool.');
     if (info.coinbaseOutputs && info.coinbaseOutputs.length > 0) {
       let percentage = this.getPayoutPercentage(info);
       updateMessage(percentage > 0 && percentage < 95, 'NOT_SOLO_MINING', 'warn', `Your share of the mining reward is only ${percentage.toFixed(1)}%`);
