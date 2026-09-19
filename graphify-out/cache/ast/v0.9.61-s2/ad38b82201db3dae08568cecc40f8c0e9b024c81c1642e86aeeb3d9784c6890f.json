@@ -1,0 +1,1 @@
+{"nodes": [{"id": "$graphify-root$_components_libsecp256k1_libsecp256k1_src_scratch_h", "label": "scratch.h", "file_type": "code", "source_file": "components/libsecp256k1/libsecp256k1/src/scratch.h", "source_location": "L1"}], "edges": [], "raw_calls": []}
