@@ -70,12 +70,14 @@ const mockSystemInfo: ISystemInfo = {
   statsLimit: 720,
   stratumCert: '',
   stratumDecodeCoinbase: true,
+  stratumShareWarning: true,
   stratumExtranonceSubscribe: false,
   stratumSuggestedDifficulty: 1000,
   stratumTLS: false,
   stratumV2AuthorityPubkey: '',
   fallbackStratumCert: '',
   fallbackStratumDecodeCoinbase: true,
+  fallbackStratumShareWarning: true,
   fallbackStratumExtranonceSubscribe: false,
   fallbackStratumSuggestedDifficulty: 1000,
   fallbackStratumTLS: false,
@@ -115,6 +117,8 @@ const mockSystemInfo: ISystemInfo = {
   networkDifficulty: 5000000,
   scriptsig: 'test-scriptsig',
   coinbaseOutputs: [],
+  coinbaseOthersCount: 0,
+  coinbaseOthersValueSatoshis: 0,
   coinbaseValueTotalSatoshis: 625000000,
   hashrateMonitor: {
     asics: [
@@ -169,13 +173,7 @@ const mockLiveDataService = {
 };
 
 const mockSystemApiService = {
-  getInfo: () => of({
-    hostname: 'Bitaxe',
-    version: 'v2.14.0',
-    hashRate: 500,
-    temp: 65,
-    // Falls TypeScript meckert, caste es als ISystemInfo:
-  } as ISystemInfo),
+  getAsicSettings: () => of({ frequencyOptions: [100, 200, 300] }),
   getStatistics: () => of(mockSystemStatistics),
   updateSystem: (_uri: string, _update: Pick<ISystemInfo, 'useFallbackStratum'>) => of(null),
   restart: () => of(null),
@@ -257,37 +255,40 @@ describe('HomeComponent', () => {
     expect(component).toBeTruthy();
   });
 
-it('should render the dashboard widgets and dropdowns when info is loaded', fakeAsync(() => {
-    const mockInfo: any = {
-      version: '2.0.0',
-      boardModel: 'Bitaxe',
-      hostname: 'bitaxe',
-      macAddr: '00:00:00:00:00:00',
-      ipAddr: '192.168.1.100',
-      uptime: 100,
-      hashrate: 500,
-      temperature: 45,
-      voltage: 1200,
-      current: 1000,
-      power: 12,
-      efficiency: 24,
-      bestDiff: '1000',
-      sharesAccepted: 10,
-      sharesRejected: 0,
-      stratumUrl: 'stratum.pool.com',
-      stratumPort: 3333,
-      stratumUser: 'user',
-      poolConnected: true,
-      coreVoltage: 1200,
-      frequency: 485,
-      autotune: false,
-      power_fault: false
-    };
+  it('uses the device presets for frequency messages', () => {
+    const info = { ...mockSystemInfo, frequency: 100 };
+    const error = { duration: 0, startTime: null };
+    component.handleSystemMessages(info, error, [100, 200, 300]);
+    expect(component.messages.some(message => message.type === 'FREQUENCY_LOW')).toBeFalse();
+    component.handleSystemMessages({ ...info, frequency: 99 }, error, [100, 200, 300]);
+    expect(component.messages.some(message => message.type === 'FREQUENCY_LOW')).toBeTrue();
+    component.handleSystemMessages(info, error, [100, 200, 300]);
+    expect(component.messages.some(message => message.type === 'FREQUENCY_LOW')).toBeFalse();
+  });
 
-    // Direkt über den gemockten Service oder die Public-Properties der Komponente steuern
-    component.info$ = of(mockInfo);
-    
-    // Erzwinge die Aktualisierung der Change Detection
+  it('keeps telemetry and messages live while settings load and after settings fail', () => {
+    fixture.destroy();
+    const settings = new Subject<{ frequencyOptions: number[] }>();
+    spyOn(mockSystemApiService, 'getAsicSettings').and.returnValue(settings);
+    mockLiveDataService.info$.next({ ...mockSystemInfo, frequency: 100 });
+    fixture = TestBed.createComponent(HomeComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    expect(component.messages.some(message => message.type === 'FREQUENCY_LOW')).toBeFalse();
+    expect(component['latestInfo']?.frequency).toBe(100);
+    settings.next({ frequencyOptions: [100, 200, 300] });
+    mockLiveDataService.info$.next({ ...mockSystemInfo, frequency: 99 });
+    expect(component.messages.some(message => message.type === 'FREQUENCY_LOW')).toBeTrue();
+
+    settings.error(new Error('Settings unavailable'));
+    expect(component.messages.some(message => message.type === 'FREQUENCY_LOW')).toBeFalse();
+    mockLiveDataService.info$.next({ ...mockSystemInfo, frequency: 0 });
+    expect(component.messages.some(message => message.type === 'FREQUENCY_LOW')).toBeTrue();
+  });
+
+  it('should render the dashboard widgets and dropdowns when info is loaded', () => {
+
     fixture.detectChanges();
     tick();
     fixture.detectChanges();
