@@ -274,10 +274,10 @@ void SYSTEM_init_system(GlobalState * GLOBAL_STATE)
     pthread_mutex_init(&GLOBAL_STATE->transport_mutex, NULL);
 
     // Allocate the job tracking tables here rather than in create_jobs_task().
-    // The stratum tasks touch valid_jobs (SYSTEM_clean_jobs_queue) as soon as they
+    // The stratum tasks touch valid_jobs (via SYSTEM_reset_pool_session) as soon as they
     // connect, so tying the allocation to create_jobs_task actually starting is a
     // NULL dereference waiting to happen if that task ever fails to spawn.
-    GLOBAL_STATE->ASIC_TASK_MODULE.active_jobs = heap_caps_calloc(MAX_ASIC_JOBS, sizeof(bm_job *), MALLOC_CAP_SPIRAM);
+    GLOBAL_STATE->ASIC_TASK_MODULE.active_jobs = heap_caps_calloc(MAX_ASIC_JOBS, sizeof(*GLOBAL_STATE->ASIC_TASK_MODULE.active_jobs), MALLOC_CAP_SPIRAM);
     GLOBAL_STATE->ASIC_TASK_MODULE.valid_jobs = heap_caps_calloc(MAX_ASIC_JOBS, sizeof(uint8_t), MALLOC_CAP_SPIRAM);
     if (GLOBAL_STATE->ASIC_TASK_MODULE.active_jobs == NULL || GLOBAL_STATE->ASIC_TASK_MODULE.valid_jobs == NULL) {
         ESP_LOGE(TAG, "Failed to allocate job tracking tables");
@@ -410,7 +410,7 @@ esp_err_t SYSTEM_init_peripherals(GlobalState * GLOBAL_STATE) {
     return ESP_OK;
 }
 
-void SYSTEM_clean_jobs_queue(GlobalState * GLOBAL_STATE)
+static void clean_jobs_queue(GlobalState * GLOBAL_STATE)
 {
     ESP_LOGI(TAG, "Clean Jobs: invalidating active jobs");
 
@@ -488,7 +488,7 @@ void SYSTEM_notify_new_ntime(GlobalState * GLOBAL_STATE, uint32_t ntime)
 // Reset decoded coinbase UI fields (scriptsig, coinbase values, outputs, block signals).
 // Note: block_height is intentionally NOT reset here; it is preserved as the "last known good"
 // network height so the UI, screen, and BAP do not flicker or lose context on transient disconnects.
-void SYSTEM_reset_coinbase_ui_state(GlobalState * GLOBAL_STATE, const char *scriptsig_msg)
+static void reset_coinbase_ui_state(GlobalState * GLOBAL_STATE, const char *scriptsig_msg)
 {
     GLOBAL_STATE->coinbase_output_count = 0;
     GLOBAL_STATE->coinbase_others_count = 0;
@@ -504,28 +504,53 @@ void SYSTEM_reset_coinbase_ui_state(GlobalState * GLOBAL_STATE, const char *scri
     GLOBAL_STATE->block_signals_count = 0;
 }
 
+void SYSTEM_reset_pool_session(GlobalState * GLOBAL_STATE)
+{
+    if (!GLOBAL_STATE) return;
+
+    SystemModule *module = &GLOBAL_STATE->SYSTEM_MODULE;
+    for (int i = 0; i < module->rejected_reason_stats_count; i++) {
+        module->rejected_reason_stats[i].count = 0;
+        module->rejected_reason_stats[i].message[0] = '\0';
+    }
+    module->rejected_reason_stats_count = 0;
+    module->shares_accepted = 0;
+    module->shares_rejected = 0;
+    module->shares_pending = 0;
+    module->response_time = 0.0f;
+    module->response_share_batch = 0;
+    module->pool_difficulty = 0.0;
+
+    clean_jobs_queue(GLOBAL_STATE);
+    reset_coinbase_ui_state(GLOBAL_STATE, "");
+}
+
 void SYSTEM_decode_and_apply_coinbase(GlobalState * GLOBAL_STATE, const miner_job_t * job)
 {
     if (!GLOBAL_STATE || !job) return;
 
     // Update network difficulty from nbits (available on all job types, including SV2 Standard)
     if (job->nbits != 0) {
-        double net_diff = networkDifficulty(job->nbits);
-        GLOBAL_STATE->network_nonce_diff = (uint64_t) net_diff;
-        suffixString(net_diff, GLOBAL_STATE->network_diff_string, DIFF_STRING_SIZE, 0);
+        uint8_t network_target[32];
+        nbits_to_target(job->nbits, network_target);
+        double net_diff = target_to_diff(network_target);
+        if (net_diff > 0.0 && net_diff != (double)UINT32_MAX) {
+            GLOBAL_STATE->network_nonce_diff = (uint64_t) net_diff;
+            suffixString(net_diff, GLOBAL_STATE->network_diff_string, DIFF_STRING_SIZE, 0);
+        }
     }
 
     // Direct Merkle Root jobs (e.g. SV2 Standard) don't carry coinbase parts
     if (job->type == JOB_TYPE_SV2_STANDARD) {
         GLOBAL_STATE->block_height = 0;
-        SYSTEM_reset_coinbase_ui_state(GLOBAL_STATE, NULL);
+        reset_coinbase_ui_state(GLOBAL_STATE, NULL);
         return;
     }
 
     mining_notification_result_t *result = heap_caps_malloc(sizeof(mining_notification_result_t), MALLOC_CAP_SPIRAM);
     if (!result) {
         ESP_LOGE(TAG, "Failed to allocate coinbase decode result in PSRAM");
-        SYSTEM_reset_coinbase_ui_state(GLOBAL_STATE, "[decode error]");
+        reset_coinbase_ui_state(GLOBAL_STATE, "[decode error]");
         return;
     }
     memset(result, 0, sizeof(mining_notification_result_t));
@@ -537,7 +562,7 @@ void SYSTEM_decode_and_apply_coinbase(GlobalState * GLOBAL_STATE, const miner_jo
     if (coinbase_process_miner_job(job, user, decode_coinbase_tx, result) != ESP_OK) {
         ESP_LOGW(TAG, "Failed to decode coinbase for job %s", job->job_id);
         free(result);
-        SYSTEM_reset_coinbase_ui_state(GLOBAL_STATE, "[decode error]");
+        reset_coinbase_ui_state(GLOBAL_STATE, "[decode error]");
         return;
     }
 
@@ -613,28 +638,33 @@ void SYSTEM_decode_and_apply_coinbase(GlobalState * GLOBAL_STATE, const miner_jo
     free(result);
 }
 
-void SYSTEM_notify_found_nonce(GlobalState * GLOBAL_STATE, double diff, uint32_t target)
+void SYSTEM_notify_found_nonce(GlobalState * GLOBAL_STATE, double diff, bool is_block)
 {
     SystemModule * module = &GLOBAL_STATE->SYSTEM_MODULE;
+
+    if (is_block) {
+        module->block_found++;
+        module->show_new_block = true;
+        ESP_LOGI(TAG, "FOUND BLOCK!!!!!!!!!!!!!!!!!!!!!! diff: %f (count: %d)", diff, module->block_found);
+    }
 
     if ((uint64_t) diff > module->best_session_nonce_diff) {
         module->best_session_nonce_diff = (uint64_t) diff;
         suffixString((uint64_t) diff, module->best_session_diff_string, DIFF_STRING_SIZE, 0);
     }
 
-    if ((uint64_t) diff > module->best_session_nonce_diff) {
+if ((uint64_t) diff > module->best_session_nonce_diff) {
         module->best_session_nonce_diff = (uint64_t) diff;
         suffixString((uint64_t) diff, module->best_session_diff_string, DIFF_STRING_SIZE, 0);
-        
+
         // Uptime in Sekunden zum Zeitpunkt des neuen Rekords festhalten:
         module->best_session_uptime = (uint32_t)((esp_timer_get_time() - module->start_time_us) / 1000000);
     }
 
-    double network_diff = networkDifficulty(target);
-    if (diff >= network_diff) {
+    if (is_block) {
         module->block_found++;
         module->show_new_block = true;
-        ESP_LOGI(TAG, "FOUND BLOCK!!!!!!!!!!!!!!!!!!!!!! %f >= %f (count: %d)", diff, network_diff, module->block_found);
+        ESP_LOGI(TAG, "FOUND BLOCK!!!!!!!!!!!!!!!!!!!!!! diff: %f (count: %d)", diff, module->block_found);
     }
 
     if ((uint64_t) diff <= module->best_nonce_diff) {
@@ -705,7 +735,7 @@ uint64_t SYSTEM_noinit_get_total_uptime_seconds()
 // Convert 128-bit to double: high * 2^64 + low. Loses precision for very large values, but sufficient for display
 double SYSTEM_noinit_get_total_hashes()
 {
-    return (double)noinit_state.cumulative_hashes_high * 18446744073709551616.0 + (double)noinit_state.cumulative_hashes_low;
+    return (double)noinit_state.cumulative_hashes_high * BITS64 + (double)noinit_state.cumulative_hashes_low;
 }
 
 double SYSTEM_noinit_get_total_log2_work()
@@ -723,7 +753,7 @@ double SYSTEM_noinit_get_total_log2_work()
     // log2(high * 2^64 + low) ≈ 64 + log2(high) for large values
     // More precise: 64 + log2(high + low/2^64)
     double high_plus_fraction = (double)noinit_state.cumulative_hashes_high + 
-                                (double)noinit_state.cumulative_hashes_low / 18446744073709551616.0;
+                                (double)noinit_state.cumulative_hashes_low / BITS64;
     return 64.0 + log2(high_plus_fraction);
 }
 

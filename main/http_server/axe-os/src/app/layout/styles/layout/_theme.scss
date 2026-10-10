@@ -42,6 +42,8 @@
 
     /* Theme Settings & Sizing Defaults */
     --color-bg-hover: rgba(255, 255, 255, 0.05);
+    /* Colour for the chart's second (temperature) axis and its series. */
+    --chart-axis2-color: #7bd8c0;
     --border-radius: 2px;
     --font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
 
@@ -104,6 +106,7 @@
     --color-overlay-select-bg: #f1f5f9;
     --color-overlay-select-border: #e2e8f0;
     --color-bg-hover: rgba(0, 0, 0, 0.04);
+    --chart-axis2-color: #0b7f68;
 }
 
 /* Glassmorphism: Apply blur filter globally when glass mode is active */
