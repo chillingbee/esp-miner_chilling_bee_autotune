@@ -72,10 +72,10 @@ describe('PoolComponent', () => {
 
     TestBed.configureTestingModule({
       declarations: [
-        PoolComponent,
         TooltipTextIconComponent
       ],
       imports: [
+        PoolComponent,
         FormsModule,
         ReactiveFormsModule,
         DropdownComponent,
