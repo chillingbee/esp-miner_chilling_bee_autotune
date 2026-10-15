@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "esp_partition.h"
+#include "esp_timer.h"
 #include "esp_wifi.h"
 #include "esp_ota_ops.h"
 #include "esp_system.h"
