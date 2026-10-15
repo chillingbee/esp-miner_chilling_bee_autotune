@@ -107,6 +107,7 @@ const mockSystemInfo: ISystemInfo = {
   nominalVoltage: 5.0,
   actualFrequency: 600,
   coreVoltageActual: 1.2,
+  coreVoltageSet: 1.2,
   current: 0,
   coreVoltage: 0,
   maxPower: 20,
@@ -335,10 +336,9 @@ describe('HomeComponent', () => {
     fixture.detectChanges();
 
     const element = fixture.nativeElement;
-    // Falls das Dropdown innerhalb eines weiteren Wrappers liegt, prüfen wir generisch auf das Element oder den Container
-    const dropdown = element.querySelector('app-dropdown') || element.querySelector('.dropdown-container');
-    expect(dropdown || element).toBeTruthy();
-  }));
+    // Verify that the dropdowns inside *ngIf are rendered
+    expect(element.querySelector('app-dropdown')).toBeTruthy();
+  });
 
   describe('pool selection', () => {
     function emitPoolInfo(changes: Partial<ISystemInfo>): void {
