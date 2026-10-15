@@ -45,7 +45,6 @@ import { ProgressbarComponent } from '../../components/progressbar/progressbar.c
 
 
 type PoolLabel = 'Primary' | 'Fallback';
-type ProtocolLabel = 'SV2 Standard Channel' | 'SV2 Extended Channel';
 type MessageType =
   | 'SYSTEM_INFO_ERROR'
   | 'MINING_PAUSED'
@@ -223,8 +222,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   private lastChartUpdate: number = 0;
   private lastBucket: number = -1;
 
-  // Performance optimization cache properties
-  private primaryColorRgb: { r: number, g: number, b: number } = { r: 0, g: 0, b: 0 };
   private isHardwareConfigInitialized = false;
   public asicsAmount: number = 0;
   public asicDomainsAmount: number = 0;
@@ -233,8 +230,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   public efficiency: number = 0;
   public efficiencyAverage: number = 0;
   public expectedEfficiency: number = 0;
-  public activePoolUserAddressPart: string = '';
-  public activePoolUserSuffixPart: string = '';
   public activePoolShareWarning: boolean = true;
   public orderedCoinbaseOutputs: ISystemInfo['coinbaseOutputs'] = [];
   public sortedRejectionReasons: Array<{ message: string; count: number; percentage: number }> = [];
@@ -251,7 +246,6 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
   private lastHasFan2Rpm = false;
 
   private destroy$ = new Subject<void>();
-  private infoSubscription?: Subscription;
   private statsSubscription?: Subscription;
   private latestInfo?: ISystemInfo;
   private liveDataStarted = false;
@@ -453,7 +447,7 @@ this.ngZone.runOutsideAngular(() => {
     });
 
     this.grid = GridStack.init({
-      column: 12,
+      column: 24,
       cellHeight: DEFAULT_CELL_HEIGHT,
       margin: 8,
       float: false,
@@ -702,7 +696,6 @@ const isCyberpunk = document.documentElement.classList.contains('theme-cyberpunk
     const surfaceBorder = documentStyle.getPropertyValue('--color-border-content').trim();
     const primaryColor = documentStyle.getPropertyValue('--color-primary').trim();
     const axis2Color = documentStyle.getPropertyValue('--chart-axis2-color').trim() || textColorSecondary;
-    this.primaryColorRgb = this.hexToRgb(primaryColor);
 
     this.rebuildChartDatasets();
 
@@ -745,7 +738,6 @@ const isCyberpunk = document.documentElement.classList.contains('theme-cyberpunk
     const textColorSecondary = documentStyle.getPropertyValue('--color-text-secondary').trim();
     const surfaceBorder = documentStyle.getPropertyValue('--color-border-content').trim();
     const primaryColor = documentStyle.getPropertyValue('--color-primary').trim();
-    this.primaryColorRgb = this.hexToRgb(primaryColor);
 
     this.chartData = {
       labels: this.dataLabel,
@@ -1147,8 +1139,6 @@ const isCyberpunk = document.documentElement.classList.contains('theme-cyberpunk
         this.responseTime = info.responseTime;
         info.coreVoltageSet = info.coreVoltageSet / 1000;
 
-        this.activePoolUserAddressPart = this.getAddressPart(this.activePoolUser);
-        this.activePoolUserSuffixPart = this.getSuffixPart(this.activePoolUser);
         this.orderedCoinbaseOutputs = this.getOrderedCoinbaseOutputs(info);
 
         const totalShares = info.sharesAccepted + info.sharesRejected;
@@ -1251,7 +1241,7 @@ const isCyberpunk = document.documentElement.classList.contains('theme-cyberpunk
       startWith(undefined)
     );
 
-    this.infoSubscription = combineLatest([this.info$, this.systemInfoError$, asicSettings$])
+    combineLatest([this.info$, this.systemInfoError$, asicSettings$])
       .pipe(takeUntil(this.destroy$))
       .subscribe(([info, systemInfoError, asicSettings]) => {
         this.handleSystemMessages(info, systemInfoError, asicSettings?.frequencyOptions);
@@ -1349,21 +1339,6 @@ const isCyberpunk = document.documentElement.classList.contains('theme-cyberpunk
     this.titleService.setTitle(parts.filter(Boolean).join(' • '));
   }
 
-
-
-  private hexToRgb(hex: string): { r: number, g: number, b: number } {
-    if (hex[0] === '#') hex = hex.slice(1);
-    if (hex.length === 3) {
-      hex = hex.split('').map((h: string) => h + h).join('');
-    }
-
-    const r = parseInt(hex.slice(0, 2), 16);
-    const g = parseInt(hex.slice(2, 4), 16);
-    const b = parseInt(hex.slice(4, 6), 16);
-
-    return { r, g, b };
-  }
-
   getRejectionExplanation(reason: string): string | null {
     return this.shareRejectReasonsService.getExplanation(reason);
   }
@@ -1384,16 +1359,19 @@ const isCyberpunk = document.documentElement.classList.contains('theme-cyberpunk
   // array at all; they are summarised by coinbaseOthersCount / coinbaseOthersValueSatoshis.
   getOrderedCoinbaseOutputs(info: ISystemInfo): ISystemInfo['coinbaseOutputs'] {
     const outputs = info.coinbaseOutputs ?? [];
-    if (outputs.length <= 1 || !this.activePoolUserAddressPart) return outputs;
+    if (outputs.length <= 1) return outputs;
 
-    const userOutputs = outputs.filter(o => o.address === this.activePoolUserAddressPart);
+    const isUserOutput = (o: any) => o.isUserOutput === 1;
+
+    const userOutputs = outputs.filter(isUserOutput);
     if (!userOutputs.length) return outputs;
 
-    return [...userOutputs, ...outputs.filter(o => o.address !== this.activePoolUserAddressPart)];
+    return [...userOutputs, ...outputs.filter(o => !isUserOutput(o))];
   }
 
+
   getPayoutPercentage(info: ISystemInfo) {
-    if (info.coinbaseValueTotalSatoshis) {
+    if ((info.coinbasePayoutStatus === 'verified' || info.coinbasePayoutStatus === 'not_found') && info.coinbaseValueTotalSatoshis) {
       return (info.coinbaseValueUserSatoshis ?? 0) / info.coinbaseValueTotalSatoshis * 100;
     }
     return -1;
@@ -1435,7 +1413,7 @@ const isCyberpunk = document.documentElement.classList.contains('theme-cyberpunk
       let percentage = this.getPayoutPercentage(info);
       const warn = this.activePoolShareWarning;
       updateMessage(warn && percentage > 0 && percentage < 95, 'NOT_SOLO_MINING', 'warn', `Your share of the mining reward is only ${percentage.toFixed(1)}%`);
-      updateMessage(warn && percentage === 0, 'NO_MINING_REWARD', 'warn', `You don't have a share in the mining reward`);
+      updateMessage(warn && info.coinbasePayoutStatus === 'not_found', 'NO_MINING_REWARD', 'warn', `You don't have a share in the mining reward`);
     }
   }
 
@@ -1735,6 +1713,14 @@ const isCyberpunk = document.documentElement.classList.contains('theme-cyberpunk
         return value.toLocaleString(undefined, { useGrouping: false, maximumFractionDigits: args?.tickmark ? undefined : settings.precision }) + settings.suffix;
     }
   }
+  public getElapsedTime(date: Date | undefined): string {
+    if (!date) return 'noch keine Daten';
+    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+    if (seconds < 60) return `${seconds}s ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    return `${Math.floor(minutes / 60)}h ago`;
+  }
 
   getAddressPart(user: string): string {
     const dotIndex = user.lastIndexOf('.');
@@ -1744,14 +1730,5 @@ const isCyberpunk = document.documentElement.classList.contains('theme-cyberpunk
   getSuffixPart(user: string): string {
     const dotIndex = user.lastIndexOf('.');
     return dotIndex !== -1 ? '.' + user.substring(dotIndex + 1) : '';
-  }
-
-  public getElapsedTime(date: Date | undefined): string {
-    if (!date) return 'noch keine Daten';
-    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
-    if (seconds < 60) return `${seconds}s ago`;
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m ago`;
-    return `${Math.floor(minutes / 60)}h ago`;
   }
 }

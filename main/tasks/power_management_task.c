@@ -11,6 +11,7 @@
 #include "utils.h"
 #include "asic_init.h"
 #include "asic_reset.h"
+#include "difficulty_controller.h"
 #include "driver/uart.h"
 
 
@@ -268,6 +269,7 @@ float core_voltage = 0;
 
             ASIC_set_frequency(GLOBAL_STATE);
             ASIC_set_nonce_space(GLOBAL_STATE);
+            difficulty_controller_update(GLOBAL_STATE);
             
             last_asic_frequency = asic_frequency;
         }
