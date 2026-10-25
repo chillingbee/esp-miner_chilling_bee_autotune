@@ -1340,13 +1340,8 @@ static esp_err_t GET_system_info(httpd_req_t *req)
         httpd_resp_send_500(req);
         return ESP_FAIL;
     }
-<<<<<<< HEAD
-
-    cJSON * root = system_api_get_full_json(GLOBAL_STATE);
-    cJSON_AddNumberToObject(root, "frequencySet", nvs_config_get_float(NVS_CONFIG_ASIC_FREQUENCY));
-=======
     yyjson_mut_val *root = yyjson_mut_doc_get_root(root_doc);
->>>>>>> upstream/master
+    yyjson_mut_obj_add_float(root_doc, root, "frequencySet", nvs_config_get_float(NVS_CONFIG_ASIC_FREQUENCY));
 
     // Add mDNS-specific fields on top of the base system info
     char * hostname_base = nvs_config_get_string(NVS_CONFIG_HOSTNAME);
@@ -1817,7 +1812,6 @@ esp_err_t http_404_error_handler(httpd_req_t * req, httpd_err_code_t err)
     return ESP_OK;
 }
 
-<<<<<<< HEAD
 esp_err_t GET_autotune_info(httpd_req_t * req)
 {
     if (is_network_allowed(req) != ESP_OK) {
@@ -1924,9 +1918,9 @@ esp_err_t POST_autotune_update(httpd_req_t * req)
 }
 
 esp_err_t start_rest_server(GlobalState * global_state)
-=======
+
 esp_err_t start_rest_server(GlobalState * GLOBAL_STATE)
->>>>>>> upstream/master
+
 {
     const httpd_uri_t routes[] = {
         // CORS preflight
@@ -1993,8 +1987,8 @@ esp_err_t start_rest_server(GlobalState * GLOBAL_STATE)
     // Initialize the WebSocket registry with the valid server handle
     websocket_init(server);
 
-<<<<<<< HEAD
-    httpd_uri_t api_options_uri = {
+    // upstream route registration kept
+    
         .uri = "/api/*", 
         .method = HTTP_OPTIONS, 
         .handler = handle_options_request, 
@@ -2213,7 +2207,7 @@ esp_err_t start_rest_server(GlobalState * GLOBAL_STATE)
         .user_ctx = rest_context
     };
     httpd_register_uri_handler(server, &common_get_uri);
-=======
+
     for (size_t i = 0; i < num_routes; i++) {
         httpd_uri_t entry = routes[i];
         if (strncmp(entry.uri, "/api/", 5) == 0 && !entry.is_websocket) {
@@ -2222,7 +2216,7 @@ esp_err_t start_rest_server(GlobalState * GLOBAL_STATE)
         }
         ESP_ERROR_CHECK(httpd_register_uri_handler(server, &entry));
     }
->>>>>>> upstream/master
+
 
     httpd_register_err_handler(server, HTTPD_404_NOT_FOUND, http_404_error_handler);
 
