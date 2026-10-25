@@ -1,12 +1,13 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { getHttpErrorMessage } from 'src/app/utils/error-handler';
 import { Component, Input, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators, ValidatorFn, ValidationErrors, AbstractControl } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators, ValidatorFn, ValidationErrors, AbstractControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { LoadingService } from 'src/app/services/loading.service';
 import { SystemApiService } from 'src/app/services/system.service';
 import { LiveDataService } from 'src/app/services/live-data.service';
 import { first } from 'rxjs';
+<<<<<<< HEAD
 import { CommonModule } from '@angular/common';
 import { TooltipTextIconComponent } from '../tooltip-text-icon/tooltip-text-icon.component';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
@@ -15,6 +16,13 @@ import { RadioButtonComponent } from '../../components/radio-button/radio-button
 
 import { CheckboxComponent } from '../../components/checkbox/checkbox.component'; // Pfad anpassen
 
+=======
+import { DropdownComponent } from '../dropdown/dropdown.component';
+import { TooltipDirective } from '../../directives/tooltip.directive';
+import { TooltipTextIconComponent } from '../tooltip-text-icon/tooltip-text-icon.component';
+import { RadioButtonComponent } from '../radio-button/radio-button.component';
+import { CheckboxComponent } from '../checkbox/checkbox.component';
+>>>>>>> upstream/master
 
 interface ITlsOption {
   value: number;
@@ -37,6 +45,7 @@ interface IPoolDropdownOption {
 }
 
 @Component({
+<<<<<<< HEAD
     selector: 'app-pool',
     templateUrl: './pool.component.html',
      standalone: true,
@@ -48,6 +57,11 @@ interface IPoolDropdownOption {
     RadioButtonComponent,
     TooltipTextIconComponent,
     CheckboxComponent /* weitere benötigte Module */],
+=======
+  selector: 'app-pool',
+  templateUrl: './pool.component.html',
+  imports: [FormsModule, ReactiveFormsModule, DropdownComponent, TooltipDirective, TooltipTextIconComponent, RadioButtonComponent, CheckboxComponent]
+>>>>>>> upstream/master
 })
 export class PoolComponent implements OnInit {
   public form!: FormGroup;

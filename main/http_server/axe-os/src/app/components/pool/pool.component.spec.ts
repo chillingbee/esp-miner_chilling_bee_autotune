@@ -71,9 +71,12 @@ describe('PoolComponent', () => {
     systemServiceSpy.updateSystem.and.returnValue(of({ status: 'success' }));
 
     TestBed.configureTestingModule({
+<<<<<<< HEAD
       declarations: [
         TooltipTextIconComponent
       ],
+=======
+>>>>>>> upstream/master
       imports: [
         PoolComponent,
         FormsModule,

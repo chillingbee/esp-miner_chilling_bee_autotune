@@ -11,7 +11,10 @@ describe('NetworkEditComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+<<<<<<< HEAD
       declarations: [],
+=======
+>>>>>>> upstream/master
       imports: [NetworkEditComponent],
       providers: [provideHttpClient(), provideToastr(), DialogService]
     });

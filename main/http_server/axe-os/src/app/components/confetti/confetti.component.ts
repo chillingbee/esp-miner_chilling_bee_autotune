@@ -9,9 +9,13 @@ interface ConfettiDivElement extends HTMLDivElement {
 @Component({
     selector: 'app-confetti',
     templateUrl: './confetti.component.html',
+<<<<<<< HEAD
     styleUrls: ['./confetti.component.scss'],
     standalone: true,
     imports: [CommonModule]
+=======
+    styleUrls: ['./confetti.component.scss']
+>>>>>>> upstream/master
 })
 export class ConfettiComponent implements AfterViewInit, OnDestroy {
   @ViewChild('container', { static: true }) containerRef!: ElementRef<HTMLDivElement>;

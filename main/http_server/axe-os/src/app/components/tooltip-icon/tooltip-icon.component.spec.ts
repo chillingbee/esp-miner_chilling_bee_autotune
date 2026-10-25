@@ -7,7 +7,11 @@ describe('TooltipIconComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+<<<<<<< HEAD
       imports: [] // TooltipIconComponent hier entfernt, da man sich nicht selbst importiert
+=======
+      imports: [TooltipIconComponent]
+>>>>>>> upstream/master
     });
     fixture = TestBed.createComponent(TooltipIconComponent);
     component = fixture.componentInstance;

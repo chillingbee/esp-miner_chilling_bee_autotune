@@ -1,4 +1,5 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+<<<<<<< HEAD
 import { CommonModule } from '@angular/common';
 import { TooltipIconComponent } from '../tooltip-icon/tooltip-icon.component'; // Pfad ggf. anpassen
 
@@ -7,6 +8,14 @@ import { TooltipIconComponent } from '../tooltip-icon/tooltip-icon.component'; /
     templateUrl: './tooltip-text-icon.component.html',
     standalone: true,
     imports: [CommonModule, TooltipIconComponent]
+=======
+import { TooltipIconComponent } from '../tooltip-icon/tooltip-icon.component';
+
+@Component({
+  selector: 'tooltip-text-icon',
+  templateUrl: './tooltip-text-icon.component.html',
+  imports: [TooltipIconComponent]
+>>>>>>> upstream/master
 })
 export class TooltipTextIconComponent implements OnChanges {
   @Input() tooltip: string | null = '';
