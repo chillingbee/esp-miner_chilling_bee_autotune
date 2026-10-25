@@ -5,7 +5,9 @@ import { getHttpErrorMessage } from 'src/app/utils/error-handler';
 import { isFrequencyLow } from 'src/app/utils/common-functions';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { DateAgoPipe } from "../pipes/date-ago.pipe";
 import { DateAgoPipe } from 'src/app/pipes/date-ago.pipe';
+import { FormatTimePipe } from 'src/app/pipes/format-time.pipe';
 import { HashSuffixPipe } from 'src/app/pipes/hash-suffix.pipe';
 import { ByteSuffixPipe } from 'src/app/pipes/byte-suffix.pipe';
 import { DiffSuffixPipe } from 'src/app/pipes/diff-suffix.pipe';
@@ -111,6 +113,7 @@ const WIDGET_DEFAULTS: WidgetDef[] = [
     AsyncPipe,
     DecimalPipe,
     DateAgoPipe,
+    FormatTimePipe,
     HashSuffixPipe,
     DiffSuffixPipe,
     AddressPipe,
