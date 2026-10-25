@@ -1,8 +1,10 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { CommonModule } from "@angular/common";
 
 @Component({
   selector: 'tooltip-text-icon',
-import { TooltipIconComponent } from '../tooltip-icon/tooltip-icon.component';
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './tooltip-text-icon.component.html',
 })
 export class TooltipTextIconComponent implements OnChanges {
