@@ -1811,6 +1811,7 @@ esp_err_t http_404_error_handler(httpd_req_t * req, httpd_err_code_t err)
 }
 
 /* autotune stub */ static esp_err_t GET_autotune_info(httpd_req_t *req){httpd_resp_set_type(req,"application/json");char *j="{\"power_limit\":25,\"fan_limit\":75}";httpd_resp_send(req,j,strlen(j));free(j);return ESP_OK;}
+static esp_err_t POST_autotune_info(httpd_req_t *req){char buf[512];int r=httpd_req_recv(req,buf,sizeof(buf)-1);if(r>0)buf[r]='';httpd_resp_set_type(req,"application/json");httpd_resp_send(req,"{\"success\":true}",17);return ESP_OK;}
 esp_err_t start_rest_server(GlobalState * GLOBAL_STATE)
 {
     const httpd_uri_t routes[] = {
@@ -1824,6 +1825,7 @@ esp_err_t start_rest_server(GlobalState * GLOBAL_STATE)
         { .uri = "/api/system/logs",               .method = HTTP_GET,     .handler = GET_system_logs },
         { .uri = "/api/system/scoreboard",         .method = HTTP_GET,     .handler = GET_scoreboard },
         { .uri = "/api/system/autotune", .method = HTTP_GET, .handler = GET_autotune_info },
+        { .uri = "/api/system/autotune",           .method = HTTP_POST,    .handler = POST_autotune_info },
         { .uri = "/api/system/statistics",         .method = HTTP_GET,     .handler = GET_system_statistics },
         { .uri = "/api/system/wifi/scan",          .method = HTTP_GET,     .handler = GET_wifi_scan },
 
