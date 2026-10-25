@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -10,7 +9,6 @@ import { TooltipDirective } from '../../directives/tooltip.directive'; // Pfad a
     styleUrls: ['./tooltip-icon.component.scss'],
     standalone: true,
     imports: [CommonModule, TooltipDirective]
-=======
 import { Component, Input, HostListener } from '@angular/core';
 import { TooltipDirective } from '../../directives/tooltip.directive';
 
@@ -19,7 +17,6 @@ import { TooltipDirective } from '../../directives/tooltip.directive';
   templateUrl: './tooltip-icon.component.html',
   styleUrls: ['./tooltip-icon.component.scss'],
   imports: [TooltipDirective]
->>>>>>> upstream/master
 })
 export class TooltipIconComponent {
   @Input() tooltip: string = '';

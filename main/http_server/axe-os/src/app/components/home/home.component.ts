@@ -113,7 +113,6 @@ const WIDGET_DEFAULTS: WidgetDef[] = [
 ];
 
 @Component({
-<<<<<<< HEAD
     selector: 'app-home',
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.scss'],
@@ -135,7 +134,6 @@ const WIDGET_DEFAULTS: WidgetDef[] = [
         TooltipTextIconComponent,
         ProgressbarComponent
     ],
-=======
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
@@ -158,7 +156,6 @@ const WIDGET_DEFAULTS: WidgetDef[] = [
     AddressPipe,
     SatsPipe
   ]
->>>>>>> upstream/master
 })
 export class HomeComponent implements OnInit, OnDestroy {
   public messages: ISystemMessage[] = [];
@@ -714,7 +711,6 @@ const entries = labels
   }
 
   private rebuildChartDatasets() {
-<<<<<<< HEAD
     const documentStyle = getComputedStyle(document.documentElement);
     const primaryColor = documentStyle.getPropertyValue('--color-primary').trim() || '#F80421';
     const textColor = documentStyle.getPropertyValue('--color-text-main').trim() || '#ffffff';
@@ -722,8 +718,6 @@ const entries = labels
 const isCyberpunk = document.documentElement.classList.contains('theme-cyberpunk');
     const axis2Color = documentStyle.getPropertyValue('--chart-axis2-color').trim() || textColorSecondary;
 
-=======
->>>>>>> upstream/master
     const datasets = [
       ...this.createChartDatasets('y'),
       ...this.createChartDatasets('y2')
@@ -1312,16 +1306,13 @@ const isCyberpunk = document.documentElement.classList.contains('theme-cyberpunk
         formatted.temp = parseFloat(formatted.temp.toFixed(1));
         formatted.temp2 = parseFloat(formatted.temp2.toFixed(1));
         formatted.responseTime = parseFloat(formatted.responseTime.toFixed(1));
-<<<<<<< HEAD
         formatted.frequency = parseFloat(info.frequency.toFixed(2));
-=======
         if (formatted.responseTimeMin !== undefined) {
           formatted.responseTimeMin = parseFloat(formatted.responseTimeMin.toFixed(1));
         }
         if (formatted.responseTimeMax !== undefined) {
           formatted.responseTimeMax = parseFloat(formatted.responseTimeMax.toFixed(1));
         }
->>>>>>> upstream/master
 
         return formatted;
       }),
@@ -1796,7 +1787,6 @@ const isCyberpunk = document.documentElement.classList.contains('theme-cyberpunk
     }
   }
 
-<<<<<<< HEAD
   public getSuggestedMaxForLabel(label: eChartLabel | undefined, info: ISystemInfo): number {
     switch (label) {
       case eChartLabel.hashrate:
@@ -1870,7 +1860,6 @@ const isCyberpunk = document.documentElement.classList.contains('theme-cyberpunk
       case eChartLabel.responseTime:     return {suffix: ' ms', precision: 1};
       case eChartLabel.frequency:        return {suffix: ' MHz', precision: 1};
       default:                           return {suffix: '', precision: 0};
-=======
   public getMinForLabel(label: string | undefined): number | undefined {
     if (!label) return undefined;
     const metric = CHART_LABEL_TO_METRIC[label] || (label as ChartMetric);
@@ -1930,7 +1919,6 @@ const isCyberpunk = document.documentElement.classList.contains('theme-cyberpunk
       case 'responseTimeMin':    return info.responseTimeMin ?? info.responseTime;
       case 'responseTimeMax':    return info.responseTimeMax ?? info.responseTime;
       default:                   return 0.0;
->>>>>>> upstream/master
     }
   }
 

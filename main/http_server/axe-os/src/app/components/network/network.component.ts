@@ -9,12 +9,9 @@ import { CommonModule } from '@angular/common';
     selector: 'app-network',
     templateUrl: './network.component.html',
     styleUrls: ['./network.component.scss'],
-<<<<<<< HEAD
     standalone: true,
     imports: [CommonModule, NetworkEditComponent]
-=======
     imports: [NetworkEditComponent, AsyncPipe]
->>>>>>> upstream/master
 })
 export class NetworkComponent implements AfterViewInit {
   form$!: Observable<FormGroup | null>;

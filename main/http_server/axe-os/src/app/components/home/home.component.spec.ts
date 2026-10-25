@@ -215,12 +215,9 @@ describe('HomeComponent', () => {
   beforeEach(() => {
     mockLiveDataService.info$ = new BehaviorSubject<ISystemInfo>(structuredClone(mockSystemInfo));
     TestBed.configureTestingModule({
-<<<<<<< HEAD
       declarations: [
         SnowflakesComponent,
       ],
-=======
->>>>>>> upstream/master
       imports: [
         ConfettiComponent,
         TooltipIconComponent,

@@ -25,13 +25,10 @@ describe('SwarmComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-<<<<<<< HEAD
       declarations: [
         ModalComponent,
         SwarmComponent,
       ],
-=======
->>>>>>> upstream/master
       imports: [
         TooltipTextIconComponent,
         ReactiveFormsModule,
@@ -109,11 +106,8 @@ describe('SwarmComponent', () => {
 
     const element = fixture.nativeElement;
 
-<<<<<<< HEAD
     // Verify that components inside *ngIf are rendered
-=======
     // Verify that components inside the @if block are rendered
->>>>>>> upstream/master
     expect(element.querySelector('app-slider')).toBeTruthy();
     expect(element.querySelector('app-modal')).toBeTruthy();
   });

@@ -8,11 +8,8 @@ describe('ModalComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-<<<<<<< HEAD
       imports: [], // ModalComponent hier entfernt
-=======
       imports: [ModalComponent]
->>>>>>> upstream/master
     });
     fixture = TestBed.createComponent(ModalComponent);
     component = fixture.componentInstance;

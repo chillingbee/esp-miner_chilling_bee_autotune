@@ -25,7 +25,6 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 
 @Component({
-<<<<<<< HEAD
     selector: 'app-network-edit',
     templateUrl: './network.edit.component.html',
     styleUrls: ['./network.edit.component.scss'],
@@ -37,12 +36,10 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
   ReactiveFormsModule,
   FormsModule
 ],
-=======
   selector: 'app-network-edit',
   templateUrl: './network.edit.component.html',
   styleUrls: ['./network.edit.component.scss'],
   imports: [FormsModule, ReactiveFormsModule, TooltipTextIconComponent, TooltipDirective, CheckboxComponent]
->>>>>>> upstream/master
 })
 export class NetworkEditComponent implements OnInit {
   private formSubject = new BehaviorSubject<FormGroup | null>(null);

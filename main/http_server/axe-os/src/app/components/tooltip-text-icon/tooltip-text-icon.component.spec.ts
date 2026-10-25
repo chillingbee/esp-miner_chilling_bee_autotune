@@ -8,10 +8,7 @@ describe('WifiIconComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-<<<<<<< HEAD
       declarations: [],
-=======
->>>>>>> upstream/master
       imports: [TooltipTextIconComponent]
     });
     fixture = TestBed.createComponent(TooltipTextIconComponent);
