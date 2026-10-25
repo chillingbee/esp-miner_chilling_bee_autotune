@@ -15,7 +15,7 @@ export interface ProgressBarMarker {
       <div class="w-full bg-progressbar rounded-sm overflow-hidden" [ngClass]="heightClass">
         <div class="bg-progressbar-value h-full transition-all duration-300" [style.width.%]="value"></div>
       <div class="w-full bg-progressbar rounded-sm overflow-hidden" [class]="heightClass">
-        <div class="bg-progressbar-value h-full transition-[width] duration-300" [style.width.%]="progressValue"></div>
+        <div class="bg-progressbar-value h-full transition-[width] duration-300" [style.width.%]="value"></div>
       </div>
 
       <!-- Optional Markers -->

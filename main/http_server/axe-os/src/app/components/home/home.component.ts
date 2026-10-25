@@ -35,14 +35,11 @@ import { SatsPipe } from '../../pipes/sats.pipe';
 import { NgTemplateOutlet } from '@angular/common';
 
 import { CommonModule } from '@angular/common';
-import { TooltipTextIconComponent } from '../tooltip-text-icon/tooltip-text-icon.component';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 // Eigene Pipes & Direktiven importieren (Pfad anpassen)
 
 
-import { SatsPipe } from '../../pipes/sats.pipe';
-import { AddressPipe } from '../../pipes/address.pipe';
 
 import { TooltipDirective } from '../../directives/tooltip.directive'; // falls als Direktive eingebunden
 
@@ -1870,117 +1867,3 @@ const isCyberpunk = document.documentElement.classList.contains('theme-cyberpunk
     }
   }
 
-  public getSuggestedMaxForLabel(label: string | undefined, info: ISystemInfo): number {
-    if (!label) return 0;
-    const metric = CHART_LABEL_TO_METRIC[label] || (label as ChartMetric);
-    switch (metric) {
-      case 'hashrate':
-      case 'hashrate_1m':
-      case 'hashrate_10m':
-      case 'hashrate_1h':      return info.expectedHashrate;
-      case 'errorPercentage':  return 1;
-      case 'asicTemp':
-      case 'asicTemp2':        return this.maxTemp;
-      case 'vrTemp':           return this.maxTemp + 25;
-      case 'asicVoltage':      return info.coreVoltage;
-      case 'voltage':          return info.nominalVoltage + .5;
-      case 'power':            return this.maxPower;
-      case 'current':          return this.maxPower / info.coreVoltage;
-      case 'fanSpeed':         return 100;
-      case 'fanRpm':
-      case 'fan2Rpm':          return 7000;
-      case 'responseTimeMin':
-      case 'responseTimeMax':  return 50;
-      default:                 return 0;
-    }
-  }
-
-  static getDataForLabel(label: string | undefined, info: ISystemInfo): number {
-    if (!label) return 0.0;
-    const metric = CHART_LABEL_TO_METRIC[label] || (label as ChartMetric);
-    switch (metric) {
-      case 'hashrate':           return info.hashRate;
-      case 'hashrate_1m':        return info.hashRate_1m;
-      case 'hashrate_10m':       return info.hashRate_10m;
-      case 'hashrate_1h':        return info.hashRate_1h;
-      case 'errorPercentage':    return info.errorPercentage;
-      case 'asicTemp':           return info.temp;
-      case 'asicTemp2':          return info.temp2;
-      case 'vrTemp':             return info.vrTemp;
-      case 'asicVoltage':        return info.coreVoltageActual;
-      case 'voltage':            return info.voltage;
-      case 'power':              return info.power;
-      case 'current':            return info.current;
-      case 'fanSpeed':           return info.fanspeed;
-      case 'fanRpm':             return info.fanrpm;
-      case 'fan2Rpm':            return info.fan2rpm;
-      case 'wifiRssi':           return info.wifiRSSI;
-      case 'freeHeap':           return info.freeHeap;
-      case 'responseTimeMin':    return info.responseTimeMin ?? info.responseTime;
-      case 'responseTimeMax':    return info.responseTimeMax ?? info.responseTime;
-      default:                   return 0.0;
-    }
-  }
-
-  static getSettingsForLabel(label: string): {suffix: string; precision: number} {
-    const metric = CHART_LABEL_TO_METRIC[label] || (label as ChartMetric);
-    switch (metric) {
-      case 'hashrate':
-      case 'hashrate_1m':
-      case 'hashrate_10m':
-      case 'hashrate_1h':      return {suffix: ' H/s', precision: 0};
-      case 'errorPercentage':  return {suffix: ' %', precision: 2};
-      case 'asicTemp':
-      case 'asicTemp2':        return {suffix: ' °C', precision: 1};
-      case 'vrTemp':           return {suffix: ' °C', precision: 1};
-      case 'asicVoltage':      return {suffix: ' V', precision: 1};
-      case 'voltage':          return {suffix: ' V', precision: 1};
-      case 'power':            return {suffix: ' W', precision: 1};
-      case 'current':          return {suffix: ' A', precision: 1};
-      case 'fanSpeed':         return {suffix: ' %', precision: 1};
-      case 'fanRpm':
-      case 'fan2Rpm':          return {suffix: ' rpm', precision: 0};
-      case 'wifiRssi':         return {suffix: ' dBm', precision: 0};
-      case 'freeHeap':         return {suffix: ' B', precision: 0};
-      case 'responseTimeMin':
-      case 'responseTimeMax':  return {suffix: ' ms', precision: 1};
-      default:                 return {suffix: '', precision: 0};
-
-    }
-  }
-
-  static cbFormatValue(value: number, datasetLabel: string, args?: any): string {
-    if (value === undefined || value === null) return '';
-    const metric = CHART_LABEL_TO_METRIC[datasetLabel] || (datasetLabel as ChartMetric);
-    switch (metric) {
-      case 'hashrate':
-      case 'hashrate_1m':
-      case 'hashrate_10m':
-      case 'hashrate_1h':
-        return HashSuffixPipe.transform(value, args);
-      case 'freeHeap':
-        return ByteSuffixPipe.transform(value, args);
-      default:
-        const settings = HomeComponent.getSettingsForLabel(metric);
-        return value.toLocaleString(undefined, { useGrouping: false, maximumFractionDigits: args?.tickmark ? undefined : settings.precision }) + settings.suffix;
-    }
-  }
-  public getElapsedTime(date: Date | undefined): string {
-    if (!date) return 'noch keine Daten';
-    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
-    if (seconds < 60) return `${seconds}s ago`;
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m ago`;
-    return `${Math.floor(minutes / 60)}h ago`;
-  }
-
-  getAddressPart(user: string): string {
-    const dotIndex = user.lastIndexOf('.');
-    return dotIndex !== -1 ? user.substring(0, dotIndex) : user;
-  }
-
-  getSuffixPart(user: string): string {
-    const dotIndex = user.lastIndexOf('.');
-    return dotIndex !== -1 ? '.' + user.substring(dotIndex + 1) : '';
-  }
-}
