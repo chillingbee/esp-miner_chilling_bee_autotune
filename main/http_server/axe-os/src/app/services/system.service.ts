@@ -68,6 +68,7 @@ export class SystemApiService {
         errorPercentage: 0.2,
         bestDiff: 238214491,
         bestSessionDiff: 21212121,
+        bestScoreUptime: 3600,
         cpuUsage: 12.5,
         freeHeap: 200504,
         freeHeapInternal: 200504,
