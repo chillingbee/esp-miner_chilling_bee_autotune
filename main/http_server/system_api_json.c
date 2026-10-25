@@ -55,11 +55,11 @@ static void system_api_add_telemetry(yyjson_mut_doc *doc, yyjson_mut_val *root, 
 
     if (last_tracked_best_diff == 0) {
         last_tracked_best_diff = current_best_diff;
-        best_score_uptime = current_uptime;
+        best_score_uptime = (uint32_t)((esp_timer_get_time() - g->SYSTEM_MODULE.start_time_us) / 1000000);
     }
     if (current_best_diff > last_tracked_best_diff) {
         last_tracked_best_diff = current_best_diff;
-        best_score_uptime = current_uptime;
+        best_score_uptime = (uint32_t)((esp_timer_get_time() - g->SYSTEM_MODULE.start_time_us) / 1000000);
     }
 
 
