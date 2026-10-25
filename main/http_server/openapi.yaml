@@ -424,6 +424,9 @@ components:
         bestSessionDiff:
           type: number
           description: Best difficulty achieved in current session
+        bestScoreUptime:
+          type: number
+          description: Uptime since best session difficulty
         boardVersion:
           type: string
           description: Hardware board version

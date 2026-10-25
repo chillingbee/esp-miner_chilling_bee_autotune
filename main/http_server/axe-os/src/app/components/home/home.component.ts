@@ -231,6 +231,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   public domainPower: number = 3;
   public efficiency: number = 0;
   public efficiencyAverage: number = 0;
+  public smoothedEfficiencyAverage: number = 0;
   public expectedEfficiency: number = 0;
   public activePoolShareWarning: boolean = true;
   public orderedCoinbaseOutputs: ISystemInfo['coinbaseOutputs'] = [];
@@ -605,7 +606,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     const fillIndex = fill ? entries.findIndex(entry => !entry.hidden) : -1;
     // Force gradient fill for first visible Y dataset
     if (fill && fillIndex >= 0) {
-      entries[fillIndex].hidden = false;
+      
     }
 
     return entries.map(({ labelKey, label, index, hidden }) => {
@@ -1038,7 +1039,19 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.updateChartDataSources(info);
 
         this.efficiency = this.calculateEfficiency(info, 'hashRate');
-        this.efficiencyAverage = this.calculateEfficiency(info, 'hashRate_1m');
+        // BERECHNUNG MIT GEGLÄTTETEM FILTER (DÄMPFUNG)
+        if (info && info.power > 0 && info.hashRate_1h > 0) {
+            const currentRawAvg = (info.power * 1000) / info.hashRate_1h;
+            if (this.smoothedEfficiencyAverage === 0) {
+                this.smoothedEfficiencyAverage = currentRawAvg;
+            } else {
+                this.smoothedEfficiencyAverage = (this.smoothedEfficiencyAverage * 0.99) + (currentRawAvg * 0.01);
+            }
+            this.efficiencyAverage = this.smoothedEfficiencyAverage;
+        } else {
+            this.efficiencyAverage = 0;
+            this.smoothedEfficiencyAverage = 0;
+        }
         this.expectedEfficiency = this.calculateEfficiency(info, 'expectedHashrate');
         this.networkDifficultyPercentage = this.getNetworkDifficultyPercentage(info);
         this.payoutPercentage = this.getPayoutPercentage(info);

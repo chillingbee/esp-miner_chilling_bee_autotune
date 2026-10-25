@@ -54,7 +54,7 @@ static void system_api_add_telemetry(yyjson_mut_doc *doc, yyjson_mut_val *root, 
     uint64_t current_best_diff = g->SYSTEM_MODULE.best_session_nonce_diff;
 
     static uint32_t session_start_uptime = 0;
-    if (last_tracked_best_diff == 0 || current_best_diff > last_tracked_best_diff) {
+    if (last_tracked_best_diff == 0 || current_best_diff != last_tracked_best_diff) {
         last_tracked_best_diff = current_best_diff;
         session_start_uptime = current_uptime;
     }
