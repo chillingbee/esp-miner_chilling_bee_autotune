@@ -34,22 +34,6 @@ import { AddressPipe } from '../../pipes/address.pipe';
 import { SatsPipe } from '../../pipes/sats.pipe';
 import { NgTemplateOutlet } from '@angular/common';
 
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-
-// Eigene Pipes & Direktiven importieren (Pfad anpassen)
-
-
-
-import { TooltipDirective } from '../../directives/tooltip.directive'; // falls als Direktive eingebunden
-
-// Eigene Komponenten importieren
-import { DropdownComponent } from '../../components/dropdown/dropdown.component';
-import { ConfettiComponent } from '../../components/confetti/confetti.component';
-import { ProgressbarComponent } from '../../components/progressbar/progressbar.component'; // Pfad anpassen
-
-
-
 type PoolLabel = 'Primary' | 'Fallback';
 type MessageType =
   | 'SYSTEM_INFO_ERROR'
@@ -110,27 +94,6 @@ const WIDGET_DEFAULTS: WidgetDef[] = [
 ];
 
 @Component({
-    selector: 'app-home',
-    templateUrl: './home.component.html',
-    styleUrls: ['./home.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-    imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        FormsModule,
-        ConfettiComponent,
-        HashSuffixPipe,
-        DiffSuffixPipe,
-        SatsPipe,
-        AddressPipe,
-        DateAgoPipe,
-        TooltipDirective,
-        DropdownComponent,
-        AppChartComponent,
-        TooltipTextIconComponent,
-        ProgressbarComponent
-    ],
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
@@ -157,16 +120,6 @@ const WIDGET_DEFAULTS: WidgetDef[] = [
 export class HomeComponent implements OnInit, OnDestroy {
   public messages: ISystemMessage[] = [];
 
-// --- KLASSEN-PROPERTIES & DI ---
-  private _lastBestDiff: number = -1;
-  private _bestDiffTimestamp: number = 0;
-  private _lastUptime: number = -1;
-
-  displayInfo: any = null;
-  public lastBestUpdate: Date = new Date();
-
-
-
   public info$!: Observable<ISystemInfo>;
   public stats$!: Observable<ISystemStatistics>;
   public pools$!: Observable<SelectOption<PoolLabel>[]>;
@@ -185,7 +138,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   public maxTemp: number = 75;
   public maxRpm: number = 7000;
   public maxFrequency: number = 800;
-
 
   public quickLink$!: Observable<string | undefined>;
 
@@ -284,10 +236,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   public networkDifficultyPercentage: string = '0';
   public payoutPercentage: number = -1;
   public chartDataSources: { name: string; value: string }[] = [];
-
-public smoothedEfficiencyAverage: number = 0;
-private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
-
   private lastHasVrTemp = false;
   private lastHasAsicTemp2 = false;
   private lastHasFanRpm = false;
@@ -298,7 +246,6 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
   private latestInfo?: ISystemInfo;
   private liveDataStarted = false;
   private resizeTimer: any;
-  private displayTickInterval: any;
   public form!: FormGroup;
 
   private staleCheckInterval: any;
@@ -311,7 +258,6 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
   @Input() uri = '';
 
   constructor(
-    private cdr: ChangeDetectorRef,
     private fb: FormBuilder,
     private systemService: SystemApiService,
     private themeService: ThemeService,
@@ -341,7 +287,6 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
   }
 
   ngOnInit(): void {
-
     this.dashboardEditService.widgetDefs = this.widgetDefs;
     this.dashboardEditService.isActive$.next(true);
 
@@ -407,16 +352,6 @@ private readonly HOME_BEST_UPDATE_KEY = 'axe_os_last_best_update';
     });
 
     this.loadPreviousData();
-
-// Live-Ticker für den Timer (aktualisiert die Anzeige sekündlich)
-this.ngZone.runOutsideAngular(() => {
-  this.displayTickInterval = setInterval(() => {
-    if (this.displayInfo) {
-      this.displayInfo = { ...this.displayInfo };
-      this.cd.markForCheck();
-    }
-  }, 1000);
-});
   }
 
   @HostListener('document:visibilitychange')
@@ -468,7 +403,6 @@ this.ngZone.runOutsideAngular(() => {
     clearTimeout(this.shareRejectedTimeout);
     clearTimeout(this.workReceivedTimeout);
     clearInterval(this.staleCheckInterval);
-    clearInterval(this.displayTickInterval);
     this.dashboardEditService.isActive$.next(false);
     this.dashboardEditService.editMode$.next(false);
     this.destroy$.next();
@@ -651,7 +585,7 @@ this.ngZone.runOutsideAngular(() => {
       : (documentStyle.getPropertyValue('--chart-axis2-color').trim() || textColorSecondary);
     const mixColor = documentStyle.getPropertyValue('--color-text-main').trim() || '#ffffff';
 
-const entries = labels
+    const entries = labels
       .filter(label => this.isSensorSupported(label, this.latestInfo))
       .map((labelKey, index) => {
         const label = CHART_LABELS[labelKey as ChartMetric] ?? labelKey;
@@ -708,38 +642,10 @@ const entries = labels
   }
 
   private rebuildChartDatasets() {
-    const documentStyle = getComputedStyle(document.documentElement);
-    const primaryColor = documentStyle.getPropertyValue('--color-primary').trim() || '#F80421';
-    const textColor = documentStyle.getPropertyValue('--color-text-main').trim() || '#ffffff';
-    const textColorSecondary = documentStyle.getPropertyValue('--color-text-secondary').trim() || '#808080';
-const isCyberpunk = document.documentElement.classList.contains('theme-cyberpunk');
-    const axis2Color = documentStyle.getPropertyValue('--chart-axis2-color').trim() || textColorSecondary;
-
     const datasets = [
       ...this.createChartDatasets('y'),
       ...this.createChartDatasets('y2')
     ];
-
-    // Cyberpunk-specific chart styling overrides (Cyan → Magenta gradient)
-    if (isCyberpunk) {
-      for (const ds of datasets) {
-        ds.backgroundColor = (context: any) => {
-          const chart = context.chart;
-          if (!chart) return 'rgba(0, 240, 255, 0.6)';
-          const { ctx, chartArea } = chart;
-          if (!chartArea) return 'rgba(0, 240, 255, 0.6)';
-          const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-          gradient.addColorStop(0, 'rgba(0, 240, 255, 0.6)');
-          gradient.addColorStop(0.5, 'rgba(0, 240, 255, 0.15)');
-          gradient.addColorStop(1, 'rgba(255, 0, 255, 0.4)');
-          return gradient;
-        };
-        ds.tension = 0.4;
-        ds.pointRadius = 0;
-        ds.pointHoverRadius = 8;
-        ds.borderWidth = 3;
-      }
-    }
 
     if (this.chartData) {
       this.chartData = {
@@ -1105,30 +1011,8 @@ const isCyberpunk = document.documentElement.classList.contains('theme-cyberpunk
         return processed;
       }),
       tap(info => {
-
-// --- FINALER, FELSENFESTER TIMER (FIRMWARE-GESTÜTZT) ---
-    const currentUptime = Number(info.uptimeSeconds) || 0;
-    const bestScoreUptime = Number((info as any).bestScoreUptime) || 0;
-
-    // Die vergangene Zeit ist mathematisch korrekt die Differenz
-    const uptimeSinceBest = Math.max(0, currentUptime - bestScoreUptime);
-    const elapsedMs = uptimeSinceBest * 1000;
-
-    // Datum setzen, ab dem der Timer zählt
-    this.lastBestUpdate = new Date(Date.now() - elapsedMs);
-
-    // Display-Info für das UI aktualisieren
-    this.displayInfo = { 
-        ...info, 
-        lastBestUpdate: this.lastBestUpdate
-    };
-    
-    this.latestInfo = info;
-    this.lastMessageTime = new Date().getTime();
-    this.cdr.detectChanges();
-    // --- ENDE ---
-
-    
+        this.latestInfo = info;
+        this.lastMessageTime = new Date().getTime();
         // Clear error indicators if data is flowing
         const systemInfoError = this.systemInfoError$.value;
         if (!!systemInfoError.duration) {
@@ -1152,26 +1036,6 @@ const isCyberpunk = document.documentElement.classList.contains('theme-cyberpunk
         this.expectedEfficiency = this.calculateEfficiency(info, 'expectedHashrate');
         this.networkDifficultyPercentage = this.getNetworkDifficultyPercentage(info);
         this.payoutPercentage = this.getPayoutPercentage(info);
-
-        // MANUELLE BERECHNUNG FÜR DEN GEGLÄTTETEN DURCHSCHNITT:
-        if (info && info.power > 0 && info.hashRate_1h > 0) {
-            const currentRawAvg = (info.power * 1000) / info.hashRate_1h;
-
-            // Wenn der Wert zum ersten Mal berechnet wird, nimm den aktuellen Wert
-            if (this.smoothedEfficiencyAverage === 0) {
-                this.smoothedEfficiencyAverage = currentRawAvg;
-            } else {
-                // FILTER: 99% alter Wert + 1% neuer Wert (schluckt sekündliche Schwankungen)
-                this.smoothedEfficiencyAverage = (this.smoothedEfficiencyAverage * 0.99) + (currentRawAvg * 0.01);
-            }
-
-            this.efficiencyAverage = this.smoothedEfficiencyAverage;
-        } else {
-            this.efficiencyAverage = 0;
-            this.smoothedEfficiencyAverage = 0;
-        }
-
-        this.expectedEfficiency = this.calculateEfficiency(info, 'expectedHashrate');
 
         const preferredPool: PoolLabel = info.useFallbackStratum === 1 ? 'Fallback' : 'Primary';
         const activePool: PoolLabel = info.isUsingFallbackStratum === 1 ? 'Fallback' : 'Primary';
@@ -1197,7 +1061,6 @@ const isCyberpunk = document.documentElement.classList.contains('theme-cyberpunk
           this.activePoolProtocol = 'SV1';
         }
         this.responseTime = info.responseTime;
-        info.coreVoltageSet = info.coreVoltageSet / 1000;
 
         this.orderedCoinbaseOutputs = this.getOrderedCoinbaseOutputs(info);
 
@@ -1303,7 +1166,6 @@ const isCyberpunk = document.documentElement.classList.contains('theme-cyberpunk
         formatted.temp = parseFloat(formatted.temp.toFixed(1));
         formatted.temp2 = parseFloat(formatted.temp2.toFixed(1));
         formatted.responseTime = parseFloat(formatted.responseTime.toFixed(1));
-        formatted.frequency = parseFloat(info.frequency.toFixed(2));
         if (formatted.responseTimeMin !== undefined) {
           formatted.responseTimeMin = parseFloat(formatted.responseTimeMin.toFixed(1));
         }
@@ -1353,9 +1215,7 @@ const isCyberpunk = document.documentElement.classList.contains('theme-cyberpunk
         }
         return result;
       }));
-
   }
-  
 
   onPoolChange(event: { originalEvent?: Event; value: PoolLabel }) {
     if (this.isChangingPool) return;
@@ -1784,79 +1644,6 @@ const isCyberpunk = document.documentElement.classList.contains('theme-cyberpunk
     }
   }
 
-  public getSuggestedMaxForLabel(label: eChartLabel | undefined, info: ISystemInfo): number {
-    switch (label) {
-      case eChartLabel.hashrate:
-      case eChartLabel.hashrate_1m:
-      case eChartLabel.hashrate_10m:
-      case eChartLabel.hashrate_1h:      return info.expectedHashrate;
-      case eChartLabel.errorPercentage:  return 1;
-      case eChartLabel.asicTemp:
-      case eChartLabel.asicTemp2:        return this.maxTemp;
-      case eChartLabel.vrTemp:           return this.maxTemp + 25;
-      case eChartLabel.asicVoltage:      return info.coreVoltage;
-      case eChartLabel.asicVoltageSet:   return info.coreVoltageSet;
-      case eChartLabel.voltage:          return info.nominalVoltage + .5;
-      case eChartLabel.power:            return this.maxPower;
-      case eChartLabel.current:          return this.maxPower / info.coreVoltage;
-      case eChartLabel.fanSpeed:         return 100;
-      case eChartLabel.fanRpm:           return 7000;
-      case eChartLabel.fan2Rpm:          return 7000;
-      case eChartLabel.responseTime:     return 50;
-      case eChartLabel.frequency:        return 0;
-      default:                           return 0;
-    }
-  }
-
-  static getDataForLabel(label: eChartLabel | undefined, info: ISystemInfo): number {
-    switch (label) {
-      case eChartLabel.hashrate:           return info.hashRate;
-      case eChartLabel.hashrate_1m:        return info.hashRate_1m;
-      case eChartLabel.hashrate_10m:       return info.hashRate_10m;
-      case eChartLabel.hashrate_1h:        return info.hashRate_1h;
-      case eChartLabel.errorPercentage:    return info.errorPercentage;
-      case eChartLabel.asicTemp:           return info.temp;
-      case eChartLabel.asicTemp2:          return info.temp2;
-      case eChartLabel.vrTemp:             return info.vrTemp;
-      case eChartLabel.asicVoltage:        return info.coreVoltageActual;
-      case eChartLabel.asicVoltageSet:     return info.coreVoltageSet;
-      case eChartLabel.voltage:            return info.voltage;
-      case eChartLabel.power:              return info.power;
-      case eChartLabel.current:            return info.current;
-      case eChartLabel.fanSpeed:           return info.fanspeed;
-      case eChartLabel.fanRpm:             return info.fanrpm;
-      case eChartLabel.fan2Rpm:            return info.fan2rpm;
-      case eChartLabel.wifiRssi:           return info.wifiRSSI;
-      case eChartLabel.freeHeap:           return info.freeHeap;
-      case eChartLabel.responseTime:       return info.responseTime;
-      case eChartLabel.frequency:          return info.frequency;
-      default:                             return 0.0;
-    }
-  }
-
-  static getSettingsForLabel(label: eChartLabel): {suffix: string; precision: number} {
-    switch (label) {
-      case eChartLabel.hashrate:
-      case eChartLabel.hashrate_1m:
-      case eChartLabel.hashrate_10m:
-      case eChartLabel.hashrate_1h:      return {suffix: ' H/s', precision: 0};
-      case eChartLabel.errorPercentage:  return {suffix: ' %', precision: 2};
-      case eChartLabel.asicTemp:
-      case eChartLabel.asicTemp2:
-      case eChartLabel.vrTemp:           return {suffix: ' °C', precision: 1};
-      case eChartLabel.asicVoltage:
-      case eChartLabel.voltage:
-      case eChartLabel.asicVoltageSet:   return {suffix: ' V', precision: 3};
-      case eChartLabel.power:            return {suffix: ' W', precision: 1};
-      case eChartLabel.current:          return {suffix: ' A', precision: 1};
-      case eChartLabel.fanSpeed:         return {suffix: ' %', precision: 1};
-      case eChartLabel.fanRpm:
-      case eChartLabel.fan2Rpm:          return {suffix: ' rpm', precision: 0};
-      case eChartLabel.wifiRssi:         return {suffix: ' dBm', precision: 0};
-      case eChartLabel.freeHeap:         return {suffix: ' B', precision: 0};
-      case eChartLabel.responseTime:     return {suffix: ' ms', precision: 1};
-      case eChartLabel.frequency:        return {suffix: ' MHz', precision: 1};
-      default:                           return {suffix: '', precision: 0};
   public getMinForLabel(label: string | undefined): number | undefined {
     if (!label) return undefined;
     const metric = CHART_LABEL_TO_METRIC[label] || (label as ChartMetric);
@@ -1867,3 +1654,99 @@ const isCyberpunk = document.documentElement.classList.contains('theme-cyberpunk
     }
   }
 
+  public getSuggestedMaxForLabel(label: string | undefined, info: ISystemInfo): number {
+    if (!label) return 0;
+    const metric = CHART_LABEL_TO_METRIC[label] || (label as ChartMetric);
+    switch (metric) {
+      case 'hashrate':
+      case 'hashrate_1m':
+      case 'hashrate_10m':
+      case 'hashrate_1h':      return info.expectedHashrate;
+      case 'errorPercentage':  return 1;
+      case 'asicTemp':
+      case 'asicTemp2':        return this.maxTemp;
+      case 'vrTemp':           return this.maxTemp + 25;
+      case 'asicVoltage':      return info.coreVoltage;
+      case 'voltage':          return info.nominalVoltage + .5;
+      case 'power':            return this.maxPower;
+      case 'current':          return this.maxPower / info.coreVoltage;
+      case 'fanSpeed':         return 100;
+      case 'fanRpm':
+      case 'fan2Rpm':          return 7000;
+      case 'responseTimeMin':
+      case 'responseTimeMax':  return 50;
+      default:                 return 0;
+    }
+  }
+
+  static getDataForLabel(label: string | undefined, info: ISystemInfo): number {
+    if (!label) return 0.0;
+    const metric = CHART_LABEL_TO_METRIC[label] || (label as ChartMetric);
+    switch (metric) {
+      case 'hashrate':           return info.hashRate;
+      case 'hashrate_1m':        return info.hashRate_1m;
+      case 'hashrate_10m':       return info.hashRate_10m;
+      case 'hashrate_1h':        return info.hashRate_1h;
+      case 'errorPercentage':    return info.errorPercentage;
+      case 'asicTemp':           return info.temp;
+      case 'asicTemp2':          return info.temp2;
+      case 'vrTemp':             return info.vrTemp;
+      case 'asicVoltage':        return info.coreVoltageActual;
+      case 'voltage':            return info.voltage;
+      case 'power':              return info.power;
+      case 'current':            return info.current;
+      case 'fanSpeed':           return info.fanspeed;
+      case 'fanRpm':             return info.fanrpm;
+      case 'fan2Rpm':            return info.fan2rpm;
+      case 'wifiRssi':           return info.wifiRSSI;
+      case 'freeHeap':           return info.freeHeap;
+      case 'responseTimeMin':    return info.responseTimeMin ?? info.responseTime;
+      case 'responseTimeMax':    return info.responseTimeMax ?? info.responseTime;
+      default:                   return 0.0;
+    }
+  }
+
+  static getSettingsForLabel(label: string): {suffix: string; precision: number} {
+    const metric = CHART_LABEL_TO_METRIC[label] || (label as ChartMetric);
+    switch (metric) {
+      case 'hashrate':
+      case 'hashrate_1m':
+      case 'hashrate_10m':
+      case 'hashrate_1h':      return {suffix: ' H/s', precision: 0};
+      case 'errorPercentage':  return {suffix: ' %', precision: 2};
+      case 'asicTemp':
+      case 'asicTemp2':        return {suffix: ' °C', precision: 1};
+      case 'vrTemp':           return {suffix: ' °C', precision: 1};
+      case 'asicVoltage':      return {suffix: ' V', precision: 1};
+      case 'voltage':          return {suffix: ' V', precision: 1};
+      case 'power':            return {suffix: ' W', precision: 1};
+      case 'current':          return {suffix: ' A', precision: 1};
+      case 'fanSpeed':         return {suffix: ' %', precision: 1};
+      case 'fanRpm':
+      case 'fan2Rpm':          return {suffix: ' rpm', precision: 0};
+      case 'wifiRssi':         return {suffix: ' dBm', precision: 0};
+      case 'freeHeap':         return {suffix: ' B', precision: 0};
+      case 'responseTimeMin':
+      case 'responseTimeMax':  return {suffix: ' ms', precision: 1};
+      default:                 return {suffix: '', precision: 0};
+
+    }
+  }
+
+  static cbFormatValue(value: number, datasetLabel: string, args?: any): string {
+    if (value === undefined || value === null) return '';
+    const metric = CHART_LABEL_TO_METRIC[datasetLabel] || (datasetLabel as ChartMetric);
+    switch (metric) {
+      case 'hashrate':
+      case 'hashrate_1m':
+      case 'hashrate_10m':
+      case 'hashrate_1h':
+        return HashSuffixPipe.transform(value, args);
+      case 'freeHeap':
+        return ByteSuffixPipe.transform(value, args);
+      default:
+        const settings = HomeComponent.getSettingsForLabel(metric);
+        return value.toLocaleString(undefined, { useGrouping: false, maximumFractionDigits: args?.tickmark ? undefined : settings.precision }) + settings.suffix;
+    }
+  }
+}

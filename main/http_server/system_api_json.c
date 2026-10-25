@@ -46,12 +46,6 @@ static const char *get_reset_reason_str(esp_reset_reason_t reason)
 static uint64_t last_tracked_best_diff = 0;
 static uint32_t best_score_uptime = 0;
 
-static void system_api_add_telemetry(cJSON *root, GlobalState *g) {
-    if (!root || !g) return;
-// Statische Variablen für das Highscore-Uptime-Tracking (müssen außerhalb der Funktion stehen!)
-static uint64_t last_tracked_best_diff = 0;
-static uint32_t best_score_uptime = 0;
-
 static void system_api_add_telemetry(yyjson_mut_doc *doc, yyjson_mut_val *root, GlobalState *g) {
     if (!doc || !root || !g) return;
 
@@ -132,15 +126,10 @@ static void system_api_add_telemetry(yyjson_mut_doc *doc, yyjson_mut_val *root, 
         best_score_uptime = current_uptime;
     }
 
-    cJSON_AddNumberToObject(root, "freeHeap", esp_get_free_heap_size());
-    cJSON_AddNumberToObject(root, "freeHeapInternal", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
-    cJSON_AddNumberToObject(root, "freeHeapSpiram", heap_caps_get_free_size(MALLOC_CAP_SPIRAM));
-    cJSON_AddNumberToObject(root, "minFreeHeap", esp_get_minimum_free_heap_size());
-    cJSON_AddNumberToObject(root, "maxAllocHeap", heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL));
-    cJSON_AddFloatToObject(root, "cpuUsage", g->SYSTEM_MODULE.cpu_usage);
-    cJSON_AddBoolToObject(root, "miningPaused", g->SYSTEM_MODULE.mining_paused);
-    cJSON_AddNumberToObject(root, "overheat_mode", g->SYSTEM_MODULE.overheat_mode ? 1 : 0);
-    cJSON_AddStringToObject(root, "wifiStatus", g->SYSTEM_MODULE.wifi_status);
+    yyjson_mut_obj_add_uint(doc, root, "cpuUsage", (uint32_t)g->SYSTEM_MODULE.cpu_usage);
+    yyjson_mut_obj_add_bool(doc, root, "miningPaused", g->SYSTEM_MODULE.mining_paused);
+    yyjson_mut_obj_add_uint(doc, root, "overheat_mode", g->SYSTEM_MODULE.overheat_mode ? 1 : 0);
+    yyjson_mut_obj_add_strcpy(doc, root, "wifiStatus", g->SYSTEM_MODULE.wifi_status);
     // Dynamic System Stats
     yyjson_mut_obj_add_uint(doc, root, "freeHeap", esp_get_free_heap_size());
     yyjson_mut_obj_add_uint(doc, root, "freeHeapInternal", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
@@ -152,7 +141,6 @@ static void system_api_add_telemetry(yyjson_mut_doc *doc, yyjson_mut_val *root, 
     yyjson_mut_obj_add_double(doc, root, "totalHashes", SYSTEM_noinit_get_total_hashes());
     yyjson_mut_obj_add_double(doc, root, "totalLog2Work", SYSTEM_noinit_get_total_log2_work());
     yyjson_mut_obj_add_float(doc, root, "cpuUsage", g->SYSTEM_MODULE.cpu_usage);
-    yyjson_mut_obj_add_bool(doc, root, "miningPaused", g->SYSTEM_MODULE.mining_paused);
     yyjson_mut_obj_add_int(doc, root, "overheat_mode", g->SYSTEM_MODULE.overheat_mode ? 1 : 0);
     yyjson_mut_obj_add_strcpy(doc, root, "wifiStatus", g->SYSTEM_MODULE.wifi_status);
 

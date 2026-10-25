@@ -16,26 +16,7 @@ import { TooltipTextIconComponent } from '../tooltip-text-icon/tooltip-text-icon
 import { TooltipDirective } from '../../directives/tooltip.directive';
 import { CheckboxComponent } from '../checkbox/checkbox.component';
 
-import { CommonModule } from '@angular/common';
-import { TooltipTextIconComponent } from '../tooltip-text-icon/tooltip-text-icon.component';
-import { CheckboxComponent } from '../checkbox/checkbox.component';
-
-
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-
-
 @Component({
-    selector: 'app-network-edit',
-    templateUrl: './network.edit.component.html',
-    styleUrls: ['./network.edit.component.scss'],
-     standalone: true,
-  imports: [
-  CommonModule,
-  TooltipTextIconComponent,
-  CheckboxComponent,
-  ReactiveFormsModule,
-  FormsModule
-],
   selector: 'app-network-edit',
   templateUrl: './network.edit.component.html',
   styleUrls: ['./network.edit.component.scss'],
