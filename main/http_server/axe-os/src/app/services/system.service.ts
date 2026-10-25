@@ -419,7 +419,7 @@ export class SystemApiService {
 
 
   public getAutotune(): Observable<any> {
-    return of({ bestSessionDiff: 21212121, efficiency: 0.95, maxPower: 40 });
+    return of({ power_limit: 25, fan_limit: 75, osh_pow_limit: 0.2, osh_fan_limit: 5, max_volt_asic: 1400, max_freq_asic: 1000, max_temp_asic: 65, max_temp_vr: 85, auto_tune: true });
   }
   public updateAutotune(update: any): Observable<any> {
     return of({ success: true });
