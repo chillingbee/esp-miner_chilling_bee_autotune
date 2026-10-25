@@ -206,10 +206,8 @@
               {{info.bestSessionDiff | diffSuffix}}
             </span>
             <span class="text-secondary text-lg">session best</span>
-          </div>
-          <div>
-            <span class="font-medium">{{ (info.bestScoreUptime || 0) | number }}</span>
-            <span class="text-secondary text-lg">ago</span>
+            <span class="font-medium ml-2">{{ (info.bestScoreUptime || 0) | number }}s</span>
+            <span class="text-secondary text-xs ml-1">ago</span>
           </div>
         </div>
       </div>
