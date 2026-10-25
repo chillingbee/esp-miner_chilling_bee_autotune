@@ -110,27 +110,6 @@ static void system_api_add_telemetry(yyjson_mut_doc *doc, yyjson_mut_val *root, 
     yyjson_mut_obj_add_uint(doc, root, "coinbaseValueUserSatoshis", g->coinbase.user_value_satoshis);
     yyjson_mut_obj_add_strcpy(doc, root, "coinbasePayoutStatus", coinbase_payout_status_to_string(g->coinbase.payout_status));
 
-    // Dynamic System Stats & Highscore Uptime Logik
-    uint32_t current_uptime = (uint32_t)((esp_timer_get_time() - g->SYSTEM_MODULE.start_time_us) / 1000000);
-    uint64_t current_best_diff = g->SYSTEM_MODULE.best_session_nonce_diff;
-
-    // Wenn Miner neu gestartet wurde oder erster Lauf
-    if (current_uptime < best_score_uptime || last_tracked_best_diff == 0) {
-        last_tracked_best_diff = current_best_diff;
-        best_score_uptime = current_uptime;
-    }
-
-    // Wenn ein neuer Highscore reinkommt -> exakte Uptime festhalten
-    if (current_best_diff > last_tracked_best_diff) {
-        last_tracked_best_diff = current_best_diff;
-        best_score_uptime = current_uptime;
-    }
-
-    yyjson_mut_obj_add_uint(doc, root, "cpuUsage", (uint32_t)g->SYSTEM_MODULE.cpu_usage);
-    yyjson_mut_obj_add_bool(doc, root, "miningPaused", g->SYSTEM_MODULE.mining_paused);
-    yyjson_mut_obj_add_uint(doc, root, "overheat_mode", g->SYSTEM_MODULE.overheat_mode ? 1 : 0);
-    yyjson_mut_obj_add_strcpy(doc, root, "wifiStatus", g->SYSTEM_MODULE.wifi_status);
-    // Dynamic System Stats
     yyjson_mut_obj_add_uint(doc, root, "freeHeap", esp_get_free_heap_size());
     yyjson_mut_obj_add_uint(doc, root, "freeHeapInternal", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
     yyjson_mut_obj_add_uint(doc, root, "freeHeapSpiram", heap_caps_get_free_size(MALLOC_CAP_SPIRAM));
