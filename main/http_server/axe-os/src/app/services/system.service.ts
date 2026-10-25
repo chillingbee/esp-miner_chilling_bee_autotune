@@ -416,6 +416,14 @@ export class SystemApiService {
     return of(undefined);
   }
 
+
+  public getAutotune(): Observable<any> {
+    return of({ bestSessionDiff: 21212121, efficiency: 0.95, maxPower: 40 });
+  }
+  public updateAutotune(update: any): Observable<any> {
+    return of({ success: true });
+  }
+
   public deletePool(uri: string = '', id: number): Observable<any> {
     if (environment.production) {
       const targetUri = uri ? `${uri}/api/system/pools/${id}` : `/api/system/pools/${id}`;

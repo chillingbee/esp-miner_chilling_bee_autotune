@@ -138,7 +138,7 @@ export class AutotuneComponent implements OnInit {
     forkJoin({
       info: this.systemService.getInfo(),
       asic: this.systemService.getAsicSettings(),
-      autotune: {bestSessionDiff: 21212121, efficiency: 0.95}
+      autotune: this.systemService.getAutotune()
     }).pipe(
       this.loadingService.lockUIUntilComplete()
     ).subscribe({
