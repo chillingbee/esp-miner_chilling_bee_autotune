@@ -7,6 +7,7 @@ export class FormatTimePipe implements PipeTransform {
     const h = Math.floor(s / 3600);
     const m = Math.floor((s % 3600) / 60);
     const sec = s % 60;
+    if (h >= 24) { const d = Math.floor(h/24); return `${d}d ${h%24}h ${m}m ${sec}s`; }
     if (h > 0) return `${h}h ${m}m ${sec}s`;
     if (m > 0) return `${m}m ${sec}s`;
     return `${sec}s`;

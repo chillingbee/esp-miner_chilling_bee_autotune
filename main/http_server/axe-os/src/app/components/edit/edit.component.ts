@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { getHttpErrorMessage } from 'src/app/utils/error-handler';
 import { Component, Input, OnInit, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
@@ -22,6 +23,7 @@ const STATS_FREQUENCY_STEPS = [0, 1, 2, 5, 10, 30, 60, 60 * 2, 60 * 6, 60 * 14, 
     selector: 'app-edit',
     templateUrl: './edit.component.html',
     standalone: true,
+  imports: [CommonModule],
     imports: [
         ReactiveFormsModule,
         CheckboxComponent,

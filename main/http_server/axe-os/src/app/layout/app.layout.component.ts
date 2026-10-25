@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, Renderer2, ViewChild } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, Subscription, Subject, takeUntil } from 'rxjs';
@@ -11,7 +12,7 @@ import { LoadingComponent } from '../components/loading/loading.component';
 @Component({
   selector: 'app-layout',
   templateUrl: './app.layout.component.html',
-  imports: [AppTopBarComponent, AppSidebarComponent, RouterOutlet, AppFooterComponent, LoadingComponent]
+  imports: [AppTopBarComponent, AppSidebarComponent, RouterOutlet, AppFooterComponent, LoadingComponent, CommonModule]
 })
 export class AppLayoutComponent implements OnDestroy {
     private destroy$ = new Subject<void>();
