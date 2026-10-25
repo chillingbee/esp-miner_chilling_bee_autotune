@@ -23,15 +23,7 @@ const STATS_FREQUENCY_STEPS = [0, 1, 2, 5, 10, 30, 60, 60 * 2, 60 * 6, 60 * 14, 
     selector: 'app-edit',
     templateUrl: './edit.component.html',
     standalone: true,
-  imports: [CommonModule],
-    imports: [
-        ReactiveFormsModule,
-        CheckboxComponent,
-        DropdownComponent,
-        SliderComponent,
-        TooltipDirective,
-        DateAgoPipe,
-    ]
+  imports: [CommonModule, ReactiveFormsModule, CheckboxComponent, DropdownComponent, SliderComponent, TooltipDirective, DateAgoPipe]
 })
 
 export class EditComponent implements OnInit, OnDestroy, OnChanges {

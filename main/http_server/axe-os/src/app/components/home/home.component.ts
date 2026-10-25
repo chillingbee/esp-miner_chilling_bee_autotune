@@ -603,6 +603,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     // fills stack into a solid block. Pick the first *visible* one, so hiding a
     // series from the legend moves the fill on rather than removing it.
     const fillIndex = fill ? entries.findIndex(entry => !entry.hidden) : -1;
+    // Force gradient fill for first visible Y dataset
+    if (fill && fillIndex >= 0) {
+      entries[fillIndex].hidden = false;
+    }
 
     return entries.map(({ labelKey, label, index, hidden }) => {
       const borderColor = (index === 0 || isScatter)
