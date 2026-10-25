@@ -1810,7 +1810,7 @@ esp_err_t http_404_error_handler(httpd_req_t * req, httpd_err_code_t err)
     return ESP_OK;
 }
 
-/* autotune */ static esp_err_t GET_autotune_info(httpd_req_t *req){char *val=nvs_config_get_string(NVS_CONFIG_AUTOTUNE);httpd_resp_set_type(req,"application/json");if(val){httpd_resp_send(req,val,strlen(val));free(val);}else{char *j="{\"power_limit\":25,\"fan_limit\":75}";httpd_resp_send(req,j,strlen(j));free(j);}return ESP_OK;}
+/* autotune */ static esp_err_t GET_autotune_info(httpd_req_t *req){char *val=nvs_config_get_string(NVS_CONFIG_AUTOTUNE);httpd_resp_set_type(req,"application/json");if(val){httpd_resp_send(req,val,strlen(val));free(val);}else{char *j="{\"power_limit\":25,\"fan_limit\":75}";httpd_resp_send(req,j,strlen(j));}return ESP_OK;}
 static esp_err_t POST_autotune_info(httpd_req_t *req){char buf[512];int r=httpd_req_recv(req,buf,sizeof(buf)-1);if(r>0)buf[r]=0;nvs_config_set_string(NVS_CONFIG_AUTOTUNE,buf);httpd_resp_set_type(req,"application/json");httpd_resp_send(req,"{\"success\":true}",17);return ESP_OK;}
 esp_err_t start_rest_server(GlobalState * GLOBAL_STATE)
 {
