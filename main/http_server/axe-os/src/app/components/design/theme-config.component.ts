@@ -128,36 +128,14 @@ export class ThemeConfigComponent implements OnInit {
         error: (error) => console.error('Error loading theme settings:', error)
       });
 
-    // Slider-Werte aus localStorage laden
-    const vars = [
-      { key: '--card-alpha', min: 0.1, max: 0.9, defaultVal: '0.4', suffix: '' },
-      { key: '--glow-intensity', min: 0, max: 1, defaultVal: '0.35', suffix: '' },
-      { key: '--card-blur', min: 0, max: 20, defaultVal: '8', suffix: 'px' }
-    ];
-    vars.forEach(v => {
-      const saved = localStorage.getItem('cyberpunk_' + v.key);
-      const val = saved ? saved.replace('px', '') : v.defaultVal;
-      document.documentElement.style.setProperty(v.key, saved || v.defaultVal + v.suffix);
-      // Initialize slider fill on load (use saved/default, not just input HTML value)
-      const input = document.querySelector(`input[data-var="${v.key}"]`) as HTMLInputElement;
-      if (input) {
-        const valForCalc = saved ? saved.replace('px', '') : v.defaultVal;
-        const min = parseFloat(input.min);
-        const max = parseFloat(input.max);
-        const pct = ((parseFloat(valForCalc) - min) / (max - min)) * 100;
-        input.style.background = `linear-gradient(to right, rgba(0,240,255,0.8) 0%, rgba(0,240,255,0.8) ${pct}%, rgba(255,0,255,0.15) ${pct}%, rgba(255,0,255,0.15) 100%)`;
-        // Also sync input.value to saved/default so thumb matches
-        input.value = valForCalc;
-      }
-    });
-
-    // Slider-Init nach Theme-Laden + nach Panel-Render (ngIf @if)
+    // Slider-Init nur einmal nach Render (300ms), keine Doppel-Init
     setTimeout(() => {
       document.querySelectorAll<HTMLInputElement>('.slider-fill').forEach((input) => {
         const key = input.getAttribute('data-var') || '--card-alpha';
         const saved = localStorage.getItem('cyberpunk_' + key);
-        // Always compute from saved/default, not from HTML input.value which may be out of sync
         const clean = saved ? saved.replace('px', '') : (key === '--card-blur' ? '8' : (key === '--glow-intensity' ? '0.35' : '0.4'));
+        const valWithSuffix = saved ? saved : (key === '--card-blur' ? clean + 'px' : clean);
+        document.documentElement.style.setProperty(key, valWithSuffix);
         input.value = clean;
         const min = parseFloat(input.min);
         const max = parseFloat(input.max);
