@@ -149,7 +149,7 @@
           <div class="flex justify-between mb-4">
             <div>
               <span class="block text-lg font-medium mb-4">Shares
-                <i class="pi pi-arrow-up transition-opacity duration-500 ml-2 text-sm align-middle text-green-500" [style.opacity]="flashShareAccepted ? '1' : '0'" appTooltip="Share Accepted" tooltipPosition="top"></i>
+                <i class="pi pi-arrow-up transition-opacity duration-500 ml-2 text-sm align-middle text-green-500" [style.opacity]="flashShareAccepted ? '1' : '0'" [class.opacity-0]="!flashShareAccepted" appTooltip="Share Accepted" tooltipPosition="top"></i>
                 <i class="pi pi-times transition-opacity duration-500 ml-1 text-sm align-middle text-red-500" class="opacity-0 transition-opacity duration-500" [style.opacity]="flashShareRejected ? '1' : '0'" appTooltip="Share Rejected" tooltipPosition="top"></i>
               </span>
               <div class="font-medium text-2xl">
