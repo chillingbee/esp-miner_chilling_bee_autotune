@@ -138,6 +138,17 @@ export class ThemeConfigComponent implements OnInit {
       const saved = localStorage.getItem('cyberpunk_' + v.key);
       const val = saved ? saved.replace('px', '') : v.defaultVal;
       document.documentElement.style.setProperty(v.key, saved || v.defaultVal + v.suffix);
+      // Initialize slider fill on load (use saved/default, not just input HTML value)
+      const input = document.querySelector(`input[data-var="${v.key}"]`) as HTMLInputElement;
+      if (input) {
+        const valForCalc = saved ? saved.replace('px', '') : v.defaultVal;
+        const min = parseFloat(input.min);
+        const max = parseFloat(input.max);
+        const pct = ((parseFloat(valForCalc) - min) / (max - min)) * 100;
+        input.style.background = `linear-gradient(to right, rgba(0,240,255,0.8) 0%, rgba(0,240,255,0.8) ${pct}%, rgba(255,0,255,0.15) ${pct}%, rgba(255,0,255,0.15) 100%)`;
+        // Also sync input.value to saved/default so thumb matches
+        input.value = valForCalc;
+      }
     });
 
     // Slider-Init nach Theme-Laden

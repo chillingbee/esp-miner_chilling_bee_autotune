@@ -578,8 +578,9 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     const showLine = !isScatter;
     const fill = isY1 && !isScatter;
-    const pointRadius = isScatter ? 3 : 2;
-    const borderWidth = isScatter ? 0 : 1;
+    const isCyberpunk = document.body.classList.contains('theme-cyberpunk') || (document.documentElement.className || '').includes('theme-cyberpunk');
+    const pointRadius = isCyberpunk ? 0 : (isScatter ? 3 : 2);
+    const borderWidth = isCyberpunk ? 2 : (isScatter ? 0 : 1);
 
     const documentStyle = getComputedStyle(document.documentElement);
     const textColorSecondary = documentStyle.getPropertyValue('--color-text-secondary').trim() || '#808080';
@@ -604,16 +605,37 @@ export class HomeComponent implements OnInit, OnDestroy {
     // fills stack into a solid block. Pick the first *visible* one, so hiding a
     // series from the legend moves the fill on rather than removing it.
     const fillIndex = fill ? entries.findIndex(entry => !entry.hidden) : -1;
-    // Force gradient fill for first visible Y dataset
-    if (fill && fillIndex >= 0) {
-      
+    // Force gradient fill for first visible Y dataset (Cyberpunk only)
+    if (fill && fillIndex >= 0 && isCyberpunk) {
+      const ctx = (this.chartData?.datasets?.[fillIndex] || {});
+      // Gradient: magenta bottom -> cyan top (under line area)
+      const gradient = (document.createElement('canvas')?.getContext('2d') || null) ?
+        (() => {
+          const c = document.createElement('canvas');
+          c.width = 1; c.height = 100;
+          const g = c.getContext('2d')!.createLinearGradient(0, 100, 0, 0);
+          g.addColorStop(0, 'rgba(255, 0, 128, 0.6)'); // magenta
+          g.addColorStop(1, 'rgba(0, 240, 255, 0.6)'); // cyan
+          return g;
+        })() : undefined;
+      (entries[fillIndex] as any).gradient = gradient;
+      // Apply immediately to active dataset for Chart.js redraw
+      const dataset = (this.chartData?.datasets ?? [])[fillIndex];
+      if (dataset) dataset.backgroundColor = gradient;
     }
 
     return entries.map(({ labelKey, label, index, hidden }) => {
       const borderColor = (index === 0 || isScatter)
         ? baseColor
         : `color-mix(in srgb, ${baseColor} ${100 - index * 15}%, ${mixColor} ${index * 15}%)`;
-      const backgroundColor = `color-mix(in srgb, ${borderColor}, transparent 81%)`;
+      const backgroundColor = (isCyberpunk && fill && index === fillIndex && (entries[fillIndex] as any)?.gradient)
+        ? (ctx: any) => {
+            const g = ctx.chart.ctx.createLinearGradient(0, ctx.chart.height || 200, 0, 0);
+            g.addColorStop(0, 'rgba(255, 0, 128, 0.6)');
+            g.addColorStop(1, 'rgba(0, 240, 255, 0.6)');
+            return g;
+          }
+        : `color-mix(in srgb, ${borderColor}, transparent 81%)`;
 
       return {
         type: 'line',
@@ -1039,7 +1061,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.updateChartDataSources(info);
 
         this.efficiency = this.calculateEfficiency(info, 'hashRate');
-        // BERECHNUNG MIT GEGLÄTTETEM FILTER (DÄMPFUNG)
+        // BERECHNUNG MIT GEGLï¿½TTETEM FILTER (Dï¿½MPFUNG)
         if (info && info.power > 0 && info.hashRate_1h > 0) {
             const currentRawAvg = (info.power * 1000) / info.hashRate_1h;
             if (this.smoothedEfficiencyAverage === 0) {
