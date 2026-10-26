@@ -153,19 +153,20 @@ export class ThemeConfigComponent implements OnInit {
 
     // Slider-Init nach Theme-Laden + nach Panel-Render (ngIf @if)
     setTimeout(() => {
+      document.querySelectorAll<HTMLInputElement>('.slider-fill').forEach((input) => {
+        const key = input.getAttribute('data-var') || '--card-alpha';
+        const saved = localStorage.getItem('cyberpunk_' + key);
+        // Always compute from saved/default, not from HTML input.value which may be out of sync
+        const clean = saved ? saved.replace('px', '') : (key === '--card-blur' ? '8' : (key === '--glow-intensity' ? '0.35' : '0.4'));
+        input.value = clean;
+        const min = parseFloat(input.min);
+        const max = parseFloat(input.max);
+        const pct = ((parseFloat(clean) - min) / (max - min)) * 100;
+        input.style.background = `linear-gradient(to right, rgba(0,240,255,0.8) 0%, rgba(0,240,255,0.8) ${pct}%, rgba(255,0,255,0.15) ${pct}%, rgba(255,0,255,0.15) 100%)`;
+      });
+      // After render, also restore saved values for cyberpunk theme (handles localStorage updates)
       if (this.selectedScheme === 'cyberpunk') {
         this.restoreSliderVals();
-      } else {
-        document.querySelectorAll<HTMLInputElement>('.slider-fill').forEach((input) => {
-          const key = input.getAttribute('data-var') || '--card-alpha';
-          const saved = localStorage.getItem('cyberpunk_' + key);
-          const clean = saved ? saved.replace('px', '') : (key === '--card-blur' ? '8' : (key === '--glow-intensity' ? '0.35' : '0.4'));
-          input.value = clean;
-          const min = parseFloat(input.min);
-          const max = parseFloat(input.max);
-          const pct = ((parseFloat(clean) - min) / (max - min)) * 100;
-          input.style.background = `linear-gradient(to right, rgba(0,240,255,0.8) 0%, rgba(0,240,255,0.8) ${pct}%, rgba(255,0,255,0.15) ${pct}%, rgba(255,0,255,0.15) 100%)`;
-        });
       }
     }, 300);
   }
