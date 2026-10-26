@@ -151,20 +151,17 @@ export class ThemeConfigComponent implements OnInit {
       }
     });
 
-    // Slider-Init nach Theme-Laden
-    setTimeout(() => {
-      document.querySelectorAll<HTMLInputElement>('.slider-fill').forEach((input) => {
-        // Wert aus localStorage / CSS-Var ermitteln
-        const key = input.getAttribute('data-var') || '--card-alpha';
-        const saved = localStorage.getItem('cyberpunk_' + key);
-        if (saved) {
-          const clean = saved.replace('px', '');
-          input.value = clean;
-        }
-        const pct = ((parseFloat(input.value) - parseFloat(input.min)) / (parseFloat(input.max) - parseFloat(input.min))) * 100;
-        input.style.background = `linear-gradient(to right, rgba(0,240,255,0.8) 0%, rgba(0,240,255,0.8) ${pct}%, rgba(255,0,255,0.15) ${pct}%, rgba(255,0,255,0.15) 100%)`;
-      });
-    }, 100);
+    // Slider-Init: nur einmal beim Laden, kein setTimeout-Überschreiben
+    document.querySelectorAll<HTMLInputElement>('.slider-fill').forEach((input) => {
+      const key = input.getAttribute('data-var') || '--card-alpha';
+      const saved = localStorage.getItem('cyberpunk_' + key);
+      const clean = saved ? saved.replace('px', '') : (key === '--card-blur' ? '8' : (key === '--glow-intensity' ? '0.35' : '0.4'));
+      input.value = clean;
+      const min = parseFloat(input.min);
+      const max = parseFloat(input.max);
+      const pct = ((parseFloat(clean) - min) / (max - min)) * 100;
+      input.style.background = `linear-gradient(to right, rgba(0,240,255,0.8) 0%, rgba(0,240,255,0.8) ${pct}%, rgba(255,0,255,0.15) ${pct}%, rgba(255,0,255,0.15) 100%)`;
+    });
   }
 
   ngOnDestroy() {
