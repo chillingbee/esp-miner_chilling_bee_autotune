@@ -74,5 +74,5 @@
     "IDF_CCACHE_ENABLE": "1",
     "ESP_ROM_ELF_DIR": "c:\\Espressif\\tools\\tools\\esp-rom-elfs\\20240305/"
   },
-  "idf.currentSetup": "C:\\esp\\v6.0.2\\esp-idf"
+  "idf.currentSetup": "C:\\esp\\v6.0.3\\esp-idf"
 }

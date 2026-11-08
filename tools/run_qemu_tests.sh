@@ -14,6 +14,7 @@ if ! command -v idf.py &> /dev/null; then
     # Try common local installation paths
     IDF_EXPORT_PATHS=(
         "$HOME/esp/v6.0.3/esp-idf/export.sh"
+        "$HOME/esp/v6.0.3/esp-idf/export.sh"
         "$HOME/esp/v5.5/esp-idf/export.sh"
         "$HOME/esp/esp-idf/export.sh"
     )
