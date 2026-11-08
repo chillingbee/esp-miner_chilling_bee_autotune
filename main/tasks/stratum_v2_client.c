@@ -53,6 +53,16 @@ static void clear_active_job_ids(uint32_t *active_job_ids, int *count)
     *count = 0;
 }
 
+static bool is_active_job_id(const uint32_t *active_job_ids, int count, uint32_t job_id)
+{
+    for (int i = 0; i < count; i++) {
+        if (active_job_ids[i] == job_id) {
+            return true;
+        }
+    }
+    return false;
+}
+
 static bool stratum_v2_load_authority_pubkey(uint8_t out[SV2_AUTHORITY_PUBKEY_SIZE], const char *b58_key)
 {
     if (!b58_key || strlen(b58_key) == 0) {
@@ -140,10 +150,15 @@ int stratum_v2_submit_share(GlobalState *GLOBAL_STATE, const asic_job_t *active_
         return -1;
     }
 
+    uint32_t sv2_job_id = (uint32_t)strtoul(active_job->job_id, NULL, 10);
+    if (!is_active_job_id(conn->active_job_ids, conn->active_job_ids_count, sv2_job_id)) {
+        pthread_mutex_unlock(&GLOBAL_STATE->transport_mutex);
+        ESP_LOGW(TAG, "Dropping stale share for job %lu (not in active jobs)", (unsigned long)sv2_job_id);
+        return -1;
+    }
+
     uint32_t sequence_number = conn->sequence_number++;
     uint8_t buf[SV2_SUBMIT_SHARES_MAX_FRAME_SIZE];
-
-    uint32_t sv2_job_id = (uint32_t)strtoul(active_job->job_id, NULL, 10);
     int len = sv2_build_submit_shares(buf, sizeof(buf),
                                       conn->channel_id,
                                       sequence_number,
@@ -785,13 +800,12 @@ esp_err_t stratum_v2_run(GlobalState *GLOBAL_STATE, uint16_t pool_idx)
                                  (unsigned long)channel_id, (unsigned long)conn->channel_id);
                         break;
                     }
-                    uint32_t pending = (conn->sequence_number > conn->resolved_shares)
-                                           ? (conn->sequence_number - conn->resolved_shares)
-                                           : 0;
-                    if (accepted_count > pending) {
+                    uint32_t reported_count = accepted_count;
+                    accepted_count = sv2_account_accepted_shares(
+                        conn->sequence_number, &conn->resolved_shares, accepted_count);
+                    if (reported_count > accepted_count) {
                         ESP_LOGW(TAG, "Clamping accepted_count (%lu) to pending shares (%lu)",
-                                 (unsigned long)accepted_count, (unsigned long)pending);
-                        accepted_count = pending;
+                                 (unsigned long)reported_count, (unsigned long)accepted_count);
                     }
                     float response_time_ms = stratum_timing_calculate_ms(&s_v2_timing, last_sequence_number, esp_timer_get_time());
                     if (response_time_ms >= 0) {
@@ -802,10 +816,6 @@ esp_err_t stratum_v2_run(GlobalState *GLOBAL_STATE, uint16_t pool_idx)
                     }
                     for (uint32_t i = 0; i < accepted_count; i++) {
                         SYSTEM_notify_accepted_share(GLOBAL_STATE);
-                    }
-                    uint32_t resolved = last_sequence_number + 1;
-                    if (resolved > conn->resolved_shares) {
-                        conn->resolved_shares = resolved;
                     }
                 }
                 break;
@@ -822,12 +832,15 @@ esp_err_t stratum_v2_run(GlobalState *GLOBAL_STATE, uint16_t pool_idx)
                                  (unsigned long)channel_id, (unsigned long)conn->channel_id);
                         break;
                     }
+                    // A reply must refer to a sequence sent on this connection.
+                    if (!sv2_account_rejected_share(
+                            conn->sequence_number, &conn->resolved_shares, seq_num)) {
+                        ESP_LOGW(TAG, "Dropping SubmitSharesError for unsent sequence %lu (sent %lu)",
+                                 (unsigned long)seq_num, (unsigned long)conn->sequence_number);
+                        break;
+                    }
                     ESP_LOGW(TAG, "Share rejected: %s", error_code);
                     SYSTEM_notify_rejected_share(GLOBAL_STATE, error_code);
-                    uint32_t resolved = seq_num + 1;
-                    if (resolved > conn->resolved_shares) {
-                        conn->resolved_shares = resolved;
-                    }
                 }
                 break;
             }
